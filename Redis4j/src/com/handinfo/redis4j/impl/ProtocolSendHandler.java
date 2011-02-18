@@ -23,7 +23,7 @@ public class ProtocolSendHandler extends OneToOneEncoder
 			return msg;
 		}
 
-		logger.info("开始编码==>将请求的命令转换为redis协议的格式");
+		logger.info("ת����Ϣ==>���� redis Э��ĸ�ʽ");
 		
 		ChannelBuffer buff = ChannelBuffers.dynamicBuffer();
 		buff.writeBytes(Ping.getProtocol());
