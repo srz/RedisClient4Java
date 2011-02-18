@@ -23,10 +23,27 @@ public class ProtocolSendHandler extends OneToOneEncoder
 			return msg;
 		}
 
-		logger.info("�?换消�?==>符合 redis 协�??的格�?");
-		
+		logger.info("转换消息==>符合 redis 协议的格式");
+
 		ChannelBuffer buff = ChannelBuffers.dynamicBuffer();
 		buff.writeBytes(Ping.getProtocol());
+		// *2\r\n$4\r\necho\r\n$6\r\ntessrz\r\n
+//		buff.writeBytes(new byte[]
+//		{ '*', '2', '\\', 'r', '\\', 'n', '$', '4', '\\', 'r', '\\', 'n', 'e', 'c', 'h', 'o', '\\', 'r', '\\', 'n', '$', '2', '\\', 'r', '\\', 'n', 's', 'r', '\\', 'r', '\\', 'n' });
+
+		System.out.println("---------+++++---------");
+		
+		for (int i = 0; i < buff.capacity(); i++)
+		{
+			byte b = buff.getByte(i);
+			System.out.print((char) b);
+
+		}
+		
+		System.out.println("------------------");
+		
+		System.out.println(buff.readableBytes());
+
 		return buff;
 	}
 

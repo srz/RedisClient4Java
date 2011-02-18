@@ -37,18 +37,24 @@ public class Redis4j implements IRedis4j
 	@Override
 	public String echo(String message)
 	{
-		// TODO Auto-generated method stub
-		return "xx";
+		String[] cmd = new String[2];
+		cmd[0] = "ECHO";
+		cmd[1] = message;
+		//channel.getPipeline().get(RedislHandler.class).excuteCmd(cmd);
+		return channel.getPipeline().get(RedislHandler.class).excuteCmd(cmd);
 	}
 
 	@Override
 	public boolean ping()
 	{
-		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		boolean b = channel.write(buffer).awaitUninterruptibly().isSuccess();
-		System.out.println(b);
+		//ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+		//boolean b = channel.write(buffer).awaitUninterruptibly().isSuccess();
+		//System.out.println(b);
 
-		//channel.getPipeline().get(RedislHandler.class);
+		String[] cmd = new String[1];
+		cmd[0] = "AUTH";
+		cmd[1] = "xxx";
+		channel.getPipeline().get(RedislHandler.class).excuteCmd(cmd);
 		return true;
 	}
 

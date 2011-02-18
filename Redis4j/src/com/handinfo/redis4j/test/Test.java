@@ -11,7 +11,7 @@ public class Test
 	 */
 	public static void main(String[] args)
 	{
-		IRedis4j client = new Redis4j("127.0.0.1", 6379);
+		IRedis4j client = new Redis4j("192.2.8.164", 6379);
 		if (client.connect())
 		{
 			if (!client.ping())
@@ -20,9 +20,9 @@ public class Test
 				return;
 			}
 
-			System.out.println(client.echo("test srz"));
+			System.out.println("服务器返回=" + client.echo("test srz"));
 
-			//client.quit();
+			client.quit();
 		}
 	}
 

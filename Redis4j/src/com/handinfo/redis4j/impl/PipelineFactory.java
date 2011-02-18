@@ -29,7 +29,7 @@ public class PipelineFactory implements ChannelPipelineFactory
 		pipeline.addLast("decoder", new StringDecoder());
 
 		//pipeline.addLast("encoder", new StringEncoder());
-		pipeline.addLast("frameEncoder", new ProtocolSendHandler());
+		//pipeline.addLast("frameEncoder", new ProtocolSendHandler());
 
 		// and then business logic.
 		pipeline.addLast("handler", new RedislHandler());
