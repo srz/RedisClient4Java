@@ -1,4 +1,4 @@
-package com.handinfo.redis4j.impl;
+package com.handinfo.redis4j.impl.protocol;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -21,34 +21,20 @@ public class RedislHandler extends SimpleChannelUpstreamHandler
 	private static final Logger logger = Logger.getLogger(RedislHandler.class.getName());
 
 	private volatile Channel channel;
-	private final BlockingQueue<String> answer = new LinkedBlockingQueue<String>();
+	private final BlockingQueue<Object> answer = new LinkedBlockingQueue<Object>();
 
-	public String excuteCmd(String[] cmd)
+	public Object sendRequest(ChannelBuffer command)
 	{
-		//buffer.writeBytes(("*" + cmd.length + "\r\n").getBytes());
-		StringBuffer sb = new StringBuffer();
-		sb.append("*" + cmd.length + "\r\n");
-		for (int i = 0; i < cmd.length; i++)
-		{
-			sb.append("$" + cmd[i].length() + "\r\n");
-			sb.append(cmd[i] + "\r\n");
-		}
-		
-		//System.out.println(sb.toString());
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		buffer.writeBytes(sb.toString().getBytes());
-		//buffer.writeBytes("*2\r\n$4\r\necho\r\n$7\r\ntestsrz\r\n".getBytes());
-		
-		sb.delete(0, sb.length()-1);
+		buffer.writeBytes(command);
 
 		channel.write(buffer).awaitUninterruptibly();
 
-		String result = null;
+		Object result = null;
 		boolean interrupted = false;
 		try
 		{
 			result = answer.take();
-			// break;
 		}
 		catch (InterruptedException e)
 		{
@@ -60,9 +46,9 @@ public class RedislHandler extends SimpleChannelUpstreamHandler
 			Thread.currentThread().interrupt();
 		}
 
-		//System.err.println("accept");
-		//System.err.println(result);
-		//System.err.println("accept - over");
+		System.err.println("accept");
+		System.err.println(result);
+		System.err.println("accept - over");
 		return result;
 	}
 
@@ -86,7 +72,7 @@ public class RedislHandler extends SimpleChannelUpstreamHandler
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 	{
-		answer.offer((String) e.getMessage());
+		answer.offer(e.getMessage());
 	}
 
 	@Override

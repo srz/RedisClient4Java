@@ -8,5 +8,6 @@ public interface IRedis4j
 	public boolean auth(String password);
 	public boolean select(int dbIndex);
 	public String echo(String message);
+	public String get(String key);
 	public boolean quit();
 }
