@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferIndexFinder;
+import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
@@ -50,13 +51,18 @@ public class ProtocolReceiveObjectDecoder extends OneToOneDecoder
 
 		logger.info("转换消息==>接收frame数据并转化为java pojo");
 
+		Object[] result = null;
 		switch (firstByte)
 		{
 		case '+':
 		{
 			// With a single line reply the first byte of the reply
 			// will be "+"
-			return binaryData.toString(1, binaryData.readableBytes() - 3, Charset.forName("UTF-8"));
+			result = new Object[2];
+			result[0] = "+";
+			//返回结果为+开头时,后面跟的一定是单行文本
+			result[1] = binaryData.toString(1, binaryData.readableBytes() - 3, Charset.forName("UTF-8"));
+			return result;
 		}
 			// break;
 		case '-':
@@ -79,14 +85,17 @@ public class ProtocolReceiveObjectDecoder extends OneToOneDecoder
 			// With bulk reply the first byte of the reply will be
 			// "$"
 
+			result = new Object[2];
+			result[0] = "$";
 			if (contentLength == -1)
 			{
-				return "";
+				result[1] = null;
 			} else
 			{
-				//TODO 未考虑返回结果为二进制的情况
-				return binaryData.toString(firstIndexLF + 1, binaryData.readableBytes() - firstIndexLF - 3, Charset.forName("UTF-8"));
+				//返回结果为$开头时,后面跟的可能是二进制对象,在更上一层来decode
+				result[1] = binaryData.slice(firstIndexLF + 1, binaryData.readableBytes() - firstIndexLF - 3).array();
 			}
+			return result;
 		}
 			// break;
 		case '*':

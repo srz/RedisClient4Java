@@ -38,7 +38,7 @@ public class Connector
 		return true;
 	}
 	
-	public Object executeCommand(String commandType, Object...args)
+	public Object[] executeCommand(String commandType, Object...args)
 	{
 		Object[] command = new Object[args.length + 1];
 		command[0] = commandType;

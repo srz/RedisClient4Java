@@ -21,16 +21,16 @@ public class RedislHandler extends SimpleChannelUpstreamHandler
 	private static final Logger logger = Logger.getLogger(RedislHandler.class.getName());
 
 	private volatile Channel channel;
-	private final BlockingQueue<Object> answer = new LinkedBlockingQueue<Object>();
+	private final BlockingQueue<Object[]> answer = new LinkedBlockingQueue<Object[]>();
 
-	public Object sendRequest(ChannelBuffer command)
+	public Object[] sendRequest(ChannelBuffer command)
 	{
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		buffer.writeBytes(command);
 
 		channel.write(buffer).awaitUninterruptibly();
 
-		Object result = null;
+		Object[] result = null;
 		boolean interrupted = false;
 		try
 		{
@@ -72,7 +72,7 @@ public class RedislHandler extends SimpleChannelUpstreamHandler
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 	{
-		answer.offer(e.getMessage());
+		answer.offer((Object[]) e.getMessage());
 	}
 
 	@Override

@@ -8,16 +8,16 @@ public class RedisCommandEncoder
 	public static ChannelBuffer getBinaryCommand(Object[] command)
 	{
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		
-		//写入头
+
+		// 写入头
 		buffer.writeBytes("*".getBytes());
 		buffer.writeBytes(String.valueOf(command.length).getBytes());
 		buffer.writeBytes("\r\n".getBytes());
-		
-		//写入参数
+
+		// 写入参数
 		for (int i = 0; i < command.length; i++)
 		{
-			if(command[i] instanceof String)
+			if (command[i] instanceof String)
 			{
 				String data = (String) command[i];
 				buffer.writeBytes("$".getBytes());
@@ -26,8 +26,17 @@ public class RedisCommandEncoder
 				buffer.writeBytes(data.getBytes());
 				buffer.writeBytes("\r\n".getBytes());
 			}
+			else
+			{
+				byte[] data = (byte[]) command[i];
+				buffer.writeBytes("$".getBytes());
+				buffer.writeBytes(String.valueOf(data.length).getBytes());
+				buffer.writeBytes("\r\n".getBytes());
+				buffer.writeBytes(data);
+				buffer.writeBytes("\r\n".getBytes());
+			}
 		}
-		
+
 		return buffer;
 	}
 }
