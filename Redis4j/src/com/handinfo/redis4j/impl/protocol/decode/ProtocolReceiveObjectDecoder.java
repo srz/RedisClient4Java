@@ -93,7 +93,7 @@ public class ProtocolReceiveObjectDecoder extends OneToOneDecoder
 			} else
 			{
 				//返回结果为$开头时,后面跟的可能是二进制对象,在更上一层来decode
-				result[1] = binaryData.slice(firstIndexLF + 1, binaryData.readableBytes() - firstIndexLF - 3).array();
+				result[1] = binaryData.copy(firstIndexLF + 1, contentLength).array();
 			}
 			return result;
 		}

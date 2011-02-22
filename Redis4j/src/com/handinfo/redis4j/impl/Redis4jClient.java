@@ -7,7 +7,9 @@ import com.dyuproject.protostuff.LinkedBuffer;
 import com.dyuproject.protostuff.ProtostuffIOUtil;
 import com.dyuproject.protostuff.Schema;
 import com.dyuproject.protostuff.runtime.RuntimeSchema;
+import com.handinfo.redis4j.api.DataType;
 import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.PackData;
 import com.handinfo.redis4j.api.RedisCommandType;
 import com.handinfo.redis4j.api.RedisResultType;
 import com.handinfo.redis4j.impl.transfers.Connector;
@@ -89,51 +91,33 @@ public class Redis4jClient implements IRedis4j
 		return connector.connect(host, port);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T> Object get(String key, Class<T> valueType) throws UnsupportedEncodingException, InstantiationException, IllegalAccessException
+	public Object get(String key)
 	{
 		Object[] result = connector.executeCommand(RedisCommandType.GET, key);
 		if (result.length > 1)
 		{
 			if (result[0].toString().equalsIgnoreCase("$"))
-			{
-				if (valueType.equals(String.class))
-				{
-					// 字符串反解码
-					return new String((byte[]) result[1], Charset.forName("UTF-8"));
-				} else
-				{
-					// 二进制反解码
-					Schema<T> schema = RuntimeSchema.getSchema(valueType.getClass().getName(), true);
-					T object = (T) new Object();//valueType.getClass().newInstance();
-					ProtostuffIOUtil.mergeFrom((byte[])result[1], object, schema);
-					return object;
-				}
+			{				
+				PackData packData = new PackData();
+				// 二进制反解码
+				Schema<PackData> schema = RuntimeSchema.getSchema(PackData.class);
+				ProtostuffIOUtil.mergeFrom((byte[]) result[1], packData, schema);
+				return packData;
 			}
 		}
-
 		return null;
 	}
 
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> boolean set(String key, T value)
 	{
-		byte[] binaryData = null;
-
-		if (value instanceof String)
-		{
-			binaryData = ((String) value).getBytes();
-		} else
-		{
-			Schema<T> schema = RuntimeSchema.getSchema(value.getClass().getName(), true);
-			LinkedBuffer buffer = LinkedBuffer.allocate(256);
-
-			binaryData = ProtostuffIOUtil.toByteArray(value, schema, buffer);
-			buffer.clear();
-		}
-
-		Object[] result = connector.executeCommand(RedisCommandType.SET, key, binaryData);
+		PackData packData = new PackData();
+		packData.setDataType(value.getClass());
+		packData.setOriginal(value);
+		Object[] result = connector.executeCommand(RedisCommandType.SET, key, packData);
 		if (result.length > 1)
 		{
 			if (result[0].toString().equalsIgnoreCase("+"))
@@ -148,4 +132,40 @@ public class Redis4jClient implements IRedis4j
 		return false;
 	}
 
+	private <T> byte[] encodeObjectToByteArray(T value)
+	{
+		byte[] binaryData = null;
+
+		if (value instanceof String || value instanceof Integer || value instanceof Long || value instanceof Float || value instanceof Double || value instanceof Short || value instanceof Boolean)
+		{
+			binaryData = String.valueOf(value).getBytes();
+		} else
+		{
+			Schema<T> schema = RuntimeSchema.getSchema(value.getClass().getName(), true);
+			LinkedBuffer buffer = LinkedBuffer.allocate(256);
+
+			binaryData = ProtostuffIOUtil.toByteArray(value, schema, buffer);
+			buffer.clear();
+		}
+		return binaryData;
+	}
+
+	private <T> void decodeObjectFromByteArray(T returnValue, byte[] data)
+	{
+		if (returnValue instanceof StringBuilder)
+		{
+			// 字符串反解码
+			String backVal = new String(data, Charset.forName("UTF-8"));
+			((StringBuilder) returnValue).append(backVal);
+		} else if (returnValue instanceof Integer || returnValue instanceof Long || returnValue instanceof Float || returnValue instanceof Double || returnValue instanceof Short || returnValue instanceof Boolean)
+		{
+			String backVal = new String(data, Charset.forName("UTF-8"));
+			// backVal.
+		} else
+		{
+			// 二进制反解码
+			Schema<T> schema = RuntimeSchema.getSchema(returnValue.getClass().getName(), true);
+			ProtostuffIOUtil.mergeFrom((byte[]) data, returnValue, schema);
+		}
+	}
 }

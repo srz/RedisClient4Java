@@ -2,6 +2,10 @@ package com.handinfo.redis4j.test;
 
 import java.io.IOException;
 
+import com.dyuproject.protostuff.LinkedBuffer;
+import com.dyuproject.protostuff.ProtostuffIOUtil;
+import com.dyuproject.protostuff.Schema;
+import com.dyuproject.protostuff.runtime.RuntimeSchema;
 import com.handinfo.redis4j.api.IRedis4j;
 import com.handinfo.redis4j.impl.Redis4jClient;
 
@@ -10,42 +14,34 @@ public class Test
 
 	/**
 	 * @param args
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws Exception
 	{
-		IRedis4j client = new Redis4jClient("192.2.8.164", 6379);
+		Redis4jClient client = new Redis4jClient("192.2.8.164", 6379);
 		if (client.connect())
 		{
-//			if (!client.ping())
-//			{
-//				client.quit();
-//				return;
-//			}
+			if (!client.ping())
+			{
+				client.quit();
+				return;
+			}
 			// System.out.println("服务器返回=" + client.echo("test srz"));
 
 			User user = new User();
 			user.setId(123);
 			user.setName("srz");
-			user.setTimestamp(System.currentTimeMillis());
-			
-			//client.set("testKey", user);
+			user.setTimestamp(12345678901L);
 
-			try
-			{
-				User u1 = (User) client.get("testKey", user.getClass());
-				System.out.println("服务器返回=" + u1.getName());
-			}
-			catch (InstantiationException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			catch (IllegalAccessException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			client.set("testKey", 56789);
+
+			// User u1 = new User();
+			// Integer i = new Integer(0);
+			//StringBuilder s = new StringBuilder();
+			// String s= new String();
+			// Boolean b = new Boolean(false);
+			Integer s = (Integer)client.get("testKey");
+			System.out.println("服务器返回=" + s);
 
 			client.quit();
 		}
@@ -56,19 +52,21 @@ public class Test
 		// user.setTimestamp(System.currentTimeMillis());
 		// System.out.println("服务器返回=" + user.getTimestamp());
 		//		
-		// Schema<User> schema =
-		// RuntimeSchema.getSchema(user.getClass().getName(), true);
+		// String abc = "xxxxxx";
+		// Schema<String> schema =
+		// RuntimeSchema.getSchema(String.class);
 		// LinkedBuffer buffer = LinkedBuffer.allocate(256);
-		//		
+		//				
 		// // protostuff serialize
-		// byte[] protostuff = ProtostuffIOUtil.toByteArray(user,
+		// byte[] protostuff = ProtostuffIOUtil.toByteArray(abc,
 		// schema, buffer);
 		// buffer.clear();
 		// //
 		// // // protostuff deserialize
-		// User f = new User();
-		// ProtostuffIOUtil.mergeFrom(protostuff, f, schema);
-		// System.out.println("服务器返回=" +f.getTimestamp());
+		// //User f = new User();
+		// String v =new String();
+		// ProtostuffIOUtil.mergeFrom(protostuff, v, schema);
+		// System.out.println("服务器返回=" +v);
 
 		// String test = "1233";
 

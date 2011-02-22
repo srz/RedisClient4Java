@@ -1,6 +1,5 @@
 package com.handinfo.redis4j.api;
 
-import java.io.UnsupportedEncodingException;
 
 
 public interface IRedis4j
@@ -11,7 +10,7 @@ public interface IRedis4j
 	public boolean auth(String password);
 	public boolean select(int dbIndex);
 	public String echo(String message);
-	public <T> Object get(String key, Class<T> valueType) throws UnsupportedEncodingException, InstantiationException, IllegalAccessException;
+	public Object  get(String key);
 	public boolean quit();
 	public<T> boolean set(String key, T value);
 }
