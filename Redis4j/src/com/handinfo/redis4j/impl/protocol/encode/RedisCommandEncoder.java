@@ -7,7 +7,7 @@ import com.dyuproject.protostuff.LinkedBuffer;
 import com.dyuproject.protostuff.ProtostuffIOUtil;
 import com.dyuproject.protostuff.Schema;
 import com.dyuproject.protostuff.runtime.RuntimeSchema;
-import com.handinfo.redis4j.api.PackData;
+import com.handinfo.redis4j.api.DataWrapper;
 
 public class RedisCommandEncoder
 {
@@ -24,35 +24,32 @@ public class RedisCommandEncoder
 		// 写入参数
 		for (int i = 0; i < command.length; i++)
 		{
-			if (command[i] instanceof String)
+			Object value = command[i];
+			byte[] bytes = null;
+			if (value instanceof String || value instanceof Integer || value instanceof Long || value instanceof Float || value instanceof Double || value instanceof Short || value instanceof Boolean)
 			{
-				String data = (String) command[i];
-				buffer.writeBytes("$".getBytes());
-				buffer.writeBytes(String.valueOf(data.length()).getBytes());
-				buffer.writeBytes("\r\n".getBytes());
-				buffer.writeBytes(data.getBytes());
-				buffer.writeBytes("\r\n".getBytes());
-			}
-			else if(command[i] instanceof PackData)
+				bytes = String.valueOf(value).getBytes();
+			} else if (value instanceof DataWrapper)
 			{
-				Schema<PackData> schema = RuntimeSchema.getSchema(PackData.class);
+				Schema<DataWrapper> schema = RuntimeSchema.getSchema(DataWrapper.class);
 				LinkedBuffer tmpBuffer = LinkedBuffer.allocate(256);
 
-				byte[] data = ProtostuffIOUtil.toByteArray((PackData)command[i], schema, tmpBuffer);
+				bytes = ProtostuffIOUtil.toByteArray((DataWrapper) value, schema, tmpBuffer);
 				tmpBuffer.clear();
-
-				buffer.writeBytes("$".getBytes());
-				buffer.writeBytes(String.valueOf(data.length).getBytes());
-				buffer.writeBytes("\r\n".getBytes());
-				buffer.writeBytes(data);
-				buffer.writeBytes("\r\n".getBytes());
-			}
-			else
+			} else
 			{
-				//TODO 其他情况?
+				// TODO 其他情况?
+			}
+			if (bytes != null)
+			{
+				buffer.writeBytes("$".getBytes());
+				buffer.writeBytes(String.valueOf(bytes.length).getBytes());
+				buffer.writeBytes("\r\n".getBytes());
+				buffer.writeBytes(bytes);
+				buffer.writeBytes("\r\n".getBytes());
 			}
 		}
-	
+
 		return buffer;
 	}
 }

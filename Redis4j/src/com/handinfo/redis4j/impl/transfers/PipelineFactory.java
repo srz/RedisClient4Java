@@ -5,8 +5,8 @@ import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
 
 import com.handinfo.redis4j.impl.protocol.RedislHandler;
-import com.handinfo.redis4j.impl.protocol.decode.ProtocolReceiveFrameDecoder;
-import com.handinfo.redis4j.impl.protocol.decode.ProtocolReceiveObjectDecoder;
+import com.handinfo.redis4j.impl.protocol.decode.ByteArrayToFrameDecoder;
+import com.handinfo.redis4j.impl.protocol.decode.FrameToObjectByteArrayDecoder;
 
 public class PipelineFactory implements ChannelPipelineFactory
 {
@@ -15,8 +15,8 @@ public class PipelineFactory implements ChannelPipelineFactory
 	{
 		ChannelPipeline pipeline = Channels.pipeline();
 
-		pipeline.addLast("framerDecoder", new ProtocolReceiveFrameDecoder());
-		pipeline.addLast("objectDecoder", new ProtocolReceiveObjectDecoder());
+		pipeline.addLast("framerDecoder", new ByteArrayToFrameDecoder());
+		pipeline.addLast("objectDecoder", new FrameToObjectByteArrayDecoder());
 		
 		pipeline.addLast("handler", new RedislHandler());
 

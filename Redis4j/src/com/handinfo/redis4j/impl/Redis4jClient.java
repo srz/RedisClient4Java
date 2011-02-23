@@ -1,17 +1,11 @@
 package com.handinfo.redis4j.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-
-import com.dyuproject.protostuff.LinkedBuffer;
-import com.dyuproject.protostuff.ProtostuffIOUtil;
-import com.dyuproject.protostuff.Schema;
-import com.dyuproject.protostuff.runtime.RuntimeSchema;
-import com.handinfo.redis4j.api.DataType;
+import com.handinfo.redis4j.api.DataWrapper;
 import com.handinfo.redis4j.api.IRedis4j;
-import com.handinfo.redis4j.api.PackData;
 import com.handinfo.redis4j.api.RedisCommandType;
+import com.handinfo.redis4j.api.RedisResultInfo;
 import com.handinfo.redis4j.api.RedisResultType;
+import com.handinfo.redis4j.impl.protocol.decode.ObjectDecoder;
 import com.handinfo.redis4j.impl.transfers.Connector;
 
 public class Redis4jClient implements IRedis4j
@@ -29,20 +23,17 @@ public class Redis4jClient implements IRedis4j
 	@Override
 	public boolean auth(String password)
 	{
-		// TODO Auto-generated method stub
-		return true;
+		return singleLineReply(RedisCommandType.AUTH, RedisResultInfo.OK, password);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public String echo(String message)
 	{
-		Object[] result = connector.executeCommand(RedisCommandType.ECHO, message);
-		if (result.length > 1)
+		Object result = bulkReply(RedisCommandType.ECHO, false, message);
+		if (result != null)
 		{
-			if (result[0].toString().equalsIgnoreCase("$"))
-			{
-				return (String) result[1];
-			}
+			return (String) result;
 		}
 
 		return null;
@@ -51,19 +42,7 @@ public class Redis4jClient implements IRedis4j
 	@Override
 	public boolean ping()
 	{
-		Object[] result = connector.executeCommand(RedisCommandType.PING);
-		if (result.length > 1)
-		{
-			if (result[0].toString().equalsIgnoreCase("+"))
-			{
-				if (((String) result[1]).equalsIgnoreCase(RedisResultType.PONG))
-				{
-					return true;
-				}
-			}
-		}
-
-		return false;
+		return singleLineReply(RedisCommandType.PING, RedisResultInfo.PONG);
 	}
 
 	//
@@ -76,8 +55,7 @@ public class Redis4jClient implements IRedis4j
 	@Override
 	public boolean select(int dbIndex)
 	{
-		// TODO Auto-generated method stub
-		return true;
+		return singleLineReply(RedisCommandType.SELECT, RedisResultInfo.OK, dbIndex);
 	}
 
 	/*
@@ -97,32 +75,52 @@ public class Redis4jClient implements IRedis4j
 		Object[] result = connector.executeCommand(RedisCommandType.GET, key);
 		if (result.length > 1)
 		{
-			if (result[0].toString().equalsIgnoreCase("$"))
-			{				
-				PackData packData = new PackData();
-				// 二进制反解码
-				Schema<PackData> schema = RuntimeSchema.getSchema(PackData.class);
-				ProtostuffIOUtil.mergeFrom((byte[]) result[1], packData, schema);
-				return packData;
+			Character resultType = (Character) result[0];
+			if (resultType == RedisResultType.BulkReplies)
+			{
+				return result[1];
 			}
 		}
 		return null;
 	}
 
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> boolean set(String key, T value)
 	{
-		PackData packData = new PackData();
-		packData.setDataType(value.getClass());
-		packData.setOriginal(value);
-		Object[] result = connector.executeCommand(RedisCommandType.SET, key, packData);
+		DataWrapper data = new DataWrapper(value);
+
+		return singleLineReply(RedisCommandType.SET, RedisResultInfo.OK, key, data);
+	}
+
+	public int del(String... keys)
+	{
+		return integerReply(RedisCommandType.DEL, keys);
+	}
+
+	public Object[] keys(String key)
+	{
+		return multiBulkReply(RedisCommandType.KEYS, false, key);
+	}
+
+	/**
+	 * 返回类型为状态码的命令统一执行此函数
+	 * 
+	 * @param redisCommandType
+	 *            命令类型
+	 * @param RedisResultInfo
+	 *            返回结果的期望值,如不符合则认为操作失败
+	 * @return 操作结果是否成功
+	 */
+	private boolean singleLineReply(String redisCommandType, String RedisResultInfo, Object... args)
+	{
+		Object[] result = connector.executeCommand(redisCommandType, args);
 		if (result.length > 1)
 		{
-			if (result[0].toString().equalsIgnoreCase("+"))
+			Character resultType = (Character) result[0];
+			if (resultType == RedisResultType.SingleLineReply)
 			{
-				if (((String) result[1]).equalsIgnoreCase(RedisResultType.OK))
+				if (((String) result[1]).equalsIgnoreCase(RedisResultInfo))
 				{
 					return true;
 				}
@@ -132,40 +130,95 @@ public class Redis4jClient implements IRedis4j
 		return false;
 	}
 
-	private <T> byte[] encodeObjectToByteArray(T value)
+	/**
+	 * 返回类型为状态码的命令统一执行此函数
+	 * 
+	 * @param redisCommandType
+	 *            命令类型
+	 * @param RedisResultInfo
+	 *            返回结果的期望值,如不符合则认为操作失败
+	 * @return 操作结果是否成功
+	 */
+	private int integerReply(String redisCommandType, Object... args)
 	{
-		byte[] binaryData = null;
-
-		if (value instanceof String || value instanceof Integer || value instanceof Long || value instanceof Float || value instanceof Double || value instanceof Short || value instanceof Boolean)
+		Object[] result = connector.executeCommand(redisCommandType, args);
+		if (result.length > 1)
 		{
-			binaryData = String.valueOf(value).getBytes();
-		} else
-		{
-			Schema<T> schema = RuntimeSchema.getSchema(value.getClass().getName(), true);
-			LinkedBuffer buffer = LinkedBuffer.allocate(256);
-
-			binaryData = ProtostuffIOUtil.toByteArray(value, schema, buffer);
-			buffer.clear();
+			Character resultType = (Character) result[0];
+			if (resultType == RedisResultType.IntegerReply)
+			{
+				return Integer.valueOf((String) result[1]);
+			}
 		}
-		return binaryData;
+
+		return -1;
 	}
 
-	private <T> void decodeObjectFromByteArray(T returnValue, byte[] data)
+	/**
+	 * 返回类型为单行数据的命令统一执行此函数
+	 * 
+	 * @param redisCommandType
+	 *            命令类型
+	 * @param args
+	 *            参数
+	 * @return 从redis取得的对象,凡是发送给redis的数据，被其处理后返回的都应该使用DataWrapper包装,
+	 *         因为解码时统一按照DataWrapper类型来解码
+	 */
+	private Object bulkReply(String redisCommandType, boolean isUseObjectDecoder, Object... args)
 	{
-		if (returnValue instanceof StringBuilder)
+		Object[] result = connector.executeCommand(redisCommandType, args);
+		if (result.length > 1)
 		{
-			// 字符串反解码
-			String backVal = new String(data, Charset.forName("UTF-8"));
-			((StringBuilder) returnValue).append(backVal);
-		} else if (returnValue instanceof Integer || returnValue instanceof Long || returnValue instanceof Float || returnValue instanceof Double || returnValue instanceof Short || returnValue instanceof Boolean)
-		{
-			String backVal = new String(data, Charset.forName("UTF-8"));
-			// backVal.
-		} else
-		{
-			// 二进制反解码
-			Schema<T> schema = RuntimeSchema.getSchema(returnValue.getClass().getName(), true);
-			ProtostuffIOUtil.mergeFrom((byte[]) data, returnValue, schema);
+			Character resultType = (Character) result[0];
+			if (resultType == RedisResultType.BulkReplies)
+			{
+				if (result[1] != null)
+				{
+					if (isUseObjectDecoder)
+						return ObjectDecoder.getObject((byte[]) result[1]);
+					else
+						return new String((byte[]) result[1]);
+				}
+				//return result[1];
+			}
 		}
+
+		return null;
+	}
+
+	private Object[] multiBulkReply(String redisCommandType, boolean isUseObjectDecoder, Object... args)
+	{
+		Object[] result = connector.executeCommand(redisCommandType, args);
+		if (result.length > 1)
+		{
+			Character resultType = (Character) result[0];
+			if (resultType == RedisResultType.MultiBulkReplies)
+			{
+				if (result[1] != null)
+				{
+					if (isUseObjectDecoder)
+					{
+						Object[] returnValue = new Object[result.length-1];
+						for(int i=1; i<result.length; i++)
+						{
+							returnValue[i-1] = ObjectDecoder.getObject((byte[]) result[1]);
+						}
+						return returnValue;
+					}
+					else
+					{
+						String[] returnValue = new String[result.length-1];
+						for(int i=1; i<result.length; i++)
+						{
+							returnValue[i-1] = new String((byte[]) result[1]);
+						}
+						return returnValue;
+					}
+				}
+			}
+		}
+
+		return null;
+
 	}
 }

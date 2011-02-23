@@ -1,12 +1,5 @@
 package com.handinfo.redis4j.test;
 
-import java.io.IOException;
-
-import com.dyuproject.protostuff.LinkedBuffer;
-import com.dyuproject.protostuff.ProtostuffIOUtil;
-import com.dyuproject.protostuff.Schema;
-import com.dyuproject.protostuff.runtime.RuntimeSchema;
-import com.handinfo.redis4j.api.IRedis4j;
 import com.handinfo.redis4j.impl.Redis4jClient;
 
 public class Test
@@ -29,44 +22,49 @@ public class Test
 			// System.out.println("服务器返回=" + client.echo("test srz"));
 
 			User user = new User();
-			user.setId(123);
-			user.setName("srz");
+			user.setId(127773);
+			user.setName("srzff");
 			user.setTimestamp(12345678901L);
 
-			client.set("testKey", 56789);
+			//client.set("testKey", user);
 
 			// User u1 = new User();
 			// Integer i = new Integer(0);
 			//StringBuilder s = new StringBuilder();
 			// String s= new String();
 			// Boolean b = new Boolean(false);
-			Integer s = (Integer)client.get("testKey");
-			System.out.println("服务器返回=" + s);
+			//User s = (User)client.get("testKey");
+			System.out.println("服务器返回=" + client.keys("*"));//("asdasdasd"));
 
 			client.quit();
 		}
 
-		// User user = new User();
-		// user.setId(123);
-		// user.setName("srz");
-		// user.setTimestamp(System.currentTimeMillis());
-		// System.out.println("服务器返回=" + user.getTimestamp());
-		//		
-		// String abc = "xxxxxx";
-		// Schema<String> schema =
-		// RuntimeSchema.getSchema(String.class);
-		// LinkedBuffer buffer = LinkedBuffer.allocate(256);
-		//				
-		// // protostuff serialize
-		// byte[] protostuff = ProtostuffIOUtil.toByteArray(abc,
-		// schema, buffer);
-		// buffer.clear();
-		// //
-		// // // protostuff deserialize
-		// //User f = new User();
-		// String v =new String();
-		// ProtostuffIOUtil.mergeFrom(protostuff, v, schema);
-		// System.out.println("服务器返回=" +v);
+//		 User user = new User();
+//		 user.setId(123);
+//		 user.setName("srz");
+//		 user.setTimestamp(12345678901L);
+//		 //System.out.println("服务器返回=" + user.getTimestamp());
+//		 
+//		 DataWrapper packData = new DataWrapper();
+//			//packData.setDataType(user.getClass());
+//			packData.setOriginal(user);
+//				
+//		 //String abc = "xxxxxx";
+//		 Schema<DataWrapper> schema =
+//		 RuntimeSchema.getSchema(DataWrapper.class);
+//		 LinkedBuffer buffer = LinkedBuffer.allocate(256);
+//						
+//		 // protostuff serialize
+//		 byte[] protostuff = ProtostuffIOUtil.toByteArray(packData,
+//		 schema, buffer);
+//		 buffer.clear();
+//
+//		// //
+//		 // // protostuff deserialize
+//		 //User f = new User();
+//		 DataWrapper packData1 = new DataWrapper();
+//		 ProtostuffIOUtil.mergeFrom(protostuff, packData1, schema);
+//		 System.out.println("服务器返回=" + ((User)packData1.getOriginal()).name);
 
 		// String test = "1233";
 
