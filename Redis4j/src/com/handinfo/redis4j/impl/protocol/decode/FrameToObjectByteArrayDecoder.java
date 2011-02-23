@@ -37,7 +37,7 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 		// 头中的内容
 		String header = binaryData.toString(1, firstIndexCR - 1, Charset.forName("UTF-8"));
 
-		logger.info("转换消息==>接收frame数据并转化为java pojo");
+		logger.info("received message,first byte is \"" + firstByte + "\"");
 
 		Object[] result = null;
 		switch (firstByte)
@@ -49,12 +49,9 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 			result = new Object[2];
 			result[0] = firstByte;
 			// 返回结果为+开头时,后面跟的一定是单行文本
-			result[1] = header;// binaryData.toString(1,
-			// binaryData.readableBytes() - 3,
-			// Charset.forName("UTF-8"));
+			result[1] = header;
 			return result;
 		}
-			// break;
 		case RedisResultType.ErrorReply:
 		{
 			// With an error message the first byte of the reply
@@ -62,13 +59,9 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 			result = new Object[2];
 			result[0] = firstByte;
 			// 返回结果为-开头时,后面跟的一定是单行文本
-			result[1] = header;// binaryData.toString(1,
-			// binaryData.readableBytes() - 3,
-			// Charset.forName("UTF-8"));
+			result[1] = header;
 			return result;
 		}
-
-			// break;
 		case RedisResultType.IntegerReply:
 		{
 			// With an integer number the first byte of the reply
@@ -80,7 +73,6 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 			// Charset.forName("UTF-8"));
 			return result;
 		}
-			// break;
 		case RedisResultType.BulkReplies:
 		{
 			// With bulk reply the first byte of the reply will be
@@ -96,15 +88,11 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 				result[1] = null;
 			} else
 			{
-				// 返回结果为$开头时,返回后面的DataWrapper中的原始数据
-				//Schema<DataWrapper> schema = RuntimeSchema.getSchema(DataWrapper.class);
-				//DataWrapper data = new DataWrapper();
-				//ProtostuffIOUtil.mergeFrom(binaryData.copy(firstIndexLF + 1, lengthFiledOfHead).array(), data, schema);
-				result[1] = binaryData.copy(firstIndexLF + 1, lengthFiledOfHead).array();//data.getOriginal();
+				// 返回结果为$开头时,返回后面的bytes
+				result[1] = binaryData.copy(firstIndexLF + 1, lengthFiledOfHead).array();
 			}
 			return result;
 		}
-			// break;
 		case RedisResultType.MultiBulkReplies:
 		{
 			// With multi-bulk reply the first byte of the reply
@@ -121,8 +109,6 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 			{
 				result = new Object[lengthFiledOfHead + 1];
 				result[0] = firstByte;
-
-				//Schema<DataWrapper> schema = RuntimeSchema.getSchema(DataWrapper.class);
 
 				int indexOfDelimiter = 0;
 				int indexOfCR = 0;
@@ -155,10 +141,7 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 						}
 						else
 						{
-							//DataWrapper data = new DataWrapper();
-							//ProtostuffIOUtil.mergeFrom(binaryData.copy(indexOfLF + 1, dataLength).array(), data, schema);
-
-							result[resultIndex++] = binaryData.copy(indexOfLF + 1, dataLength).array();//data.getOriginal();
+							result[resultIndex++] = binaryData.copy(indexOfLF + 1, dataLength).array();
 						}
 
 						i = i + dataLength + 3;
@@ -170,20 +153,6 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 						i++;
 					}
 				}
-
-				// if (lengthFiledOfHead == -1)
-				// {
-				// result[1] = null;
-				// } else
-				// {
-				// //返回结果为$开头时,返回后面的DataWrapper中的原始数据
-				// Schema<DataWrapper> schema =
-				// RuntimeSchema.getSchema(DataWrapper.class);
-				// DataWrapper data = new DataWrapper();
-				// ProtostuffIOUtil.mergeFrom(binaryData.copy(firstIndexLF + 1,
-				// lengthFiledOfHead).array(), data, schema);
-				// result[1] = data.getOriginal();
-				// }
 			}
 
 			return result;

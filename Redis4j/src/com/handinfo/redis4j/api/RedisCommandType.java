@@ -13,4 +13,5 @@ public class RedisCommandType
 	
 	public static final String DEL = "DEL";
 	public static final String KEYS = "KEYS";
+	public static final String RENAME = "RENAME";
 }

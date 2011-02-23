@@ -26,7 +26,6 @@ public class Redis4jClient implements IRedis4j
 		return singleLineReply(RedisCommandType.AUTH, RedisResultInfo.OK, password);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String echo(String message)
 	{
@@ -49,7 +48,9 @@ public class Redis4jClient implements IRedis4j
 	@Override
 	public boolean quit()
 	{
-		return connector.disconnect();
+		boolean serverInfo = singleLineReply(RedisCommandType.QUIT, RedisResultInfo.OK);
+		connector.disconnect();
+		return serverInfo;
 	}
 
 	@Override
@@ -72,16 +73,7 @@ public class Redis4jClient implements IRedis4j
 	@Override
 	public Object get(String key)
 	{
-		Object[] result = connector.executeCommand(RedisCommandType.GET, key);
-		if (result.length > 1)
-		{
-			Character resultType = (Character) result[0];
-			if (resultType == RedisResultType.BulkReplies)
-			{
-				return result[1];
-			}
-		}
-		return null;
+		return bulkReply(RedisCommandType.GET, true, key);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -98,11 +90,15 @@ public class Redis4jClient implements IRedis4j
 		return integerReply(RedisCommandType.DEL, keys);
 	}
 
-	public Object[] keys(String key)
+	public String[] keys(String key)
 	{
-		return multiBulkReply(RedisCommandType.KEYS, false, key);
+		return (String[]) multiBulkReply(RedisCommandType.KEYS, false, key);
 	}
 
+	public boolean rename(String key, String newKey)
+	{
+		return singleLineReply(RedisCommandType.RENAME, RedisResultInfo.OK, key, newKey);
+	}
 	/**
 	 * 返回类型为状态码的命令统一执行此函数
 	 * 
@@ -179,7 +175,6 @@ public class Redis4jClient implements IRedis4j
 					else
 						return new String((byte[]) result[1]);
 				}
-				//return result[1];
 			}
 		}
 
@@ -210,7 +205,7 @@ public class Redis4jClient implements IRedis4j
 						String[] returnValue = new String[result.length-1];
 						for(int i=1; i<result.length; i++)
 						{
-							returnValue[i-1] = new String((byte[]) result[1]);
+							returnValue[i-1] = new String((byte[]) result[i]);
 						}
 						return returnValue;
 					}

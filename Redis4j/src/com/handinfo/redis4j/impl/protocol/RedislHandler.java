@@ -45,10 +45,6 @@ public class RedislHandler extends SimpleChannelUpstreamHandler
 		{
 			Thread.currentThread().interrupt();
 		}
-
-		System.err.println("accept");
-		System.err.println(result.length);
-		System.err.println("accept - over");
 		return result;
 	}
 
