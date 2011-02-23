@@ -162,6 +162,8 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 						}
 
 						i = i + dataLength + 3;
+						indexOfCR = 0;
+						indexOfLF = 0;
 					}
 					else
 					{

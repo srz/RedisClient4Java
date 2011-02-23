@@ -119,6 +119,11 @@ public class ByteArrayToFrameDecoder extends FrameDecoder
 							isFrameFinish = true;
 							break;
 						}
+						else
+						{
+							indexOfCR = 0;
+							indexOfLF = 0;
+						}
 					}
 				}
 

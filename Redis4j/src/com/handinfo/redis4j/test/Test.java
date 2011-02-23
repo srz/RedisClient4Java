@@ -11,14 +11,14 @@ public class Test
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		Redis4jClient client = new Redis4jClient("192.2.8.164", 6379);
+		Redis4jClient client = new Redis4jClient("127.0.0.1", 6379);
 		if (client.connect())
 		{
-			if (!client.ping())
-			{
-				client.quit();
-				return;
-			}
+//			if (!client.ping())
+//			{
+//				client.quit();
+//				return;
+//			}
 			// System.out.println("服务器返回=" + client.echo("test srz"));
 
 			User user = new User();
@@ -34,7 +34,7 @@ public class Test
 			// String s= new String();
 			// Boolean b = new Boolean(false);
 			//User s = (User)client.get("testKey");
-			System.out.println("服务器返回=" + client.keys("*"));//("asdasdasd"));
+			System.out.println("服务器返回=" + client.keys("*_a*").length);//("asdasdasd"));
 
 			client.quit();
 		}
