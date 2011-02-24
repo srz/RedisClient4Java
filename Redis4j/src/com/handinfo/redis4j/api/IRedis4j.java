@@ -44,8 +44,10 @@ public interface IRedis4j
 	/***********************************************************\
 	 * Strings
 	\***********************************************************/
-	public Object  get(String key);
-	public<T> boolean set(String key, T value);
+	public String  get(String key);
+	public boolean set(String key, String value);
+	public Object getObject(String key);
+	public <T> boolean setObject(String key, T value);
 	
 	/***********************************************************\
 	 * Keys

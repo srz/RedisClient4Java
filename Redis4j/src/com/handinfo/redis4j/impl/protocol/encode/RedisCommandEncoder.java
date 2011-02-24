@@ -29,16 +29,13 @@ public class RedisCommandEncoder
 			if (value instanceof String || value instanceof Integer || value instanceof Long || value instanceof Float || value instanceof Double || value instanceof Short || value instanceof Boolean)
 			{
 				bytes = String.valueOf(value).getBytes();
-			} else if (value instanceof DataWrapper)
+			} else
 			{
 				Schema<DataWrapper> schema = RuntimeSchema.getSchema(DataWrapper.class);
 				LinkedBuffer tmpBuffer = LinkedBuffer.allocate(256);
 
 				bytes = ProtostuffIOUtil.toByteArray((DataWrapper) value, schema, tmpBuffer);
 				tmpBuffer.clear();
-			} else
-			{
-				// TODO 其他情况?
 			}
 			if (bytes != null)
 			{

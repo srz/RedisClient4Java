@@ -37,7 +37,7 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 		// 头中的内容
 		String header = binaryData.toString(1, firstIndexCR - 1, Charset.forName("UTF-8"));
 
-		logger.info("received message,first byte is \"" + firstByte + "\"");
+		//logger.info("received message,first byte is \"" + firstByte + "\"");
 
 		Object[] result = null;
 		switch (firstByte)
@@ -105,6 +105,11 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 			{
 				result = new Object[1];
 				result[0] = firstByte;
+			} else if (lengthFiledOfHead == 0)
+			{
+				result = new Object[2];
+				result[0] = firstByte;
+				result[1] = null;
 			} else
 			{
 				result = new Object[lengthFiledOfHead + 1];
@@ -133,13 +138,12 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 					}
 					if (indexOfCR + 1 == indexOfLF)
 					{
-						int dataLength = Integer.valueOf(binaryData.toString(indexOfDelimiter+1, indexOfCR-indexOfDelimiter-1,  Charset.forName("UTF-8")));
-						if(dataLength == 0)
+						int dataLength = Integer.valueOf(binaryData.toString(indexOfDelimiter + 1, indexOfCR - indexOfDelimiter - 1, Charset.forName("UTF-8")));
+						if (dataLength == 0)
 						{
 							result[resultIndex++] = null;
 							i++;
-						}
-						else
+						} else
 						{
 							result[resultIndex++] = binaryData.copy(indexOfLF + 1, dataLength).array();
 						}
@@ -147,8 +151,7 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 						i = i + dataLength + 3;
 						indexOfCR = 0;
 						indexOfLF = 0;
-					}
-					else
+					} else
 					{
 						i++;
 					}
