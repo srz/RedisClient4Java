@@ -17,9 +17,9 @@ public class TestKeys
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
-		client = new Redis4jClient("192.2.8.164", 6379);
-		System.out.println("connect to RedisServer... back = " + client.connect());
-		client.select(10);
+		client = new Redis4jClient("192.2.8.164", 6379, 5, 10);
+		//System.out.println("connect to RedisServer... back = " + client.connect());
+		//client.select(10);
 	}
 
 	@AfterClass
@@ -52,7 +52,7 @@ public class TestKeys
 	public void testDelForOneKey()
 	{
 		String key = "WillBeDeletedKey";
-		client.set(key, "I am WillBeDeletedKey");
+		boolean b = client.set(key, "I am WillBeDeletedKey");
 		assertTrue(client.del(key)==1);
 	}
 	

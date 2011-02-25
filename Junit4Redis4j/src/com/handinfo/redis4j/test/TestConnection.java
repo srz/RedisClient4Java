@@ -17,8 +17,8 @@ public class TestConnection
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
-		client = new Redis4jClient("192.2.8.164", 6379);
-		System.out.println("connect to RedisServer... back=" + client.connect());;
+		client = new Redis4jClient("192.2.8.164", 6379, 5, 10);
+		//System.out.println("connect to RedisServer... back=" + client.connect());;
 	}
 
 	@AfterClass
@@ -58,9 +58,9 @@ public class TestConnection
 		assertTrue(client.ping());
 	}
 
-	@Test
-	public void testSelect()
-	{
-		assertTrue(client.select(0));
-	}
+//	@Test
+//	public void testSelect()
+//	{
+//		assertTrue(client.select(0));
+//	}
 }
