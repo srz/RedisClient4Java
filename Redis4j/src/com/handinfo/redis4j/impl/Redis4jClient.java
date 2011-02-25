@@ -6,18 +6,20 @@ import com.handinfo.redis4j.api.RedisCommandType;
 import com.handinfo.redis4j.api.RedisResultInfo;
 import com.handinfo.redis4j.api.RedisResultType;
 import com.handinfo.redis4j.impl.protocol.decode.ObjectDecoder;
+import com.handinfo.redis4j.impl.transfers.ConnectionPool;
 import com.handinfo.redis4j.impl.transfers.Connector;
 
 public class Redis4jClient implements IRedis4j
 {
 	private String host;
 	private int port;
-	private Connector connector;
+	private ConnectionPool pool;
 
-	public Redis4jClient(String host, int port)
+	public Redis4jClient(String host, int port, int poolSize, int indexDB)
 	{
 		this.host = host;
 		this.port = port;
+		pool = new ConnectionPool(host, port, poolSize, indexDB);
 	}
 
 	@Override
@@ -48,27 +50,33 @@ public class Redis4jClient implements IRedis4j
 	@Override
 	public boolean quit()
 	{
-		boolean serverInfo = singleLineReplyForBoolean(RedisCommandType.QUIT, RedisResultInfo.OK);
-		connector.disconnect();
-		return serverInfo;
+		//boolean serverInfo = singleLineReplyForBoolean(RedisCommandType.QUIT, RedisResultInfo.OK);
+		//connector.disconnect();
+		pool.closePool();
+		return true;
 	}
 
-	@Override
-	public boolean select(int dbIndex)
+	/**
+	 * 由于使用了连接池,如果公开此函数,并发情况下无法保证连接池中的所有连接都会修改默认操作的数据库
+	 * 所以修改为在初始化连接池时调用
+	 * @param dbIndex
+	 * @return
+	 */
+	private boolean select(int dbIndex)
 	{
 		return singleLineReplyForBoolean(RedisCommandType.SELECT, RedisResultInfo.OK, dbIndex);
 	}
 
-	/*
-	 * 创建到Redis服务器的连接，需要调用quit()函数关闭此连接
-	 */
-	@Override
-	public boolean connect()
-	{
-		connector = new Connector();
-
-		return connector.connect(host, port);
-	}
+//	/*
+//	 * 创建到Redis服务器的连接，需要调用quit()函数关闭此连接
+//	 */
+//	@Override
+//	public boolean connect()
+//	{
+//		connector = new Connector();
+//
+//		return connector.connect(host, port);
+//	}
 
 	@Override
 	public String get(String key)
@@ -197,7 +205,9 @@ public class Redis4jClient implements IRedis4j
 	 */
 	private boolean singleLineReplyForBoolean(String redisCommandType, String RedisResultInfo, Object... args)
 	{
-		Object[] result = connector.executeCommand(redisCommandType, args);
+		Connector conn = pool.getConnector();
+		Object[] result = conn.executeCommand(redisCommandType, args);
+		pool.releaseConnector(conn);
 		if (result.length > 1)
 		{
 			Character resultType = (Character) result[0];
@@ -215,7 +225,9 @@ public class Redis4jClient implements IRedis4j
 	
 	private String singleLineReplyForString(String redisCommandType, Object... args)
 	{
-		Object[] result = connector.executeCommand(redisCommandType, args);
+		Connector conn = pool.getConnector();
+		Object[] result = conn.executeCommand(redisCommandType, args);
+		pool.releaseConnector(conn);
 		if (result.length > 1)
 		{
 			Character resultType = (Character) result[0];
@@ -239,7 +251,9 @@ public class Redis4jClient implements IRedis4j
 	 */
 	private int integerReply(String redisCommandType, Object... args)
 	{
-		Object[] result = connector.executeCommand(redisCommandType, args);
+		Connector conn = pool.getConnector();
+		Object[] result = conn.executeCommand(redisCommandType, args);
+		pool.releaseConnector(conn);
 		if (result.length > 1)
 		{
 			Character resultType = (Character) result[0];
@@ -266,7 +280,9 @@ public class Redis4jClient implements IRedis4j
 	 */
 	private Object bulkReply(String redisCommandType, boolean isUseObjectDecoder, Object... args)
 	{
-		Object[] result = connector.executeCommand(redisCommandType, args);
+		Connector conn = pool.getConnector();
+		Object[] result = conn.executeCommand(redisCommandType, args);
+		pool.releaseConnector(conn);
 		if (result.length > 1)
 		{
 			Character resultType = (Character) result[0];
@@ -287,7 +303,9 @@ public class Redis4jClient implements IRedis4j
 
 	private Object[] multiBulkReply(String redisCommandType, boolean isUseObjectDecoder, Object... args)
 	{
-		Object[] result = connector.executeCommand(redisCommandType, args);
+		Connector conn = pool.getConnector();
+		Object[] result = conn.executeCommand(redisCommandType, args);
+		pool.releaseConnector(conn);
 		if (result.length > 1)
 		{
 			Character resultType = (Character) result[0];

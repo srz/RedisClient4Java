@@ -8,6 +8,8 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 
+import com.handinfo.redis4j.api.RedisCommandType;
+import com.handinfo.redis4j.api.RedisResultInfo;
 import com.handinfo.redis4j.impl.protocol.RedislHandler;
 import com.handinfo.redis4j.impl.protocol.encode.RedisCommandEncoder;
 
@@ -38,8 +40,15 @@ public class Connector
 		return true;
 	}
 	
+	public void selectDB(int indexDB)
+	{
+		executeCommand(RedisCommandType.SELECT, RedisResultInfo.OK, indexDB);
+	}
+	
 	public Object[] executeCommand(String commandType, Object...args)
 	{
+		//System.out.println( String.valueOf(this.hashCode())+"--"+ Thread.currentThread().getName()+"--"+  commandType+"--");
+		
 		Object[] command = new Object[args.length + 1];
 		command[0] = commandType;
 		for(int i=1; i<command.length; i++)
