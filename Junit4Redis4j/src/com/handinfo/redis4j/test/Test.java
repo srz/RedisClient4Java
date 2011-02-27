@@ -14,7 +14,7 @@ public class Test
 	static AtomicInteger ai = new AtomicInteger();
 	static long start = System.currentTimeMillis();
 	static CountDownLatch cdl;
-	static int repeats = 40000;
+	static int repeats = 400;
 	static BlockingQueue<String> keys = new LinkedBlockingQueue<String>(300000);
 
 	public static void main(String[] args) throws InterruptedException
@@ -32,14 +32,14 @@ public class Test
 			keys.put("key_" + i);
 		}
 		
-		final Redis4jClient client = new Redis4jClient("127.0.0.1", 6379, 30, 10);
+		final Redis4jClient client = new Redis4jClient("127.0.0.1", 6379, 10, 10);
 		// System.out.println(client.set("testKey", s));
 		//		
 		int corePoolSize = 300;
 		final ExecutorService pool = Executors.newFixedThreadPool(corePoolSize);
 		cdl = new CountDownLatch(corePoolSize);
 
-		long start = System.currentTimeMillis();
+		long start = System.nanoTime();
 		
 		for (int i = 0; i < corePoolSize; i++)
 		{
@@ -91,7 +91,7 @@ public class Test
 		pool.shutdown();
 		cdl.await();
 		
-		System.out.println("TPS=" + ai.get()/((System.currentTimeMillis()-start)/1000));
+		System.out.println("TPS=" + ai.get()/((System.nanoTime()-start)/1000000000));
 
 		client.quit();
 	}
