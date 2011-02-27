@@ -17,7 +17,7 @@ public class TestKeys
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
-		client = new Redis4jClient("192.2.8.164", 6379, 5, 10);
+		client = new Redis4jClient("127.0.0.1", 6379, 900, 10);
 		//System.out.println("connect to RedisServer... back = " + client.connect());
 		//client.select(10);
 	}

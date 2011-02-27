@@ -1,10 +1,9 @@
 package com.handinfo.redis4j.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -17,7 +16,7 @@ public class TestConnection
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
-		client = new Redis4jClient("192.2.8.164", 6379, 5, 10);
+		client = new Redis4jClient("127.0.0.1", 6379, 900, 10);
 		//System.out.println("connect to RedisServer... back=" + client.connect());;
 	}
 

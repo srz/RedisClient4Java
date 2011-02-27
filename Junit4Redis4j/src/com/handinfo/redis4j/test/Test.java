@@ -1,76 +1,99 @@
 package com.handinfo.redis4j.test;
 
-import java.util.Random;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import com.handinfo.redis4j.impl.Redis4jClient;
 
 public class Test
 {
-	public static void main(String[] args)
-	{
-		final BlockingQueue<Integer> queue = new LinkedBlockingQueue<Integer>(3);
-		final Random random = new Random();
+	static AtomicInteger ai = new AtomicInteger();
+	static long start = System.currentTimeMillis();
+	static CountDownLatch cdl;
+	static int repeats = 40000;
+	static BlockingQueue<String> keys = new LinkedBlockingQueue<String>(300000);
 
-		queue.clear();
+	public static void main(String[] args) throws InterruptedException
+	{
 		
-		class Producer implements Runnable
+		String s = "";
+		for (int i = 0; i < 3000; i++)
 		{
-			@Override
-			public void run()
+			s += "0";
+		}
+		final String tmp = s;
+		
+		for(int i=0; i<300000; i++)
+		{
+			keys.put("key_" + i);
+		}
+		
+		final Redis4jClient client = new Redis4jClient("127.0.0.1", 6379, 30, 10);
+		// System.out.println(client.set("testKey", s));
+		//		
+		int corePoolSize = 300;
+		final ExecutorService pool = Executors.newFixedThreadPool(corePoolSize);
+		cdl = new CountDownLatch(corePoolSize);
+
+		long start = System.currentTimeMillis();
+		
+		for (int i = 0; i < corePoolSize; i++)
+		{
+			pool.execute(new Runnable()
 			{
-				try
+				@Override
+				public void run()
 				{
-					Thread.sleep(1000);
-				}
-				catch (InterruptedException e1)
-				{
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				while (true)
-				{
-					try
+					for (int i = 0; i < repeats; i++)
 					{
-						int i = random.nextInt(100);
-						queue.put(i);// 当队列达到容量时候，会自动阻塞的
-						System.out.println("+++++++++++++++++++++++queue.put===" + queue.size());
-						if (queue.size() == 3)
+						String value = String.valueOf(System.currentTimeMillis()) + tmp;
+						String key = null;
+						try
 						{
-							System.out.println("full");
+							key = keys.take();
+						} catch (InterruptedException e1)
+						{
+							e1.printStackTrace();
+						}
+						boolean result = client.set(key, value);
+						//String b = client.get(key);
+						if (!result)
+							System.out.println(key);
+						else
+							ai.incrementAndGet();
+						
+						try
+						{
+							keys.put(key);
+						} catch (InterruptedException e1)
+						{
+							e1.printStackTrace();
+						}
+						
+						try
+						{
+							Thread.sleep(0);
+						} catch (InterruptedException e)
+						{
+							e.printStackTrace();
 						}
 					}
-					catch (InterruptedException e)
-					{
-						e.printStackTrace();
-					}
+					cdl.countDown();
 				}
-			}
+
+			});
 		}
 
-		class Consumer implements Runnable
-		{
-			@Override
-			public void run()
-			{
-				while (true)
-				{
-					try
-					{
-						Thread.sleep(3000);
-						int i = queue.take();// 当队列为空时，也会自动阻塞
-						System.out.println("----------take===" + queue.size());
-						
-					}
-					catch (InterruptedException e)
-					{
-						e.printStackTrace();
-					}
-				}
-			}
-		}
+		pool.shutdown();
+		cdl.await();
+		
+		System.out.println("TPS=" + ai.get()/((System.currentTimeMillis()-start)/1000));
 
-		new Thread(new Producer()).start();
-		new Thread(new Consumer()).start();
+		client.quit();
 	}
 
 }
