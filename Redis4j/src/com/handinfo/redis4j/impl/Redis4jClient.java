@@ -73,19 +73,6 @@ public class Redis4jClient implements IRedis4j
 //
 //		return connector.connect(host, port);
 //	}
-
-	@Override
-	public String get(String key)
-	{
-		return (String) bulkReply(RedisCommandType.GET, false, key);
-	}
-
-	@Override
-	public boolean set(String key, String value)
-	{
-		return singleLineReplyForBoolean(RedisCommandType.SET, RedisResultInfo.OK, key, value);
-	}
-	
 	
 	/**
 	 * 获取无法转化为字符串的对象,该功能不受到redis官方支持
@@ -159,10 +146,10 @@ public class Redis4jClient implements IRedis4j
 		return integerReply(RedisCommandType.PERSIST, key)==1 ? true : false;
 	}
 	
-	//TODO redis如何知道内部存储的是数字?
-	public Object[] sort(String key)
+	//TODO 暂时先写个简单版本的,后面在追加重载版本
+	public Object[] sort(String key, String...args)
 	{
-		return multiBulkReply(RedisCommandType.KEYS, false, key);
+		return multiBulkReply(RedisCommandType.SORT, false, key, args);
 	}
 	
 	public boolean expireat(String key,  long timestamp)
@@ -170,9 +157,9 @@ public class Redis4jClient implements IRedis4j
 		return integerReply(RedisCommandType.EXPIREAT, key, timestamp)==1 ? true : false;
 	}
 	
-	public Object randomkey()
+	public String randomkey()
 	{
-		return bulkReply(RedisCommandType.RANDOMKEY, true);
+		return (String) bulkReply(RedisCommandType.RANDOMKEY, false);
 	}
 	
 	public int ttl(String key)
@@ -180,7 +167,97 @@ public class Redis4jClient implements IRedis4j
 		return integerReply(RedisCommandType.TTL, key);
 	}
 	
+	public int append(String key, String value)
+	{
+		return integerReply(RedisCommandType.APPEND, key);
+	}
 	
+	public String getrange(String key, int start, int end)
+	{
+		return (String) bulkReply(RedisCommandType.GETRANGE, false, start, end);
+	}
+	
+	public Boolean mset(String key, String value)
+	{
+		return singleLineReplyForBoolean(RedisCommandType.MSET, RedisResultInfo.OK, value);
+	}
+	
+	public Boolean setnx(String key, String value)
+	{
+		return integerReply(RedisCommandType.SETNX, key)==1 ? true : false;
+	}
+	
+	public int decr(String key)
+	{
+		return integerReply(RedisCommandType.DECR, key);
+	}
+	
+	public String getset(String key, String value)
+	{
+		return (String) bulkReply(RedisCommandType.GETSET, false, value);
+	}
+	
+	public Boolean msetnx(String key, String value)
+	{
+		return integerReply(RedisCommandType.MSETNX, key)==1 ? true : false;
+	}
+	
+	public int setrange(String key, int offset, String value)
+	{
+		return integerReply(RedisCommandType.SETRANGE, key, offset, value);
+	}
+	
+	public int decrby(String key, int decrement)
+	{
+		return integerReply(RedisCommandType.DECRBY, key, decrement);
+	}
+	
+	public int incr(String key)
+	{
+		return integerReply(RedisCommandType.INCR, key);
+	}
+	
+	@Override
+	public boolean set(String key, String value)
+	{
+		return singleLineReplyForBoolean(RedisCommandType.SET, RedisResultInfo.OK, key, value);
+	}
+	
+	public int strlen(String key)
+	{
+		return integerReply(RedisCommandType.STRLEN, key);
+	}
+	
+	@Override
+	public String get(String key)
+	{
+		return (String) bulkReply(RedisCommandType.GET, false, key);
+	}
+	
+	public int incrby(String key, int increment)
+	{
+		return integerReply(RedisCommandType.INCRBY, key, increment);
+	}
+	
+	public int setbit(String key, int offset, int value)
+	{
+		return integerReply(RedisCommandType.SETBIT, key, offset, value);
+	}
+	
+	public int getbit(String key, int offset)
+	{
+		return integerReply(RedisCommandType.GETBIT, key, offset);
+	}
+	
+	public String[] mget(String...keys)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.MGET, false, keys);
+	}
+	
+	public boolean setex(String key, int seconds, String value)
+	{
+		return singleLineReplyForBoolean(RedisCommandType.SETEX, RedisResultInfo.OK, key, seconds, value);
+	}
 	
 	
 	
