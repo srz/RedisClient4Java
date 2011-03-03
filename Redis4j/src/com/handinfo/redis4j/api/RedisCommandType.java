@@ -131,16 +131,18 @@ public class RedisCommandType
 	public static final String INFO = "INFO";
 	public static final String SLAVEOF = "SLAVEOF";
 	public static final String BGSAVE = "BGSAVE";
-	public static final String DEBUG_OBJECT = "DEBUG OBJECT";
+	public static final String DEBUG = "DEBUG";
+	public static final String DEBUG_OBJECT = "OBJECT";
 	public static final String LASTSAVE = "LASTSAVE";
 	public static final String SYNC = "SYNC";
-	public static final String CONFIG_GET = "CONFIG GET";
-	public static final String DEBUG_SEGFAULT = "DEBUG SEGFAULT";
+	public static final String CONFIG = "CONFIG";
+	public static final String CONFIG_GET = "GET";
+	public static final String DEBUG_SEGFAULT = "SEGFAULT";
 	public static final String MONITOR = "MONITOR";
-	public static final String CONFIG_SET  = "CONFIG SET";
+	public static final String CONFIG_SET  = "SET";
 	public static final String FLUSHALL = "FLUSHALL";
 	public static final String SAVE = "SAVE";
-	public static final String CONFIG_RESETSTAT = "CONFIG RESETSTAT";
+	public static final String CONFIG_RESETSTAT = "RESETSTAT";
 	public static final String FLUSHDB = "FLUSHDB";
 	public static final String SHUTDOWN = "SHUTDOWN";
 }

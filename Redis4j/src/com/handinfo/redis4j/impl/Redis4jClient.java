@@ -17,52 +17,6 @@ public class Redis4jClient implements IRedis4j
 		connector = new Connector(host, port, poolSize, indexDB);
 	}
 
-	@Override
-	public boolean auth(String password)
-	{
-		return singleLineReplyForBoolean(RedisCommandType.AUTH, RedisResultInfo.OK, password);
-	}
-
-	@Override
-	public String echo(String message)
-	{
-		Object result = bulkReply(RedisCommandType.ECHO, false, message);
-		if (result != null)
-		{
-			return (String) result;
-		}
-
-		return null;
-	}
-
-	@Override
-	public boolean ping()
-	{
-		return singleLineReplyForBoolean(RedisCommandType.PING, RedisResultInfo.PONG);
-	}
-
-	//
-	@Override
-	public boolean quit()
-	{
-		//boolean serverInfo = singleLineReplyForBoolean(RedisCommandType.QUIT, RedisResultInfo.OK);
-		//connector.disconnect();
-		connector.disconnect();
-		return true;
-	}
-
-	/**
-	 * 由于使用了连接池,如果公开此函数,并发情况下无法保证连接池中的所有连接都会修改默认操作的数据库
-	 * 后续在考虑是否添加此函数
-	 * @param dbIndex
-	 * @return
-	 */
-	@SuppressWarnings("unused")
-	private boolean select(int dbIndex)
-	{
-		return singleLineReplyForBoolean(RedisCommandType.SELECT, RedisResultInfo.OK, dbIndex);
-	}
-
 //	/*
 //	 * 创建到Redis服务器的连接，需要调用quit()函数关闭此连接
 //	 */
@@ -259,13 +213,486 @@ public class Redis4jClient implements IRedis4j
 		return singleLineReplyForBoolean(RedisCommandType.SETEX, RedisResultInfo.OK, key, seconds, value);
 	}
 	
+	public Boolean hdel(String key, String field)
+	{
+		return integerReply(RedisCommandType.HDEL, key, field)==1 ? true : false;
+	}
 	
+	public String[] hgetall(String key)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.HGETALL, false, key);
+	}
 	
+	public int hlen(String key)
+	{
+		return integerReply(RedisCommandType.HLEN, key);
+	}
+	
+	public Boolean hset(String key, String field, String value)
+	{
+		return integerReply(RedisCommandType.HSET, key, field, value)==1 ? true : false;
+	}
+	
+	public Boolean hexists(String key, String field)
+	{
+		return integerReply(RedisCommandType.HEXISTS, key, field)==1 ? true : false;
+	}
+	
+	public int hincrby(String key, String field, int increment)
+	{
+		return integerReply(RedisCommandType.HINCRBY, key, field, increment);
+	}
+	
+	public String[] hmget(String key, String field)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.HMGET, false, key, field);
+	}
+	
+	public Boolean hsetnx(String key, String field, String value)
+	{
+		return integerReply(RedisCommandType.HSETNX, key, field, value)==1 ? true : false;
+	}
+	
+	public String hget(String key, String field)
+	{
+		return (String) bulkReply(RedisCommandType.HGET, false, key, field);
+	}
+	
+	public String[] hkeys(String key)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.HKEYS, false, key);
+	}
+	
+	public boolean hmset(String key, String field, String value)
+	{
+		return singleLineReplyForBoolean(RedisCommandType.HMSET, RedisResultInfo.OK, key, field, value);
+	}
+	
+	public String[] hvals(String key)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.HVALS, false, key);
+	}
+	
+	public String[] blpop(String key, int timeout)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.BLPOP, false, key, timeout);
+	}
+	
+	public int llen(String key)
+	{
+		return integerReply(RedisCommandType.LLEN, key);
+	}
+	
+	public int lrem(String key, int count, String value)
+	{
+		return integerReply(RedisCommandType.LREM, key, count, value);
+	}
+	
+	public int rpush(String key, String value)
+	{
+		return integerReply(RedisCommandType.RPUSH, key, value);
+	}
+	
+	public String[] brpop(String key, int timeout)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.BRPOP, false, key, timeout);
+	}
+	
+	public String lpop(String key)
+	{
+		return singleLineReplyForString(RedisCommandType.LPOP, key);
+	}
+	
+	public boolean lset(String key, int index, String value)
+	{
+		return singleLineReplyForBoolean(RedisCommandType.LSET, RedisResultInfo.OK, key, index, value);
+	}
+	
+	public int rpushx(String key, String value)
+	{
+		return integerReply(RedisCommandType.RPUSHX, key, value);
+	}
+	
+	public String brpoplpush(String source, String destination, int timeout)
+	{
+		return (String) bulkReply(RedisCommandType.BRPOPLPUSH, false, source, destination, timeout);
+	}
+	
+	public int lpush(String key, String value)
+	{
+		return integerReply(RedisCommandType.LPUSH, key, value);
+	}
+	
+	public boolean ltrim(String key, int start, int stop)
+	{
+		return singleLineReplyForBoolean(RedisCommandType.LTRIM, RedisResultInfo.OK, key, start, stop);
+	}
+	
+	public String lindex(String key, int index)
+	{
+		return singleLineReplyForString(RedisCommandType.LINDEX, key, index);
+	}
+	
+	public int lpushx(String key, String value)
+	{
+		return integerReply(RedisCommandType.LPUSHX, key, value);
+	}
+	
+	public String rpop(String key)
+	{
+		return (String) bulkReply(RedisCommandType.RPOP, false, key);
+	}
+	
+	public int linsert(String key, String BEFORE_AFTER, String pivot, String value)
+	{
+		return integerReply(RedisCommandType.LINSERT, key, BEFORE_AFTER, pivot, value);
+	}
+	
+	public String[] lrange(String key, int start, int stop)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.LRANGE, false, key, start, stop);
+	}
+	
+	public String rpoplpush(String source, String destination)
+	{
+		return (String) bulkReply(RedisCommandType.RPOPLPUSH, false, source, destination);
+	}
+	
+	public Boolean sadd(String key, String member)
+	{
+		return integerReply(RedisCommandType.SADD, key, member)==1 ? true : false;
+	}
+	
+	public String[] sinter(String...keys)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.SINTER, false, keys);
+	}
+	
+	public Boolean smove(String source, String destination, String member)
+	{
+		return integerReply(RedisCommandType.SMOVE, source, destination, member)==1 ? true : false;
+	}
+	
+	public String[] sunion(String...keys)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.SUNION, false, keys);
+	}
+	
+	public int scard(String key)
+	{
+		return integerReply(RedisCommandType.SCARD, key);
+	}
+	
+	public int sinterstore(String destination, String...keys)
+	{
+		return integerReply(RedisCommandType.SINTERSTORE, destination, keys);
+	}
+	
+	public String spop(String key)
+	{
+		return (String) bulkReply(RedisCommandType.SPOP, false, key);
+	}
+	
+	public int sunionstore(String destination, String...keys)
+	{
+		return integerReply(RedisCommandType.SUNIONSTORE, destination, keys);
+	}
+	
+	public String[] sdiff(String...keys)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.SDIFF, false, keys);
+	}
+	
+	public Boolean sismember(String key, String member)
+	{
+		return integerReply(RedisCommandType.SISMEMBER, key, member)==1 ? true : false;
+	}
+	
+	public String srandmember(String key)
+	{
+		return (String) bulkReply(RedisCommandType.SRANDMEMBER, false, key);
+	}
+	
+	public int sdiffstore(String destination, String...keys)
+	{
+		return integerReply(RedisCommandType.SDIFFSTORE, destination, keys);
+	}
+	
+	public String[] smembers(String key)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.SMEMBERS, false, key);
+	}
+	
+	public Boolean srem(String key, String member)
+	{
+		return integerReply(RedisCommandType.SREM, key, member)==1 ? true : false;
+	}
+	
+	public Boolean zadd(String key, int score, String member)
+	{
+		return integerReply(RedisCommandType.ZADD, key, score, member)==1 ? true : false;
+	}
+	
+	public int zinterstore(String...args)
+	{
+		return integerReply(RedisCommandType.ZINTERSTORE, args);
+	}
+	
+	public Boolean zrem(String key, String member)
+	{
+		return integerReply(RedisCommandType.ZREM, key, member)==1 ? true : false;
+	}
+	
+	public String[] zrevrangebyscore(String...args)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.ZREVRANGEBYSCORE, false, args);
+	}
+	
+	public int zcard(String key)
+	{
+		return integerReply(RedisCommandType.ZCARD, key);
+	}
+	
+	public String[] zrange(String key, int start, int stop)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.ZRANGE, false, key, start, stop);
+	}
+	
+	public int zremrangebyrank(String key, int start, int stop)
+	{
+		return integerReply(RedisCommandType.ZREMRANGEBYRANK, key, start, stop);
+	}
+	
+	public int zrevrank(String key, String member)
+	{
+		return integerReply(RedisCommandType.ZREVRANK, key, member);
+	}
+	
+	public int zcount(String key, int min, int max)
+	{
+		return integerReply(RedisCommandType.ZCOUNT, key, min, max);
+	}
+	
+	public String[] zrangebyscore(String...args)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.ZRANGEBYSCORE, false, args);
+	}
+	
+	public int zremrangebyscore(String key, int min, int max)
+	{
+		return integerReply(RedisCommandType.ZREMRANGEBYSCORE, key, min, max);
+	}
+	
+	public String zscore(String key, String member)
+	{
+		return (String) bulkReply(RedisCommandType.ZSCORE, false, key, member);
+	}
+	
+	public String zincrby(String key, int increment, String member)
+	{
+		return (String) bulkReply(RedisCommandType.ZINCRBY, false, key, increment, member);
+	}
+	
+	public int zrank(String key, String member)
+	{
+		return integerReply(RedisCommandType.ZRANK, key, member);
+	}
+	
+	public String[] zrevrange(String key, int start, int stop)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.ZREVRANGE, false, key, start, stop);
+	}
+	
+	public int zunionstore(String...args)
+	{
+		return integerReply(RedisCommandType.ZUNIONSTORE, args);
+	}
+	
+	public boolean discard()
+	{
+		return singleLineReplyForBoolean(RedisCommandType.DISCARD, RedisResultInfo.OK);
+	}
+	
+	public String[] exec()
+	{
+		return (String[]) multiBulkReply(RedisCommandType.EXEC, false);
+	}
+	
+	public boolean multi()
+	{
+		return singleLineReplyForBoolean(RedisCommandType.MULTI, RedisResultInfo.OK);
+	}
+	
+	public boolean unwatch()
+	{
+		return singleLineReplyForBoolean(RedisCommandType.UNWATCH, RedisResultInfo.OK);
+	}
+	
+	public boolean watch()
+	{
+		return singleLineReplyForBoolean(RedisCommandType.WATCH, RedisResultInfo.OK);
+	}
+	
+	@Override
+	public boolean auth(String password)
+	{
+		return singleLineReplyForBoolean(RedisCommandType.AUTH, RedisResultInfo.OK, password);
+	}
+
+	@Override
+	public String echo(String message)
+	{
+		Object result = bulkReply(RedisCommandType.ECHO, false, message);
+		if (result != null)
+		{
+			return (String) result;
+		}
+
+		return null;
+	}
+
+	@Override
+	public boolean ping()
+	{
+		return singleLineReplyForBoolean(RedisCommandType.PING, RedisResultInfo.PONG);
+	}
+
+	//
+	@Override
+	public boolean quit()
+	{
+		//boolean serverInfo = singleLineReplyForBoolean(RedisCommandType.QUIT, RedisResultInfo.OK);
+		//connector.disconnect();
+		connector.disconnect();
+		return true;
+	}
+
+	/**
+	 * 由于使用了连接池,如果公开此函数,并发情况下无法保证连接池中的所有连接都会修改默认操作的数据库
+	 * 后续在考虑是否添加此函数
+	 * @param dbIndex
+	 * @return
+	 */
+	@SuppressWarnings("unused")
+	private boolean select(int dbIndex)
+	{
+		return singleLineReplyForBoolean(RedisCommandType.SELECT, RedisResultInfo.OK, dbIndex);
+	}
+	
+	public boolean bgrewriteaof()
+	{
+		return singleLineReplyForBoolean(RedisCommandType.BGREWRITEAOF, RedisResultInfo.OK);
+	}
+	
+	public boolean bgsave()
+	{
+		return singleLineReplyForBoolean(RedisCommandType.BGSAVE, RedisResultInfo.OK);
+	}
+	
+	public String[] config_get(String parameter)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.CONFIG, false, RedisCommandType.CONFIG_GET, parameter);
+	}
+	
+	public boolean config_resetstat()
+	{
+		return singleLineReplyForBoolean(RedisCommandType.CONFIG, RedisResultInfo.OK, RedisCommandType.CONFIG_RESETSTAT);
+	}
+	
+	public boolean config_set(String parameter, String value)
+	{
+		return singleLineReplyForBoolean(RedisCommandType.CONFIG, RedisResultInfo.OK, RedisCommandType.CONFIG_SET, parameter, value);
+	}
+	
+	public int dbsize()
+	{
+		return integerReply(RedisCommandType.DBSIZE);
+	}
+	
+	public String[] debug_object(String key)
+	{
+		return (String[]) multiBulkReply(RedisCommandType.DEBUG, false, RedisCommandType.DEBUG_OBJECT, key);
+	}
+	
+	public String[] debug_segfault()
+	{
+		return (String[]) multiBulkReply(RedisCommandType.DEBUG, false, RedisCommandType.DEBUG_SEGFAULT);
+	}
+	
+	public boolean flushall()
+	{
+		return singleLineReplyForBoolean(RedisCommandType.FLUSHALL, RedisResultInfo.OK);
+	}
 	
 	public boolean flushdb()
 	{
 		return singleLineReplyForBoolean(RedisCommandType.FLUSHDB, RedisResultInfo.OK);
 	}
+	
+	public String[] info()
+	{
+		return (String[]) multiBulkReply(RedisCommandType.INFO, false);
+	}
+	
+	public int lastsave()
+	{
+		return integerReply(RedisCommandType.LASTSAVE);
+	}
+	
+	public String monitor()
+	{
+		return (String) bulkReply(RedisCommandType.MONITOR, false);
+	}
+	
+	public boolean save()
+	{
+		return singleLineReplyForBoolean(RedisCommandType.SAVE, RedisResultInfo.OK);
+	}
+	
+	public boolean shutdown()
+	{
+		return !singleLineReplyForBoolean(RedisCommandType.SHUTDOWN, RedisResultInfo.SHUTDOWNERROR);
+	}
+	
+	public boolean slaveof()
+	{
+		return singleLineReplyForBoolean(RedisCommandType.SLAVEOF, RedisResultInfo.OK);
+	}
+	
+	public String[] sync()
+	{
+		return (String[]) multiBulkReply(RedisCommandType.SYNC, false);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	/**
 	 * 返回类型为状态码的命令统一执行此函数
