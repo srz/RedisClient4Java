@@ -1,8 +1,6 @@
 package com.handinfo.redis4j.api;
 
-import java.io.Serializable;
-
-public class DataWrapper<T> implements Serializable
+public class DataWrapper<T>
 {
 	/**
 	 * @param original

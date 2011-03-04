@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.handinfo.redis4j.api.IRedis4j;
 import com.handinfo.redis4j.impl.Redis4jClient;
 
 public class Test
@@ -32,7 +33,7 @@ public class Test
 			keys.put("key_" + i);
 		}
 		
-		final Redis4jClient client = new Redis4jClient("127.0.0.1", 6379, 10, 10);
+		final IRedis4j client = new Redis4jClient("127.0.0.1", 6379, 10, 10);
 		// System.out.println(client.set("testKey", s));
 		//		
 		int corePoolSize = 300;
@@ -59,7 +60,7 @@ public class Test
 						{
 							e1.printStackTrace();
 						}
-						boolean result = client.set(key, value);
+						boolean result = client.getStrings().set(key, value);
 						//String b = client.get(key);
 						if (!result)
 							System.out.println(key);
@@ -93,7 +94,7 @@ public class Test
 		
 		System.out.println("TPS=" + ai.get()/((System.nanoTime()-start)/1000000000));
 
-		client.quit();
+		client.getConnection().quit();
 	}
 
 }
