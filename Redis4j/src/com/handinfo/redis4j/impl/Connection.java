@@ -15,6 +15,11 @@ public class Connection extends BaseCommand implements IConnection
 		this.connector = connector;
 	}
 
+	private boolean isHaveConnectToServer()
+	{
+		return connector == null ? false: true;
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IConnection#auth(java.lang.String)
 	 */
@@ -51,9 +56,7 @@ public class Connection extends BaseCommand implements IConnection
 	 */
 	public boolean quit()
 	{
-		//boolean serverInfo = singleLineReplyForBoolean(RedisCommandType.QUIT, RedisResultInfo.OK);
-		//connector.disconnect();
-		connector.disconnect();
+		connector.disConnect();
 		return true;
 	}
 

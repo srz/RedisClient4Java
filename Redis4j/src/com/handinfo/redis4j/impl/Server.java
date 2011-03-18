@@ -15,17 +15,17 @@ public class Server extends BaseCommand implements IServer
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IServer#bgrewriteaof()
 	 */
-	public boolean bgrewriteaof()
+	public String bgrewriteaof()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.BGREWRITEAOF, RedisResultInfo.OK);
+		return singleLineReplyForString(RedisCommandType.BGREWRITEAOF);
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IServer#bgsave()
 	 */
-	public boolean bgsave()
+	public String bgsave()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.BGSAVE, RedisResultInfo.OK);
+		return singleLineReplyForString(RedisCommandType.BGSAVE);
 	}
 	
 	/* (non-Javadoc)
@@ -95,9 +95,9 @@ public class Server extends BaseCommand implements IServer
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IServer#info()
 	 */
-	public String[] info()
+	public String info()
 	{
-		return (String[]) multiBulkReply(RedisCommandType.INFO, false);
+		return (String)bulkReply(RedisCommandType.INFO, false);
 	}
 	
 	/* (non-Javadoc)
@@ -111,9 +111,14 @@ public class Server extends BaseCommand implements IServer
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IServer#monitor()
 	 */
-	public String monitor()
+	public void monitor()
 	{
-		return (String) bulkReply(RedisCommandType.MONITOR, false);
+		asyncBulkReply(RedisCommandType.MONITOR, false);
+	}
+	
+	public String getMonitorResult()
+	{
+		return asyncGetBulkReplyResult();
 	}
 	
 	/* (non-Javadoc)

@@ -3,7 +3,11 @@ package com.handinfo.redis4j.api;
 
 public interface IRedis4j
 {
-
+	/**
+	 * @return 判断网络连接是否建立成功
+	 */
+	public boolean isConnectSucess();
+	
 	/**
 	 * @return the connection
 	 */
@@ -48,5 +52,10 @@ public interface IRedis4j
 	 * @return the transactions
 	 */
 	public ITransactions getTransactions();
+	
+	/**
+	 * @return the new IRedis4j
+	 */
+	public IRedis4j clone();
 
 }

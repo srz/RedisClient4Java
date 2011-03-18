@@ -1,5 +1,7 @@
 package com.handinfo.redis4j.impl;
 
+import java.util.concurrent.BlockingQueue;
+
 import com.handinfo.redis4j.api.RedisResultType;
 import com.handinfo.redis4j.impl.protocol.decode.ObjectDecoder;
 import com.handinfo.redis4j.impl.transfers.Connector;
@@ -7,6 +9,7 @@ import com.handinfo.redis4j.impl.transfers.Connector;
 public class BaseCommand
 {
 	private Connector connector;
+	private BlockingQueue<Object[]> answer;
 	
 	/**
 	 * @param connector
@@ -29,7 +32,7 @@ public class BaseCommand
 	{
 		Object[] result = connector.executeCommand(redisCommandType, args);
 
-		if (result.length > 1)
+		if (result != null && result.length > 1)
 		{
 			Character resultType = (Character) result[0];
 			if (resultType == RedisResultType.SingleLineReply)
@@ -48,7 +51,7 @@ public class BaseCommand
 	{
 		Object[] result = connector.executeCommand(redisCommandType, args);
 
-		if (result.length > 1)
+		if (result != null && result.length > 1)
 		{
 			Character resultType = (Character) result[0];
 			if (resultType == RedisResultType.SingleLineReply)
@@ -73,7 +76,7 @@ public class BaseCommand
 	{
 		Object[] result = connector.executeCommand(redisCommandType, args);
 
-		if (result.length > 1)
+		if (result != null && result.length > 1)
 		{
 			Character resultType = (Character) result[0];
 			if (resultType == RedisResultType.IntegerReply)
@@ -101,7 +104,7 @@ public class BaseCommand
 	{
 		Object[] result = connector.executeCommand(redisCommandType, args);
 
-		if (result.length > 1)
+		if (result != null && result.length > 1)
 		{
 			Character resultType = (Character) result[0];
 			if (resultType == RedisResultType.BulkReplies)
@@ -123,7 +126,7 @@ public class BaseCommand
 	{
 		Object[] result = connector.executeCommand(redisCommandType, args);
 		
-		if (result.length > 1)
+		if (result != null && result.length > 1)
 		{
 			Character resultType = (Character) result[0];
 			if (resultType == RedisResultType.MultiBulkReplies)
@@ -156,6 +159,62 @@ public class BaseCommand
 		}
 
 		return null;
+	}
+	
+	/**
+	 * 返回类型为单行数据的命令统一执行此函数
+	 * 发送给redis的数据,如果被DataWrapper包装过,则参数isUseObjectDecoder应该为true,否则为false
+	 * 
+	 * @param redisCommandType
+	 *            命令类型
+	 * @param isUseObjectDecoder 是否使用对象序列化功能
+	 * @param args
+	 *            其它参数
+	 * @return 从redis取得的对象,
+	 *         因为解码时统一按照DataWrapper类型来解码
+	 */
+	protected void asyncBulkReply(String redisCommandType, boolean isUseObjectDecoder, Object... args)
+	{
+		answer = connector.asyncExecuteCommand(redisCommandType, args);
+	}
+	
+	/**
+	 * 返回类型为单行数据的命令统一执行此函数
+	 * 发送给redis的数据,如果被DataWrapper包装过,则参数isUseObjectDecoder应该为true,否则为false
+	 * 
+	 * @return 从redis取得的对象,
+	 *         因为解码时统一按照DataWrapper类型来解码
+	 */
+	protected String asyncGetBulkReplyResult()
+	{
+		Object[] result = null;
+		boolean interrupted = false;
+		try
+		{
+			result = answer.take();
+		}
+		catch (InterruptedException e)
+		{
+			interrupted = true;
+		}
 
+		if (interrupted)
+		{
+			Thread.currentThread().interrupt();
+		}
+
+		if (result != null && result.length > 1)
+		{
+			Character resultType = (Character) result[0];
+			if (resultType == RedisResultType.SingleLineReply)
+			{
+				if (result[1] != null)
+				{
+					return (String) result[1];
+				}
+			}
+		}
+
+		return null;
 	}
 }

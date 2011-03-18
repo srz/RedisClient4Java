@@ -3,9 +3,9 @@ package com.handinfo.redis4j.api;
 public interface IServer
 {
 
-	public boolean bgrewriteaof();
+	public String bgrewriteaof();
 
-	public boolean bgsave();
+	public String bgsave();
 
 	public String[] config_get(String parameter);
 
@@ -23,11 +23,13 @@ public interface IServer
 
 	public boolean flushdb();
 
-	public String[] info();
+	public String info();
 
 	public int lastsave();
 
-	public String monitor();
+	public void monitor();
+	
+	public String getMonitorResult();
 
 	public boolean save();
 

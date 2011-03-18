@@ -2,6 +2,7 @@ package com.handinfo.redis4j.impl.protocol;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +15,9 @@ import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.jboss.netty.channel.WriteCompletionEvent;
+
+import com.handinfo.redis4j.impl.transfers.Connector;
 
 public class RedislHandler extends SimpleChannelUpstreamHandler
 {
@@ -23,7 +27,15 @@ public class RedislHandler extends SimpleChannelUpstreamHandler
 	private volatile Channel channel;
 	private final BlockingQueue<Object[]> answer = new LinkedBlockingQueue<Object[]>();
 
-	public Object[] sendRequest(ChannelBuffer command)
+	/**
+	 * @param connector
+	 */
+	public RedislHandler()
+	{
+		super();
+	}
+
+	public Object[] syncSendRequest(ChannelBuffer command)
 	{
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		buffer.writeBytes(command);
@@ -38,14 +50,20 @@ public class RedislHandler extends SimpleChannelUpstreamHandler
 		}
 		catch (InterruptedException e)
 		{
-			interrupted = true;
+			e.printStackTrace();
 		}
 
-		if (interrupted)
-		{
-			Thread.currentThread().interrupt();
-		}
 		return result;
+	}
+	
+	public BlockingQueue<Object[]> asyncSendRequest(ChannelBuffer command)
+	{
+		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
+		buffer.writeBytes(command);
+
+		channel.write(buffer).awaitUninterruptibly();
+		
+		return answer;
 	}
 
 	@Override
@@ -75,6 +93,24 @@ public class RedislHandler extends SimpleChannelUpstreamHandler
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
 	{
 		logger.log(Level.WARNING, "Unexpected exception from downstream.", e.getCause());
-		e.getChannel().close();
+		//e.getChannel().close();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jboss.netty.channel.SimpleChannelUpstreamHandler#channelClosed(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.ChannelStateEvent)
+	 */
+	@Override
+	public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	{
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jboss.netty.channel.SimpleChannelUpstreamHandler#channelDisconnected(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.ChannelStateEvent)
+	 */
+	@Override
+	public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
+	{
+		answer.offer(new Object[]{null});
 	}
 }

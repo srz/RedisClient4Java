@@ -37,7 +37,7 @@ public class FrameToObjectByteArrayDecoder extends OneToOneDecoder
 		// 头中的内容
 		String header = binaryData.toString(1, firstIndexCR - 1, Charset.forName("UTF-8"));
 
-		//logger.info("received message,first byte is \"" + firstByte + "\"");
+		// logger.info("received message,first byte is \"" + firstByte + "\"");
 
 		Object[] result = null;
 		switch (firstByte)
