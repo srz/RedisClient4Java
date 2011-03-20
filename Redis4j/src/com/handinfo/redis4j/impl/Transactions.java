@@ -16,7 +16,7 @@ public class Transactions extends BaseCommand implements ITransactions
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ITransactions#discard()
 	 */
-	public boolean discard()
+	public boolean discard() throws Exception
 	{
 		return singleLineReplyForBoolean(RedisCommandType.DISCARD, RedisResultInfo.OK);
 	}
@@ -24,7 +24,7 @@ public class Transactions extends BaseCommand implements ITransactions
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ITransactions#exec()
 	 */
-	public String[] exec()
+	public String[] exec() throws Exception
 	{
 		return (String[]) multiBulkReply(RedisCommandType.EXEC, false);
 	}
@@ -32,7 +32,7 @@ public class Transactions extends BaseCommand implements ITransactions
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ITransactions#multi()
 	 */
-	public boolean multi()
+	public boolean multi() throws Exception
 	{
 		return singleLineReplyForBoolean(RedisCommandType.MULTI, RedisResultInfo.OK);
 	}
@@ -40,7 +40,7 @@ public class Transactions extends BaseCommand implements ITransactions
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ITransactions#unwatch()
 	 */
-	public boolean unwatch()
+	public boolean unwatch() throws Exception
 	{
 		return singleLineReplyForBoolean(RedisCommandType.UNWATCH, RedisResultInfo.OK);
 	}
@@ -48,7 +48,7 @@ public class Transactions extends BaseCommand implements ITransactions
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ITransactions#watch()
 	 */
-	public boolean watch()
+	public boolean watch() throws Exception
 	{
 		return singleLineReplyForBoolean(RedisCommandType.WATCH, RedisResultInfo.OK);
 	}

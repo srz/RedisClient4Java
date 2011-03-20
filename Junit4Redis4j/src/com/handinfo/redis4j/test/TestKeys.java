@@ -44,13 +44,13 @@ public class TestKeys
 	}
 
 	@Test
-	public void testDelForNoExistKey()
+	public void testDelForNoExistKey() throws Exception
 	{
 		assertTrue(client.getKeys().del("NoExistKey")==0);
 	}
 	
 	@Test
-	public void testDelForOneKey()
+	public void testDelForOneKey() throws Exception
 	{
 		String key = "WillBeDeletedKey";
 		boolean b = client.getStrings().set(key, "I am WillBeDeletedKey");
@@ -58,7 +58,7 @@ public class TestKeys
 	}
 	
 	@Test
-	public void testDelForThreeKey()
+	public void testDelForThreeKey() throws Exception
 	{
 		String key_1 = "WillBeDeletedKey1";
 		String key_2 = "WillBeDeletedKey2";
@@ -70,7 +70,7 @@ public class TestKeys
 	}
 
 	@Test
-	public void testRename()
+	public void testRename() throws Exception
 	{
 		String key_1 = "WillBeRenamedKey_1";
 		String value = "I am WillBeRenamedKey";
@@ -85,7 +85,7 @@ public class TestKeys
 	}
 
 	@Test
-	public void testKeys()
+	public void testKeys() throws Exception
 	{
 		int successStep = 0;
 		String[] keys = client.getKeys().keys("*");
@@ -113,7 +113,7 @@ public class TestKeys
 	}
 	
 	@Test
-	public void testType()
+	public void testType() throws Exception
 	{
 		int successStep = 0;
 		String key_str = "string";

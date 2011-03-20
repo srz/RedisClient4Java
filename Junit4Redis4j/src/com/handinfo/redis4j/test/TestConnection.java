@@ -40,20 +40,20 @@ public class TestConnection
 //	}
 
 	@Test
-	public void testAuth()
+	public void testAuth() throws Exception
 	{
 		assertTrue(client.getConnection().auth("pwd"));
 	}
 
 	@Test
-	public void testEcho()
+	public void testEcho() throws Exception
 	{
 		String str = "i am server response echo!";
 		assertEquals("there is a bug in here!", str, client.getConnection().echo("i am server response echo!"));
 	}
 
 	@Test
-	public void testPing()
+	public void testPing() throws Exception
 	{
 		assertTrue(client.getConnection().ping());
 	}

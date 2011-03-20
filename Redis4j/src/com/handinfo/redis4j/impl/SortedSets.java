@@ -16,7 +16,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zadd(java.lang.String, int, java.lang.String)
 	 */
-	public Boolean zadd(String key, int score, String member)
+	public Boolean zadd(String key, int score, String member) throws Exception
 	{
 		return integerReply(RedisCommandType.ZADD, key, score, member)==1 ? true : false;
 	}
@@ -24,7 +24,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zinterstore(java.lang.String)
 	 */
-	public int zinterstore(String...args)
+	public int zinterstore(String...args) throws Exception
 	{
 		return integerReply(RedisCommandType.ZINTERSTORE, args);
 	}
@@ -32,7 +32,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zrem(java.lang.String, java.lang.String)
 	 */
-	public Boolean zrem(String key, String member)
+	public Boolean zrem(String key, String member) throws Exception
 	{
 		return integerReply(RedisCommandType.ZREM, key, member)==1 ? true : false;
 	}
@@ -40,7 +40,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zrevrangebyscore(java.lang.String)
 	 */
-	public String[] zrevrangebyscore(String...args)
+	public String[] zrevrangebyscore(String...args) throws Exception
 	{
 		return (String[]) multiBulkReply(RedisCommandType.ZREVRANGEBYSCORE, false, args);
 	}
@@ -48,7 +48,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zcard(java.lang.String)
 	 */
-	public int zcard(String key)
+	public int zcard(String key) throws Exception
 	{
 		return integerReply(RedisCommandType.ZCARD, key);
 	}
@@ -56,7 +56,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zrange(java.lang.String, int, int)
 	 */
-	public String[] zrange(String key, int start, int stop)
+	public String[] zrange(String key, int start, int stop) throws Exception
 	{
 		return (String[]) multiBulkReply(RedisCommandType.ZRANGE, false, key, start, stop);
 	}
@@ -64,7 +64,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zremrangebyrank(java.lang.String, int, int)
 	 */
-	public int zremrangebyrank(String key, int start, int stop)
+	public int zremrangebyrank(String key, int start, int stop) throws Exception
 	{
 		return integerReply(RedisCommandType.ZREMRANGEBYRANK, key, start, stop);
 	}
@@ -72,7 +72,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zrevrank(java.lang.String, java.lang.String)
 	 */
-	public int zrevrank(String key, String member)
+	public int zrevrank(String key, String member) throws Exception
 	{
 		return integerReply(RedisCommandType.ZREVRANK, key, member);
 	}
@@ -80,7 +80,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zcount(java.lang.String, int, int)
 	 */
-	public int zcount(String key, int min, int max)
+	public int zcount(String key, int min, int max) throws Exception
 	{
 		return integerReply(RedisCommandType.ZCOUNT, key, min, max);
 	}
@@ -88,7 +88,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zrangebyscore(java.lang.String)
 	 */
-	public String[] zrangebyscore(String...args)
+	public String[] zrangebyscore(String...args) throws Exception
 	{
 		return (String[]) multiBulkReply(RedisCommandType.ZRANGEBYSCORE, false, args);
 	}
@@ -96,7 +96,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zremrangebyscore(java.lang.String, int, int)
 	 */
-	public int zremrangebyscore(String key, int min, int max)
+	public int zremrangebyscore(String key, int min, int max) throws Exception
 	{
 		return integerReply(RedisCommandType.ZREMRANGEBYSCORE, key, min, max);
 	}
@@ -104,7 +104,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zscore(java.lang.String, java.lang.String)
 	 */
-	public String zscore(String key, String member)
+	public String zscore(String key, String member) throws Exception
 	{
 		return (String) bulkReply(RedisCommandType.ZSCORE, false, key, member);
 	}
@@ -112,7 +112,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zincrby(java.lang.String, int, java.lang.String)
 	 */
-	public String zincrby(String key, int increment, String member)
+	public String zincrby(String key, int increment, String member) throws Exception
 	{
 		return (String) bulkReply(RedisCommandType.ZINCRBY, false, key, increment, member);
 	}
@@ -120,7 +120,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zrank(java.lang.String, java.lang.String)
 	 */
-	public int zrank(String key, String member)
+	public int zrank(String key, String member) throws Exception
 	{
 		return integerReply(RedisCommandType.ZRANK, key, member);
 	}
@@ -128,7 +128,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zrevrange(java.lang.String, int, int)
 	 */
-	public String[] zrevrange(String key, int start, int stop)
+	public String[] zrevrange(String key, int start, int stop) throws Exception
 	{
 		return (String[]) multiBulkReply(RedisCommandType.ZREVRANGE, false, key, start, stop);
 	}
@@ -136,7 +136,7 @@ public class SortedSets extends BaseCommand implements ISortedSets
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ISortedSets#zunionstore(java.lang.String)
 	 */
-	public int zunionstore(String...args)
+	public int zunionstore(String...args) throws Exception
 	{
 		return integerReply(RedisCommandType.ZUNIONSTORE, args);
 	}

@@ -2,6 +2,7 @@ package com.handinfo.redis4j.impl;
 
 import java.util.concurrent.BlockingQueue;
 
+import com.handinfo.redis4j.api.Command;
 import com.handinfo.redis4j.api.RedisResultType;
 import com.handinfo.redis4j.impl.protocol.decode.ObjectDecoder;
 import com.handinfo.redis4j.impl.transfers.Connector;
@@ -27,8 +28,9 @@ public class BaseCommand
 	 * @param RedisResultInfo
 	 *            返回结果的期望值,如不符合则认为操作失败
 	 * @return 操作结果是否成功
+	 * @throws Exception 
 	 */
-	protected boolean singleLineReplyForBoolean(String redisCommandType, String RedisResultInfo, Object... args)
+	protected boolean singleLineReplyForBoolean(String redisCommandType, String RedisResultInfo, Object... args) throws Exception
 	{
 		Object[] result = connector.executeCommand(redisCommandType, args);
 
@@ -47,7 +49,7 @@ public class BaseCommand
 		return false;
 	}
 	
-	protected String singleLineReplyForString(String redisCommandType, Object... args)
+	protected String singleLineReplyForString(String redisCommandType, Object... args) throws Exception
 	{
 		Object[] result = connector.executeCommand(redisCommandType, args);
 
@@ -71,8 +73,9 @@ public class BaseCommand
 	 * @param RedisResultInfo
 	 *            返回结果的期望值,如不符合则认为操作失败
 	 * @return 操作结果是否成功
+	 * @throws Exception 
 	 */
-	protected int integerReply(String redisCommandType, Object... args)
+	protected int integerReply(String redisCommandType, Object... args) throws Exception
 	{
 		Object[] result = connector.executeCommand(redisCommandType, args);
 
@@ -99,8 +102,9 @@ public class BaseCommand
 	 *            其它参数
 	 * @return 从redis取得的对象,
 	 *         因为解码时统一按照DataWrapper类型来解码
+	 * @throws Exception 
 	 */
-	protected Object bulkReply(String redisCommandType, boolean isUseObjectDecoder, Object... args)
+	protected Object bulkReply(String redisCommandType, boolean isUseObjectDecoder, Object... args) throws Exception
 	{
 		Object[] result = connector.executeCommand(redisCommandType, args);
 
@@ -122,7 +126,7 @@ public class BaseCommand
 		return null;
 	}
 
-	protected Object[] multiBulkReply(String redisCommandType, boolean isUseObjectDecoder, Object... args)
+	protected Object[] multiBulkReply(String redisCommandType, boolean isUseObjectDecoder, Object... args) throws Exception
 	{
 		Object[] result = connector.executeCommand(redisCommandType, args);
 		

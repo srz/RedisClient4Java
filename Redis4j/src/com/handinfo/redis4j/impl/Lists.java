@@ -16,7 +16,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#blpop(java.lang.String, int)
 	 */
-	public String[] blpop(String key, int timeout)
+	public String[] blpop(String key, int timeout) throws Exception
 	{
 		return (String[]) multiBulkReply(RedisCommandType.BLPOP, false, key, timeout);
 	}
@@ -24,7 +24,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#llen(java.lang.String)
 	 */
-	public int llen(String key)
+	public int llen(String key) throws Exception
 	{
 		return integerReply(RedisCommandType.LLEN, key);
 	}
@@ -32,7 +32,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#lrem(java.lang.String, int, java.lang.String)
 	 */
-	public int lrem(String key, int count, String value)
+	public int lrem(String key, int count, String value) throws Exception
 	{
 		return integerReply(RedisCommandType.LREM, key, count, value);
 	}
@@ -40,7 +40,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#rpush(java.lang.String, java.lang.String)
 	 */
-	public int rpush(String key, String value)
+	public int rpush(String key, String value) throws Exception
 	{
 		return integerReply(RedisCommandType.RPUSH, key, value);
 	}
@@ -48,7 +48,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#brpop(java.lang.String, int)
 	 */
-	public String[] brpop(String key, int timeout)
+	public String[] brpop(String key, int timeout) throws Exception
 	{
 		return (String[]) multiBulkReply(RedisCommandType.BRPOP, false, key, timeout);
 	}
@@ -56,7 +56,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#lpop(java.lang.String)
 	 */
-	public String lpop(String key)
+	public String lpop(String key) throws Exception
 	{
 		return singleLineReplyForString(RedisCommandType.LPOP, key);
 	}
@@ -64,7 +64,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#lset(java.lang.String, int, java.lang.String)
 	 */
-	public boolean lset(String key, int index, String value)
+	public boolean lset(String key, int index, String value) throws Exception
 	{
 		return singleLineReplyForBoolean(RedisCommandType.LSET, RedisResultInfo.OK, key, index, value);
 	}
@@ -72,7 +72,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#rpushx(java.lang.String, java.lang.String)
 	 */
-	public int rpushx(String key, String value)
+	public int rpushx(String key, String value) throws Exception
 	{
 		return integerReply(RedisCommandType.RPUSHX, key, value);
 	}
@@ -80,7 +80,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#brpoplpush(java.lang.String, java.lang.String, int)
 	 */
-	public String brpoplpush(String source, String destination, int timeout)
+	public String brpoplpush(String source, String destination, int timeout) throws Exception
 	{
 		return (String) bulkReply(RedisCommandType.BRPOPLPUSH, false, source, destination, timeout);
 	}
@@ -88,7 +88,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#lpush(java.lang.String, java.lang.String)
 	 */
-	public int lpush(String key, String value)
+	public int lpush(String key, String value) throws Exception
 	{
 		return integerReply(RedisCommandType.LPUSH, key, value);
 	}
@@ -96,7 +96,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#ltrim(java.lang.String, int, int)
 	 */
-	public boolean ltrim(String key, int start, int stop)
+	public boolean ltrim(String key, int start, int stop) throws Exception
 	{
 		return singleLineReplyForBoolean(RedisCommandType.LTRIM, RedisResultInfo.OK, key, start, stop);
 	}
@@ -104,7 +104,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#lindex(java.lang.String, int)
 	 */
-	public String lindex(String key, int index)
+	public String lindex(String key, int index) throws Exception
 	{
 		return singleLineReplyForString(RedisCommandType.LINDEX, key, index);
 	}
@@ -112,7 +112,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#lpushx(java.lang.String, java.lang.String)
 	 */
-	public int lpushx(String key, String value)
+	public int lpushx(String key, String value) throws Exception
 	{
 		return integerReply(RedisCommandType.LPUSHX, key, value);
 	}
@@ -120,7 +120,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#rpop(java.lang.String)
 	 */
-	public String rpop(String key)
+	public String rpop(String key) throws Exception
 	{
 		return (String) bulkReply(RedisCommandType.RPOP, false, key);
 	}
@@ -128,7 +128,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#linsert(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
-	public int linsert(String key, String BEFORE_AFTER, String pivot, String value)
+	public int linsert(String key, String BEFORE_AFTER, String pivot, String value) throws Exception
 	{
 		return integerReply(RedisCommandType.LINSERT, key, BEFORE_AFTER, pivot, value);
 	}
@@ -136,7 +136,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#lrange(java.lang.String, int, int)
 	 */
-	public String[] lrange(String key, int start, int stop)
+	public String[] lrange(String key, int start, int stop) throws Exception
 	{
 		return (String[]) multiBulkReply(RedisCommandType.LRANGE, false, key, start, stop);
 	}
@@ -144,7 +144,7 @@ public class Lists extends BaseCommand implements ILists
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.ILists#rpoplpush(java.lang.String, java.lang.String)
 	 */
-	public String rpoplpush(String source, String destination)
+	public String rpoplpush(String source, String destination) throws Exception
 	{
 		return (String) bulkReply(RedisCommandType.RPOPLPUSH, false, source, destination);
 	}

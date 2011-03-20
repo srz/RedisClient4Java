@@ -16,19 +16,31 @@ public class ByteArrayToFrameDecoder extends FrameDecoder
 	@Override
 	protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer) throws Exception
 	{
+		//确保收到至少一个字节
+		if(buffer.readableBytes() == 0)
+			return null;
+		
+		//取出第一个readerIndex位置的字节
+		char firstByte = (char) buffer.getByte(buffer.readerIndex());
+		
+		//取保第一个readerIndex位置的字节是协议中约定的
+		if(!(firstByte == RedisResultType.SingleLineReply || firstByte == RedisResultType.ErrorReply || firstByte == RedisResultType.IntegerReply || firstByte == RedisResultType.BulkReplies || firstByte == RedisResultType.MultiBulkReplies))
+		{
+			//如不是协议中约定的字符,放弃第一个字符并重新处理
+			buffer.readByte();
+			return null;
+		}
+		
 		// 确保收到第一个\r\n.
-		int firstIndexCR = buffer.bytesBefore(ChannelBufferIndexFinder.CR);
-		int firstIndexLF = buffer.bytesBefore(ChannelBufferIndexFinder.LF);
+		int firstIndexCR = buffer.bytesBefore(buffer.readerIndex(), buffer.readableBytes(), ChannelBufferIndexFinder.CR);
+		int firstIndexLF = buffer.bytesBefore(buffer.readerIndex(), buffer.readableBytes(), ChannelBufferIndexFinder.LF);
 
 		if(!(firstIndexLF > 0 && firstIndexLF == firstIndexCR+1))
 		{
 			return null;
 		}
 
-		//buffer.markReaderIndex();
-
-		// Read the first byte.
-		char firstByte = (char) buffer.getByte(0);
+		
 
 		switch (firstByte)
 		{
@@ -60,8 +72,9 @@ public class ByteArrayToFrameDecoder extends FrameDecoder
 		{
 			// With bulk reply the first byte of the reply will be
 			// "$"
-			
-			int contentLength = Integer.valueOf(buffer.toString(1, firstIndexCR-1, Charset.forName("UTF-8")));
+			//String tmp = buffer.toString(buffer.readerIndex()+1, firstIndexCR-1, Charset.forName("UTF-8"));
+			//System.out.println("tmp=" + tmp + "--firstIndexLF=" + firstIndexLF + "--firstIndexCR=" + firstIndexCR + "--buffer.readableBytes=" + buffer.readableBytes());
+			int contentLength = Integer.valueOf(buffer.toString(buffer.readerIndex()+1, firstIndexCR-1, Charset.forName("UTF-8")));
 			if(contentLength == -1)
 			{
 				//返回的头内容为 -1，说明无后续数据
@@ -86,7 +99,7 @@ public class ByteArrayToFrameDecoder extends FrameDecoder
 		{
 			// With multi-bulk reply the first byte of the reply
 			// will be "*"
-			int objectNumber = Integer.valueOf(buffer.toString(1, firstIndexCR-1, Charset.forName("UTF-8")));
+			int objectNumber = Integer.valueOf(buffer.toString(buffer.readerIndex()+1, firstIndexCR-1, Charset.forName("UTF-8")));
 			if(objectNumber == -1 || objectNumber == 0)
 			{
 				//返回的头内容为 -1,说明服务器出错，返回头内容为0,说明没有符合查询条件的数据
@@ -102,7 +115,7 @@ public class ByteArrayToFrameDecoder extends FrameDecoder
 				boolean isFrameFinish = false;
 				
 				//遍历数组查找最后一个\r\n的位置
-				for(int i=0; i<buffer.readableBytes(); i++)
+				for(int i=buffer.readerIndex(); i<buffer.readableBytes(); i++)
 				{
 					if(buffer.getByte(i) == '\r')
 					{
@@ -129,7 +142,7 @@ public class ByteArrayToFrameDecoder extends FrameDecoder
 
 				if(isFrameFinish)
 				{
-					return buffer.readBytes(indexOfLF + 1);
+					return buffer.readBytes(indexOfLF + 1 - buffer.readerIndex());
 				}
 				else
 				{
@@ -139,7 +152,7 @@ public class ByteArrayToFrameDecoder extends FrameDecoder
 			}
 		}
 		default:
-			return buffer.readBytes(1);
+			return null;
 		}
 	}
 }

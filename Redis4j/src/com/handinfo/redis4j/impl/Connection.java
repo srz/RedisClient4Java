@@ -23,7 +23,7 @@ public class Connection extends BaseCommand implements IConnection
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IConnection#auth(java.lang.String)
 	 */
-	public boolean auth(String password)
+	public boolean auth(String password) throws Exception
 	{
 		return singleLineReplyForBoolean(RedisCommandType.AUTH, RedisResultInfo.OK, password);
 	}
@@ -31,7 +31,7 @@ public class Connection extends BaseCommand implements IConnection
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IConnection#echo(java.lang.String)
 	 */
-	public String echo(String message)
+	public String echo(String message) throws Exception
 	{
 		Object result = bulkReply(RedisCommandType.ECHO, false, message);
 		if (result != null)
@@ -45,7 +45,7 @@ public class Connection extends BaseCommand implements IConnection
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IConnection#ping()
 	 */
-	public boolean ping()
+	public boolean ping() throws Exception
 	{
 		return singleLineReplyForBoolean(RedisCommandType.PING, RedisResultInfo.PONG);
 	}
@@ -65,9 +65,10 @@ public class Connection extends BaseCommand implements IConnection
 	 * 后续在考虑是否添加此函数
 	 * @param dbIndex
 	 * @return
+	 * @throws Exception 
 	 */
 	@SuppressWarnings("unused")
-	private boolean select(int dbIndex)
+	private boolean select(int dbIndex) throws Exception
 	{
 		return singleLineReplyForBoolean(RedisCommandType.SELECT, RedisResultInfo.OK, dbIndex);
 	}

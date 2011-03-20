@@ -31,23 +31,18 @@ public class Redis4jClient implements IRedis4j
 	private int poolMaxSize;
 	private int indexDB;
 
-	public Redis4jClient(String host, int port, int poolMaxSize, int indexDB)
+	
+
+	public Redis4jClient(String host, int port, int poolMaxSize, int indexDB) throws Exception
 	{
 		this.host = host;
 		this.port = port;
 		this.poolMaxSize = poolMaxSize;
 		this.indexDB = indexDB;
 		
-		try
-		{
-			connector = new Connector(host, port, poolMaxSize, indexDB);
-		}
-		catch (Exception e)
-		{
-			System.out.println(e.getMessage());
-		}
-
-		if (connector != null)
+		connector = new Connector(host, port, poolMaxSize, indexDB);
+		
+		if(connector.connect())
 		{
 			connection = new Connection(connector);
 			hashes = new Hashes(connector);
@@ -59,6 +54,16 @@ public class Redis4jClient implements IRedis4j
 			strings = new Strings(connector);
 			transactions = new Transactions(connector);
 		}
+	}
+	
+	public Redis4jClient(String host, int port) throws Exception
+	{
+		this(host, port, 1, 0);
+	}
+	
+	public Redis4jClient(String host, int port, int indexDB) throws Exception
+	{
+		this(host, port, 1, indexDB);
 	}
 	
 	public boolean isConnectSucess()
@@ -158,7 +163,14 @@ public class Redis4jClient implements IRedis4j
 	
 	public IRedis4j clone()
 	{
-		return new Redis4jClient(this.host, this.port, this.poolMaxSize, this.indexDB);
+		try
+		{
+			return new Redis4jClient(this.host, this.port, this.poolMaxSize, this.indexDB);
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	// /*

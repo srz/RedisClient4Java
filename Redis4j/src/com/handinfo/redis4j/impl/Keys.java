@@ -16,7 +16,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#del(java.lang.String)
 	 */
-	public int del(String... keys)
+	public int del(String... keys) throws Exception
 	{
 		return integerReply(RedisCommandType.DEL, keys);
 	}
@@ -24,7 +24,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#keys(java.lang.String)
 	 */
-	public String[] keys(String key)
+	public String[] keys(String key) throws Exception
 	{
 		return (String[]) multiBulkReply(RedisCommandType.KEYS, false, key);
 	}
@@ -32,7 +32,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#rename(java.lang.String, java.lang.String)
 	 */
-	public boolean rename(String key, String newKey)
+	public boolean rename(String key, String newKey) throws Exception
 	{
 		return singleLineReplyForBoolean(RedisCommandType.RENAME, RedisResultInfo.OK, key, newKey);
 	}
@@ -40,7 +40,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#type(java.lang.String)
 	 */
-	public String type(String key)
+	public String type(String key) throws Exception
 	{
 		return singleLineReplyForString(RedisCommandType.TYPE,  key);
 	}
@@ -48,7 +48,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#exists(java.lang.String)
 	 */
-	public boolean exists(String key)
+	public boolean exists(String key) throws Exception
 	{
 		return integerReply(RedisCommandType.EXISTS, key)==1 ? true : false;
 	}
@@ -56,7 +56,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#move(java.lang.String, int)
 	 */
-	public boolean move(String key, int indexDB)
+	public boolean move(String key, int indexDB) throws Exception
 	{
 		return integerReply(RedisCommandType.MOVE, key, indexDB)==1 ? true : false;
 	}
@@ -64,7 +64,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#renamenx(java.lang.String, java.lang.String)
 	 */
-	public boolean renamenx(String key, String newKey)
+	public boolean renamenx(String key, String newKey) throws Exception
 	{
 		return integerReply(RedisCommandType.RENAMENX, key, newKey)==1 ? true : false;
 	}
@@ -72,7 +72,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#expire(java.lang.String, int)
 	 */
-	public boolean expire(String key, int seconds)
+	public boolean expire(String key, int seconds) throws Exception
 	{
 		return integerReply(RedisCommandType.EXPIRE, key, seconds)==1 ? true : false;
 	}
@@ -80,7 +80,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#persist(java.lang.String)
 	 */
-	public boolean persist(String key)
+	public boolean persist(String key) throws Exception
 	{
 		return integerReply(RedisCommandType.PERSIST, key)==1 ? true : false;
 	}
@@ -89,7 +89,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#sort(java.lang.String, java.lang.String)
 	 */
-	public Object[] sort(String key, String...args)
+	public Object[] sort(String key, String...args) throws Exception
 	{
 		return multiBulkReply(RedisCommandType.SORT, false, key, args);
 	}
@@ -97,7 +97,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#expireat(java.lang.String, long)
 	 */
-	public boolean expireat(String key,  long timestamp)
+	public boolean expireat(String key,  long timestamp) throws Exception
 	{
 		return integerReply(RedisCommandType.EXPIREAT, key, timestamp)==1 ? true : false;
 	}
@@ -105,7 +105,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#randomkey()
 	 */
-	public String randomkey()
+	public String randomkey() throws Exception
 	{
 		return (String) bulkReply(RedisCommandType.RANDOMKEY, false);
 	}
@@ -113,7 +113,7 @@ public class Keys extends BaseCommand implements IKeys
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IKeys#ttl(java.lang.String)
 	 */
-	public int ttl(String key)
+	public int ttl(String key) throws Exception
 	{
 		return integerReply(RedisCommandType.TTL, key);
 	}

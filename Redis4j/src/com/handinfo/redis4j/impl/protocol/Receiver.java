@@ -1,59 +1,34 @@
 package com.handinfo.redis4j.impl.protocol;
 
+import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelEvent;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.channel.WriteCompletionEvent;
 
+import com.handinfo.redis4j.api.Command;
 import com.handinfo.redis4j.impl.transfers.Connector;
 
-public class RedislHandler extends SimpleChannelUpstreamHandler
+public class Receiver extends SimpleChannelUpstreamHandler
 {
 
-	private static final Logger logger = Logger.getLogger(RedislHandler.class.getName());
-
-	private volatile Channel channel;
-	private final BlockingQueue<Object[]> answer = new LinkedBlockingQueue<Object[]>();
+	private static final Logger logger = Logger.getLogger(Receiver.class.getName());
+	private Connector connector;
 
 	/**
 	 * @param connector
 	 */
-	public RedislHandler()
+	public Receiver(Connector connector)
 	{
 		super();
-	}
-
-	public Object[] syncSendRequest(ChannelBuffer command)
-	{
-		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
-		buffer.writeBytes(command);
-
-		channel.write(buffer).awaitUninterruptibly();
-
-		Object[] result = null;
-		boolean interrupted = false;
-		try
-		{
-			result = answer.take();
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-
-		return result;
+		this.connector = connector;
 	}
 	
 	public BlockingQueue<Object[]> asyncSendRequest(ChannelBuffer command)
@@ -61,39 +36,57 @@ public class RedislHandler extends SimpleChannelUpstreamHandler
 		ChannelBuffer buffer = ChannelBuffers.dynamicBuffer();
 		buffer.writeBytes(command);
 
-		channel.write(buffer).awaitUninterruptibly();
+		//channel.write(buffer).awaitUninterruptibly();
 		
-		return answer;
-	}
-
-	@Override
-	public void handleUpstream(ChannelHandlerContext ctx, ChannelEvent e) throws Exception
-	{
-		if (e instanceof ChannelStateEvent)
-		{
-			// logger.info(e.toString());
-		}
-		super.handleUpstream(ctx, e);
-	}
-
-	@Override
-	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
-	{
-		channel = e.getChannel();
-		super.channelOpen(ctx, e);
+		return null;
 	}
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 	{
-		answer.offer((Object[]) e.getMessage());
+		Command cmd = null;
+		try
+		{
+			cmd = this.connector.getWriteFinishCommandQueue().take();
+		} catch (InterruptedException ex)
+		{
+			ex.printStackTrace();
+			Thread.currentThread().interrupt();
+		}
+		if(cmd != null)
+		{
+			cmd.setResult((Object[]) e.getMessage());
+			cmd.resume();
+		}
+		else
+		{
+			logger.log(Level.WARNING, "if you found this,please tell me,this is a bug!");
+		}
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
 	{
 		logger.log(Level.WARNING, "Unexpected exception from downstream.", e.getCause());
-		//e.getChannel().close();
+		
+		Command cmd = null;
+		try
+		{
+			cmd = this.connector.getWriteFinishCommandQueue().take();
+		} catch (InterruptedException ex)
+		{
+			ex.printStackTrace();
+			Thread.currentThread().interrupt();
+		}
+		if(cmd != null)
+		{
+			cmd.setException((Exception) e.getCause());
+			cmd.resume();
+		}
+		else
+		{
+			logger.log(Level.WARNING, "if you found this,please tell me,this is a bug!");
+		}
 	}
 
 	/* (non-Javadoc)
@@ -111,6 +104,13 @@ public class RedislHandler extends SimpleChannelUpstreamHandler
 	@Override
 	public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception
 	{
-		answer.offer(new Object[]{null});
+		Iterator<Command> task= this.connector.getWriteFinishCommandQueue().iterator();
+		while(task.hasNext())
+		{
+			Command cmd = task.next();
+			task.next().setException(new Exception("connection has been disconnected"));
+			cmd.resume();
+		}
+		this.connector.getWriteFinishCommandQueue().clear();
 	}
 }
