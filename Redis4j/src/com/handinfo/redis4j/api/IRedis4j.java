@@ -13,6 +13,8 @@ import com.handinfo.redis4j.api.classification.ITransactions;
 
 public interface IRedis4j
 {	
+	public boolean getIsConnected();
+	
 	/**
 	 * @return the connection
 	 */

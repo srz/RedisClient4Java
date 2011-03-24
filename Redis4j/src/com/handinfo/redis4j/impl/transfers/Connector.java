@@ -144,6 +144,14 @@ public class Connector implements IConnector
 		}
 	}
 
+	public boolean getIsConnected()
+	{
+		if (channel != null)
+			return channel.isConnected();
+		else
+			return false;
+	}
+
 	private void selectDB(int indexDB) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		executeCommand(RedisCommandType.SELECT, indexDB);
@@ -174,8 +182,7 @@ public class Connector implements IConnector
 				if (cmd.getException() instanceof CleanLockedThreadException)
 				{
 					throw (CleanLockedThreadException) cmd.getException();
-				}
-				else
+				} else
 				{
 					throw cmd.getException();
 				}

@@ -85,6 +85,11 @@ public class Redis4jClient implements IRedis4j
 	{
 		this(host, port, 1, indexDB, IDEL_TIMEOUT_PING, RECONNECT_DELAY);
 	}
+	
+	public boolean getIsConnected()
+	{
+		return connector.getIsConnected();
+	}
 
 	/*
 	 * (non-Javadoc)

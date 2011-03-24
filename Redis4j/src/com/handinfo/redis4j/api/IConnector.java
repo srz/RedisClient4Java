@@ -15,6 +15,8 @@ public interface IConnector
 
 	public boolean connect() throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
 	
+	public boolean getIsConnected();
+	
 	public ReentrantLock getLock();
 	
 	public AtomicBoolean getIsAllowWrite();
