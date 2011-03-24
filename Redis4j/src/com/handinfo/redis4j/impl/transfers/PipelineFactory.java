@@ -3,28 +3,29 @@ package com.handinfo.redis4j.impl.transfers;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
-import org.jboss.netty.util.HashedWheelTimer;
+import org.jboss.netty.handler.timeout.IdleStateHandler;
 import org.jboss.netty.util.Timer;
 
-import com.handinfo.redis4j.impl.protocol.Idelhandler;
-import com.handinfo.redis4j.impl.protocol.Receiver;
-import com.handinfo.redis4j.impl.protocol.decode.ByteArrayToFrameDecoder;
-import com.handinfo.redis4j.impl.protocol.decode.FrameToObjectByteArrayDecoder;
-import com.handinfo.redis4j.impl.protocol.encode.CommandToBinaryData;
-import com.handinfo.redis4j.impl.protocol.encode.Sender;
+import com.handinfo.redis4j.api.IConnector;
+import com.handinfo.redis4j.impl.transfers.decoder.FrameToObjectArray;
+import com.handinfo.redis4j.impl.transfers.decoder.InputStreamToFrame;
+import com.handinfo.redis4j.impl.transfers.encoder.CommandWrapperToBinaryData;
+import com.handinfo.redis4j.impl.transfers.handler.HeartbeatHandler;
+import com.handinfo.redis4j.impl.transfers.handler.MessageHandler;
+import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
 
 public class PipelineFactory implements ChannelPipelineFactory
 {
 	private final Timer timer;
-	private Connector connector;
+	private IConnector connector;
 
 	/**
 	 * @param connector
 	 */
-	public PipelineFactory(Connector connector)
+	public PipelineFactory(IConnector connector, Timer timer)
 	{
 		super();
-		this.timer = new HashedWheelTimer();
+		this.timer = timer;
 		this.connector = connector;
 	}
 
@@ -32,16 +33,17 @@ public class PipelineFactory implements ChannelPipelineFactory
 	{
 		ChannelPipeline pipeline = Channels.pipeline();
 
-		//pipeline.addLast("idelCheck", new IdleStateHandler(timer, 0, 3, 0));
-		pipeline.addLast("idelhandler", new Idelhandler());
+		pipeline.addLast("IdleStateHandler", new IdleStateHandler(timer, 0, connector.getHeartbeatTime(), 0));
+		pipeline.addLast("HeartbeatHandler", new HeartbeatHandler(connector));
+		pipeline.addLast("ReconnectNetworkHandler", new ReconnectNetworkHandler(connector, timer));
 		
-		pipeline.addLast("objectEncoder", new CommandToBinaryData());
-		pipeline.addLast("sender", new Sender());
+		pipeline.addLast("ObjectEncoder", new CommandWrapperToBinaryData());
 		
-		pipeline.addLast("framerDecoder", new ByteArrayToFrameDecoder());
-		pipeline.addLast("objectDecoder", new FrameToObjectByteArrayDecoder());
+		pipeline.addLast("FramerDecoder", new InputStreamToFrame());
+		pipeline.addLast("ObjectDecoder", new FrameToObjectArray());
 
-		pipeline.addLast("receiver", new Receiver(connector));
+		pipeline.addLast("MessageHandler", new MessageHandler(connector));
+		
 
 		return pipeline;
 	}

@@ -1,13 +1,18 @@
 package com.handinfo.redis4j.api;
 
+import com.handinfo.redis4j.api.classification.IConnection;
+import com.handinfo.redis4j.api.classification.IHashes;
+import com.handinfo.redis4j.api.classification.IKeys;
+import com.handinfo.redis4j.api.classification.ILists;
+import com.handinfo.redis4j.api.classification.IServer;
+import com.handinfo.redis4j.api.classification.ISets;
+import com.handinfo.redis4j.api.classification.ISortedSets;
+import com.handinfo.redis4j.api.classification.IStrings;
+import com.handinfo.redis4j.api.classification.ITransactions;
+
 
 public interface IRedis4j
-{
-	/**
-	 * @return 判断网络连接是否建立成功
-	 */
-	public boolean isConnectSucess();
-	
+{	
 	/**
 	 * @return the connection
 	 */

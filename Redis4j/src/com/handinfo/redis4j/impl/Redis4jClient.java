@@ -1,21 +1,35 @@
 package com.handinfo.redis4j.impl;
 
-import com.handinfo.redis4j.api.IConnection;
-import com.handinfo.redis4j.api.IHashes;
-import com.handinfo.redis4j.api.IKeys;
-import com.handinfo.redis4j.api.ILists;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.IRedis4j;
-import com.handinfo.redis4j.api.IServer;
-import com.handinfo.redis4j.api.ISets;
-import com.handinfo.redis4j.api.ISortedSets;
-import com.handinfo.redis4j.api.IStrings;
-import com.handinfo.redis4j.api.ITransactions;
+import com.handinfo.redis4j.api.classification.IConnection;
+import com.handinfo.redis4j.api.classification.IHashes;
+import com.handinfo.redis4j.api.classification.IKeys;
+import com.handinfo.redis4j.api.classification.ILists;
+import com.handinfo.redis4j.api.classification.IServer;
+import com.handinfo.redis4j.api.classification.ISets;
+import com.handinfo.redis4j.api.classification.ISortedSets;
+import com.handinfo.redis4j.api.classification.IStrings;
+import com.handinfo.redis4j.api.classification.ITransactions;
+import com.handinfo.redis4j.impl.classification.Connection;
+import com.handinfo.redis4j.impl.classification.Hashes;
+import com.handinfo.redis4j.impl.classification.Keys;
+import com.handinfo.redis4j.impl.classification.Lists;
+import com.handinfo.redis4j.impl.classification.Server;
+import com.handinfo.redis4j.impl.classification.Sets;
+import com.handinfo.redis4j.impl.classification.SortedSets;
+import com.handinfo.redis4j.impl.classification.Strings;
+import com.handinfo.redis4j.impl.classification.Transactions;
 import com.handinfo.redis4j.impl.transfers.Connector;
+import com.handinfo.redis4j.impl.transfers.handler.HeartbeatHandler;
 
 public class Redis4jClient implements IRedis4j
 {
-	private Connector connector = null;
-
+	private static final Logger logger = Logger.getLogger(Redis4jClient.class.getName());
+	private IConnector connector = null;
 	private IConnection connection = null;
 	private IHashes hashes = null;
 	private IKeys keys = null;
@@ -30,45 +44,46 @@ public class Redis4jClient implements IRedis4j
 	private int port;
 	private int poolMaxSize;
 	private int indexDB;
+	private int heartbeatTime;
+	private int reconnectDelay;
+	private final static int IDEL_TIMEOUT_PING = 10;//默认检测连接空闲发送ping的间隔时间,单位是秒
+	private final static int RECONNECT_DELAY = 10;//默认断网重连间隔时间,单位是秒
 
-	
-
-	public Redis4jClient(String host, int port, int poolMaxSize, int indexDB) throws Exception
+	public Redis4jClient(String host, int port, int poolMaxSize, int indexDB, int heartbeatTime, int reconnectDelay) //throws Exception
 	{
 		this.host = host;
 		this.port = port;
 		this.poolMaxSize = poolMaxSize;
 		this.indexDB = indexDB;
+		this.heartbeatTime = heartbeatTime;
+		this.reconnectDelay = reconnectDelay;
 		
-		connector = new Connector(host, port, poolMaxSize, indexDB);
+		connector = new Connector(host, port, poolMaxSize, indexDB, heartbeatTime, reconnectDelay);
+		connection = new Connection(connector);
+		hashes = new Hashes(connector);
+		keys = new Keys(connector);
+		lists = new Lists(connector);
+		server = new Server(connector);
+		sets = new Sets(connector);
+		sortedSets = new SortedSets(connector);
+		strings = new Strings(connector);
+		transactions = new Transactions(connector);
 		
-		if(connector.connect())
+		if(!connector.connect())
 		{
-			connection = new Connection(connector);
-			hashes = new Hashes(connector);
-			keys = new Keys(connector);
-			lists = new Lists(connector);
-			server = new Server(connector);
-			sets = new Sets(connector);
-			sortedSets = new SortedSets(connector);
-			strings = new Strings(connector);
-			transactions = new Transactions(connector);
+			//throw new Exception("can not connect to server");
+			logger.log(Level.WARNING, "can not connect to server,client will reconnect after " + this.reconnectDelay + " s");
 		}
 	}
 	
-	public Redis4jClient(String host, int port) throws Exception
+	public Redis4jClient(String host, int port)// throws Exception
 	{
-		this(host, port, 1, 0);
+		this(host, port, 1, 0, IDEL_TIMEOUT_PING, RECONNECT_DELAY);
 	}
 	
-	public Redis4jClient(String host, int port, int indexDB) throws Exception
+	public Redis4jClient(String host, int port, int indexDB)// throws Exception
 	{
-		this(host, port, 1, indexDB);
-	}
-	
-	public boolean isConnectSucess()
-	{
-		return connector == null ? false: true;
+		this(host, port, 1, indexDB, IDEL_TIMEOUT_PING, RECONNECT_DELAY);
 	}
 
 	/*
@@ -165,7 +180,7 @@ public class Redis4jClient implements IRedis4j
 	{
 		try
 		{
-			return new Redis4jClient(this.host, this.port, this.poolMaxSize, this.indexDB);
+			return new Redis4jClient(this.host, this.port, this.poolMaxSize, this.indexDB, this.heartbeatTime, this.reconnectDelay);
 		} catch (Exception e)
 		{
 			e.printStackTrace();
