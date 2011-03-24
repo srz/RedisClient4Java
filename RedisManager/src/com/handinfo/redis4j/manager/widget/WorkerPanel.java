@@ -19,7 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import com.handinfo.redis4j.api.IRedis4j;
-import com.handinfo.redis4j.api.IServer;
+import com.handinfo.redis4j.api.classification.IServer;
 import com.handinfo.redis4j.manager.widget.command.ConfirmExecutePanel;
 import com.handinfo.redis4j.manager.widget.command.LongConnectionPanel;
 import com.handinfo.redis4j.manager.widget.command.NormalInfoPanel;
