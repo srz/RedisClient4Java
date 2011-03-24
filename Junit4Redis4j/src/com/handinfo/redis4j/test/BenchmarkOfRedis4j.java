@@ -1,7 +1,5 @@
 package com.handinfo.redis4j.test;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,14 +10,14 @@ import com.handinfo.redis4j.impl.Redis4jClient;
 
 public class BenchmarkOfRedis4j
 {
-	static int repeats = 2000;//每个线程循环执行的次数
-	static int corePoolSize = 1000;//测试程序启动的工作线程数
-	static int dataLength = 10240;//数据长度,单位byte
+	static int repeats = 40000;//每个线程循环执行的次数
+	static int corePoolSize = 10;//测试程序启动的工作线程数
+	static int dataLength = 1024;//数据长度,单位byte
 	
 	static CountDownLatch latch;
 	static AtomicInteger numberOfAllExecute = new AtomicInteger(0);
 
-	static String[] keys = new String[300000];
+	static String[] keys = new String[512000];//500MB内存
 
 	public static void main(String[] args) throws Exception
 	{
@@ -30,7 +28,7 @@ public class BenchmarkOfRedis4j
 		}
 		final String tmp = s;
 		
-		final IRedis4j client = new Redis4jClient("192.168.1.102", 6379, 0, 10);
+		final IRedis4j client = new Redis4jClient("192.2.9.223", 6379, 10);
 		
 		for(int i=0; i<keys.length; i++)
 		{
