@@ -11,7 +11,6 @@ public class DataCheck
 {
 	static int repeats = 200;//每个线程循环执行的次数
 	static int corePoolSize = 500;//测试程序启动的工作线程数
-	static int connectionPoolSize = 19;//客户端连接池数
 	
 	static CountDownLatch cdl;
 	static AtomicInteger numberOfAllExecute = new AtomicInteger(0);
@@ -19,7 +18,7 @@ public class DataCheck
 
 	public static void main(String[] args) throws Exception
 	{
-		final Redis4jClient client = new Redis4jClient("192.2.9.223", 6379, connectionPoolSize, 10, 10, 1);
+		final Redis4jClient client = new Redis4jClient("192.2.9.223", 6379, 10, 10, 1);
 		
 		for(int i=0; i<keys.length; i++)
 		{

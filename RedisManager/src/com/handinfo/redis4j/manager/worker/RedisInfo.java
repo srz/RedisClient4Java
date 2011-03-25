@@ -3,7 +3,6 @@ package com.handinfo.redis4j.manager.worker;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 
 import com.handinfo.redis4j.api.IRedis4j;
@@ -22,7 +21,7 @@ public class RedisInfo extends SwingWorker<String, String>
 		this.client = client;
 		this.isCycle = new AtomicBoolean(isAutomaticUpdate);
 	}
-	
+
 	public void setAutomaticUpdate(boolean isAutomaticUpdate)
 	{
 		isCycle.set(isAutomaticUpdate);
@@ -38,7 +37,14 @@ public class RedisInfo extends SwingWorker<String, String>
 				if (isCycle.get() || !isStartOnce)
 				{
 					publish("-------------------------------\n");
-					publish(client.getServer().info());
+					try
+					{
+						publish(client.getServer().info());
+					}
+					catch (Exception ex)
+					{
+						publish(ex.getMessage() + "\n");
+					}
 					publish("-------------------------------");
 					isStartOnce = true;
 					Thread.sleep(4000);

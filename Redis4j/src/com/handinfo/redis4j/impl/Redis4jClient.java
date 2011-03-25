@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.IRedis4jAsync;
 import com.handinfo.redis4j.api.classification.IConnection;
 import com.handinfo.redis4j.api.classification.IHashes;
 import com.handinfo.redis4j.api.classification.IKeys;
@@ -42,23 +43,21 @@ public class Redis4jClient implements IRedis4j
 	
 	private String host;
 	private int port;
-	private int poolMaxSize;
 	private int indexDB;
 	private int heartbeatTime;
 	private int reconnectDelay;
 	private final static int IDEL_TIMEOUT_PING = 10;//默认检测连接空闲发送ping的间隔时间,单位是秒
 	private final static int RECONNECT_DELAY = 10;//默认断网重连间隔时间,单位是秒
 
-	public Redis4jClient(String host, int port, int poolMaxSize, int indexDB, int heartbeatTime, int reconnectDelay) //throws Exception
+	public Redis4jClient(String host, int port, int indexDB, int heartbeatTime, int reconnectDelay) //throws Exception
 	{
 		this.host = host;
 		this.port = port;
-		this.poolMaxSize = poolMaxSize;
 		this.indexDB = indexDB;
 		this.heartbeatTime = heartbeatTime;
 		this.reconnectDelay = reconnectDelay;
 		
-		connector = new Connector(host, port, poolMaxSize, indexDB, heartbeatTime, reconnectDelay);
+		connector = new Connector(host, port, indexDB, heartbeatTime, reconnectDelay, true);
 		connection = new Connection(connector);
 		hashes = new Hashes(connector);
 		keys = new Keys(connector);
@@ -78,12 +77,12 @@ public class Redis4jClient implements IRedis4j
 	
 	public Redis4jClient(String host, int port)// throws Exception
 	{
-		this(host, port, 1, 0, IDEL_TIMEOUT_PING, RECONNECT_DELAY);
+		this(host, port, 0, IDEL_TIMEOUT_PING, RECONNECT_DELAY);
 	}
 	
 	public Redis4jClient(String host, int port, int indexDB)// throws Exception
 	{
-		this(host, port, 1, indexDB, IDEL_TIMEOUT_PING, RECONNECT_DELAY);
+		this(host, port, indexDB, IDEL_TIMEOUT_PING, RECONNECT_DELAY);
 	}
 	
 	public boolean getIsConnected()
@@ -185,7 +184,19 @@ public class Redis4jClient implements IRedis4j
 	{
 		try
 		{
-			return new Redis4jClient(this.host, this.port, this.poolMaxSize, this.indexDB, this.heartbeatTime, this.reconnectDelay);
+			return new Redis4jClient(this.host, this.port, this.indexDB, this.heartbeatTime, this.reconnectDelay);
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public IRedis4jAsync getAsyncClient()
+	{
+		try
+		{
+			return new Redis4jAsyncClient(this.host, this.port, this.indexDB, this.heartbeatTime, this.reconnectDelay);
 		} catch (Exception e)
 		{
 			e.printStackTrace();

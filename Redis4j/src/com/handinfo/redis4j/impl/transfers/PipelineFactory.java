@@ -34,16 +34,18 @@ public class PipelineFactory implements ChannelPipelineFactory
 		ChannelPipeline pipeline = Channels.pipeline();
 
 		pipeline.addLast("IdleStateHandler", new IdleStateHandler(timer, 0, connector.getHeartbeatTime(), 0));
-		pipeline.addLast("HeartbeatHandler", new HeartbeatHandler(connector));
+		if (connector.isUseHeartbeat())
+		{
+			pipeline.addLast("HeartbeatHandler", new HeartbeatHandler(connector));
+		}
 		pipeline.addLast("ReconnectNetworkHandler", new ReconnectNetworkHandler(connector, timer));
-		
+
 		pipeline.addLast("ObjectEncoder", new CommandWrapperToBinaryData());
-		
+
 		pipeline.addLast("FramerDecoder", new InputStreamToFrame());
 		pipeline.addLast("ObjectDecoder", new FrameToObjectArray());
 
 		pipeline.addLast("MessageHandler", new MessageHandler(connector));
-		
 
 		return pipeline;
 	}

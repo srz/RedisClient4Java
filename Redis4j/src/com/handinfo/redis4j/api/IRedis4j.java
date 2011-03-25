@@ -12,7 +12,7 @@ import com.handinfo.redis4j.api.classification.ITransactions;
 
 
 public interface IRedis4j
-{	
+{
 	public boolean getIsConnected();
 	
 	/**
@@ -64,5 +64,7 @@ public interface IRedis4j
 	 * @return the new IRedis4j
 	 */
 	public IRedis4j clone();
+	
+	public IRedis4jAsync getAsyncClient();
 
 }

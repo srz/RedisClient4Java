@@ -71,6 +71,10 @@ public class MessageHandler extends SimpleChannelHandler
 		}
 		if (cmd != null)
 		{
+			if(cmd.getType().equals(CommandWrapper.Type.ASYNC))
+			{
+				this.commandQueue.put(cmd);
+			}
 			cmd.setResult((Object[]) e.getMessage());
 			cmd.resume();
 		} else

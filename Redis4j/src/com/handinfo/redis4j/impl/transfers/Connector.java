@@ -2,6 +2,7 @@ package com.handinfo.redis4j.impl.transfers;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,11 +20,11 @@ import org.jboss.netty.util.HashedWheelTimer;
 import org.jboss.netty.util.Timer;
 
 import com.handinfo.redis4j.api.IConnector;
+import com.handinfo.redis4j.api.IRedis4jAsync;
 import com.handinfo.redis4j.api.RedisCommandType;
 import com.handinfo.redis4j.api.RedisResultType;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
-import com.handinfo.redis4j.api.exception.RedisClientException;
 import com.handinfo.redis4j.impl.util.CommandWrapper;
 
 public class Connector implements IConnector
@@ -42,17 +43,17 @@ public class Connector implements IConnector
 	private final BlockingQueue<CommandWrapper> commandQueue = new LinkedBlockingQueue<CommandWrapper>();;
 	private AtomicBoolean isAllowWrite = new AtomicBoolean(true);
 	private final ReentrantLock lock = new ReentrantLock();
+	private boolean isUseHeartbeat;
 
-	/**
-	 * TODO 连接池考虑后面再增加,经过试用xmemcached客户度连接池,效果还不如没有时好
-	 **/
-	public Connector(String host, int port, int poolMaxSize, int indexDB, int heartbeatTime, int reconnectDelay) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+
+	public Connector(String host, int port, int indexDB, int heartbeatTime, int reconnectDelay, boolean isUseHeartbeat) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		if (!checkIpAndPort(host, port))
 		{
 			throw new IllegalArgumentException("create connector failed, please check host or port");
 		}
 
+		this.isUseHeartbeat = isUseHeartbeat;
 		this.reconnectDelay = reconnectDelay;
 		this.heartbeatTime = heartbeatTime;
 		this.hostAddress = new InetSocketAddress(host.trim(), port);
@@ -67,6 +68,14 @@ public class Connector implements IConnector
 
 		// 设置ChannelGroup
 		this.channelGroup = new DefaultChannelGroup();
+	}
+
+	/**
+	 * @return the isUseHeartbeat
+	 */
+	public boolean isUseHeartbeat()
+	{
+		return isUseHeartbeat;
 	}
 
 	/**
@@ -166,14 +175,13 @@ public class Connector implements IConnector
 	 */
 	public Object[] executeCommand(String commandType, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
-		// 等待返回结果
 		if (channel != null && channel.isConnected())
 		{
 			Object[] redisCommand = new Object[args.length + 1];
 			redisCommand[0] = commandType;
 			System.arraycopy(args, 0, redisCommand, 1, args.length);
 
-			final CommandWrapper cmd = new CommandWrapper(redisCommand);
+			final CommandWrapper cmd = new CommandWrapper(CommandWrapper.Type.SYNC, redisCommand);
 
 			channel.write(cmd);
 
@@ -196,42 +204,80 @@ public class Connector implements IConnector
 					{
 						return cmd.getResult();
 					}
+					else
+					{
+						throw new ErrorCommandException((String) result[1]);
+					}
 				}
-				throw new ErrorCommandException((String) result[1]);
+				else
+				{
+					throw new ErrorCommandException("Error back value");
+				}
 			}
 		} else
 			throw new IllegalStateException("connection has been disconnected.");
 	}
 
-	public BlockingQueue<Object[]> asyncExecuteCommand(String commandType, Object... args)
+	public void executeAsyncCommand(IRedis4jAsync.Notify notify, String commandType, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException
 	{
-		Object[] command = new Object[args.length + 1];
-		command[0] = commandType;
-		for (int i = 1; i < command.length; i++)
+		if (channel != null && channel.isConnected())
 		{
-			command[i] = args[i - 1];
-		}
+			Object[] redisCommand = new Object[args.length + 1];
+			redisCommand[0] = commandType;
+			System.arraycopy(args, 0, redisCommand, 1, args.length);
 
-		BlockingQueue<Object[]> result = null;
-		Channel channel = null;
+			final CommandWrapper cmd = new CommandWrapper(CommandWrapper.Type.ASYNC, redisCommand);
 
-		// try
-		// {
-		// //channel = getChannelFromPool();
-		//
-		// if (channel != null && channel.isConnected())
-		// {
-		// // 读数据
-		// result =
-		// channel.getPipeline().get(RedislHandler.class).asyncSendRequest(RedisCommandEncoder.getBinaryCommand(command));
-		// }
-		//
-		// } catch (InterruptedException e)
-		// {
-		// e.printStackTrace();
-		// }
-
-		return result;
+			boolean isFirstWrite = true;
+			while (true)
+			{
+				if(isStartQuit.get())
+					break;
+				if(isFirstWrite)
+				{
+					isFirstWrite = false;
+					channel.write(cmd);
+				}
+				if (channel == null || !channel.isConnected())
+				{
+					notify.onNotify("Connection has been disconnected, please wait to auto reconnect or quit the client...");
+					Thread.sleep(this.reconnectDelay*1000);
+					isFirstWrite = true;
+				} else
+				{
+					if (cmd.getException() != null)
+					{
+						if (cmd.getException() instanceof CleanLockedThreadException)
+						{
+							throw (CleanLockedThreadException) cmd.getException();
+						} else
+						{
+							throw cmd.getException();
+						}
+					} else
+					{
+						Object[] result = cmd.getResult();
+						if (result != null && result.length > 1)
+						{
+							Character resultType = (Character) result[0];
+							if (resultType != RedisResultType.ErrorReply)
+							{
+								notify.onNotify(String.valueOf(cmd.getResult()[1]));
+								cmd.pause();
+							}
+							else
+								throw new ErrorCommandException((String) result[1]);
+						}
+						else
+						{
+							throw new ErrorCommandException("Error back value");
+						}
+						
+					}
+				}
+			}
+		} else
+			throw new IllegalStateException("connection has been disconnected.");
 	}
 
 	/*
@@ -271,6 +317,14 @@ public class Connector implements IConnector
 						commandQueue.clear();
 
 						printMsg(Level.INFO, "Clean finished==" + commandQueue.size());
+					}
+					catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+					catch (BrokenBarrierException e)
+					{
+						e.printStackTrace();
 					}
 					finally
 					{

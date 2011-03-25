@@ -1,34 +1,46 @@
 package com.handinfo.redis4j.impl.util;
 
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.exception.RedisClientException;
-import com.handinfo.redis4j.impl.transfers.Connector;
 
 public class CommandWrapper
 {
-	private String type;
+	private Type type;
 	private ChannelBuffer value;
 	private CountDownLatch latch;
+	private CyclicBarrier barrier;
 	private RedisClientException exception;
 	private Object[] result;
-	
+
 	private AtomicBoolean isPause = new AtomicBoolean(false);
 	private AtomicBoolean isResume = new AtomicBoolean(false);
 
-	public CommandWrapper(Object[] commandList)
+	public enum Type
 	{
-		this.type = String.valueOf(commandList[0]);
+		SYNC, ASYNC;
+	}
+
+	public CommandWrapper(Type type, Object[] commandList)
+	{
+		this.type = type;
 		this.value = getBinaryCommand(commandList);
 		this.result = null;
-		this.latch = new CountDownLatch(1);
+
 		this.exception = null;
+
+		if (this.type.equals(CommandWrapper.Type.SYNC))
+			this.latch = new CountDownLatch(1);
+		else
+			this.barrier = new CyclicBarrier(2);
 	}
 
 	private ChannelBuffer getBinaryCommand(Object[] commandList)
@@ -65,7 +77,7 @@ public class CommandWrapper
 		return buffer;
 	}
 
-	public String getType()
+	public Type getType()
 	{
 		return type;
 	}
@@ -75,27 +87,50 @@ public class CommandWrapper
 		return value;
 	}
 
-	public void pause() throws InterruptedException
+	public void pause() throws InterruptedException, BrokenBarrierException
 	{
-		if (!isPause.getAndSet(true))
+		if (type.equals(CommandWrapper.Type.SYNC))
 		{
-			latch.await();
+			if (!isPause.getAndSet(true))
+			{
+				latch.await();
+			}
+		}
+		else
+		{
+			barrier.reset();
+			barrier.await();
 		}
 	}
 
-	public void pause(long timeout, TimeUnit unit) throws InterruptedException
+	public void pause(long timeout, TimeUnit unit) throws InterruptedException, BrokenBarrierException, TimeoutException
 	{
-		if (!isPause.getAndSet(true))
+		if (type.equals(CommandWrapper.Type.SYNC))
 		{
-			latch.await(timeout, unit);
+			if (!isPause.getAndSet(true))
+			{
+				latch.await(timeout, unit);
+			}
+		}
+		else
+		{
+			barrier.reset();
+			barrier.await(timeout, unit);
 		}
 	}
 
-	public void resume()
+	public void resume() throws InterruptedException, BrokenBarrierException
 	{
-		if (!isResume.getAndSet(true))
+		if (type.equals(CommandWrapper.Type.SYNC))
 		{
-			latch.countDown();
+			if (!isResume.getAndSet(true))
+			{
+				latch.countDown();
+			}
+		}
+		else
+		{
+			barrier.await();
 		}
 	}
 

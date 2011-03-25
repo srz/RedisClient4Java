@@ -129,7 +129,7 @@ public class NewConnection extends JDialog implements ActionListener, PropertyCh
 					JOptionPane.showMessageDialog(NewConnection.this, "输入的IP或端口号无效", "Try again", JOptionPane.ERROR_MESSAGE);
 				} else
 				{
-					client = new Redis4jClient(this.ipAddress.getText().trim(), Integer.valueOf(this.port.getText().trim()), 1, 10, 10, 10);
+					client = new Redis4jClient(this.ipAddress.getText().trim(), Integer.valueOf(this.port.getText().trim()), 10, 10, 10);
 					if (client.getIsConnected())
 					{
 						tabName = ipAddress.getText().trim() + ":" + port.getText().trim();

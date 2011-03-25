@@ -15,7 +15,7 @@ public class SimpleTest
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		final IRedis4j client = new Redis4jClient("192.2.9.223", 6379, 1, 10, 3, 3);
+		final IRedis4j client = new Redis4jClient("192.2.9.223", 6379, 10, 3, 3);
 		// System.out.println("------------");
 		// client.getConnection().echo("xxx");
 		Thread t = new Thread(new Runnable()

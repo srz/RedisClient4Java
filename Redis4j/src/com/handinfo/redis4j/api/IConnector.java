@@ -2,18 +2,20 @@ package com.handinfo.redis4j.api;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
-import com.handinfo.redis4j.api.exception.RedisClientException;
 import com.handinfo.redis4j.impl.util.CommandWrapper;
 
 public interface IConnector
 {
 
 	public boolean connect() throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
+	
+	public boolean isUseHeartbeat();
 	
 	public boolean getIsConnected();
 	
@@ -33,6 +35,8 @@ public interface IConnector
 
 	public Object[] executeCommand(String commandType, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
 
+	public void executeAsyncCommand(IRedis4jAsync.Notify notify, String commandType, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException;
+	
 	public void disConnect();
 	
 	public void cleanCommandQueue();
