@@ -1,8 +1,8 @@
 package com.handinfo.redis4j.impl.classification;
 
 import com.handinfo.redis4j.api.IConnector;
-import com.handinfo.redis4j.api.RedisCommandType;
-import com.handinfo.redis4j.api.RedisResultInfo;
+import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.classification.ITransactions;
 import com.handinfo.redis4j.impl.CommandExecutor;
 
@@ -19,7 +19,7 @@ public class Transactions extends CommandExecutor implements ITransactions
 	 */
 	public boolean discard()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.DISCARD, RedisResultInfo.OK);
+		return singleLineReplyForBoolean(RedisCommand.DISCARD, RedisResponseMessage.OK);
 	}
 	
 	/* (non-Javadoc)
@@ -27,7 +27,7 @@ public class Transactions extends CommandExecutor implements ITransactions
 	 */
 	public String[] exec()
 	{
-		return (String[]) multiBulkReply(RedisCommandType.EXEC, false);
+		return (String[]) multiBulkReply(RedisCommand.EXEC, false);
 	}
 	
 	/* (non-Javadoc)
@@ -35,7 +35,7 @@ public class Transactions extends CommandExecutor implements ITransactions
 	 */
 	public boolean multi()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.MULTI, RedisResultInfo.OK);
+		return singleLineReplyForBoolean(RedisCommand.MULTI, RedisResponseMessage.OK);
 	}
 	
 	/* (non-Javadoc)
@@ -43,7 +43,7 @@ public class Transactions extends CommandExecutor implements ITransactions
 	 */
 	public boolean unwatch()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.UNWATCH, RedisResultInfo.OK);
+		return singleLineReplyForBoolean(RedisCommand.UNWATCH, RedisResponseMessage.OK);
 	}
 	
 	/* (non-Javadoc)
@@ -51,6 +51,6 @@ public class Transactions extends CommandExecutor implements ITransactions
 	 */
 	public boolean watch()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.WATCH, RedisResultInfo.OK);
+		return singleLineReplyForBoolean(RedisCommand.WATCH, RedisResponseMessage.OK);
 	}
 }

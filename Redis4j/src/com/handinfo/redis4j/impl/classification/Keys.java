@@ -1,8 +1,8 @@
 package com.handinfo.redis4j.impl.classification;
 
 import com.handinfo.redis4j.api.IConnector;
-import com.handinfo.redis4j.api.RedisCommandType;
-import com.handinfo.redis4j.api.RedisResultInfo;
+import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.classification.IKeys;
 import com.handinfo.redis4j.impl.CommandExecutor;
 
@@ -19,7 +19,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public int del(String... keys)
 	{
-		return integerReply(RedisCommandType.DEL, keys);
+		return integerReply(RedisCommand.DEL, keys);
 	}
 
 	/* (non-Javadoc)
@@ -27,7 +27,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public String[] keys(String key)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.KEYS, false, key);
+		return (String[]) multiBulkReply(RedisCommand.KEYS, false, key);
 	}
 
 	/* (non-Javadoc)
@@ -35,7 +35,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public boolean rename(String key, String newKey)
 	{
-		return singleLineReplyForBoolean(RedisCommandType.RENAME, RedisResultInfo.OK, key, newKey);
+		return singleLineReplyForBoolean(RedisCommand.RENAME, RedisResponseMessage.OK, key, newKey);
 	}
 	
 	/* (non-Javadoc)
@@ -43,7 +43,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public String type(String key)
 	{
-		return singleLineReplyForString(RedisCommandType.TYPE,  key);
+		return singleLineReplyForString(RedisCommand.TYPE,  key);
 	}
 	
 	/* (non-Javadoc)
@@ -51,7 +51,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public boolean exists(String key)
 	{
-		return integerReply(RedisCommandType.EXISTS, key)==1 ? true : false;
+		return integerReply(RedisCommand.EXISTS, key)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -59,7 +59,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public boolean move(String key, int indexDB)
 	{
-		return integerReply(RedisCommandType.MOVE, key, indexDB)==1 ? true : false;
+		return integerReply(RedisCommand.MOVE, key, indexDB)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -67,7 +67,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public boolean renamenx(String key, String newKey)
 	{
-		return integerReply(RedisCommandType.RENAMENX, key, newKey)==1 ? true : false;
+		return integerReply(RedisCommand.RENAMENX, key, newKey)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -75,7 +75,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public boolean expire(String key, int seconds)
 	{
-		return integerReply(RedisCommandType.EXPIRE, key, seconds)==1 ? true : false;
+		return integerReply(RedisCommand.EXPIRE, key, seconds)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -83,7 +83,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public boolean persist(String key)
 	{
-		return integerReply(RedisCommandType.PERSIST, key)==1 ? true : false;
+		return integerReply(RedisCommand.PERSIST, key)==1 ? true : false;
 	}
 	
 	//TODO 暂时先写个简单版本的,后面在追加重载版本
@@ -92,7 +92,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public Object[] sort(String key, String...args)
 	{
-		return multiBulkReply(RedisCommandType.SORT, false, key, args);
+		return multiBulkReply(RedisCommand.SORT, false, key, args);
 	}
 	
 	/* (non-Javadoc)
@@ -100,7 +100,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public boolean expireat(String key,  long timestamp)
 	{
-		return integerReply(RedisCommandType.EXPIREAT, key, timestamp)==1 ? true : false;
+		return integerReply(RedisCommand.EXPIREAT, key, timestamp)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -108,7 +108,7 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public String randomkey()
 	{
-		return (String) bulkReply(RedisCommandType.RANDOMKEY, false);
+		return (String) bulkReply(RedisCommand.RANDOMKEY, false);
 	}
 	
 	/* (non-Javadoc)
@@ -116,6 +116,6 @@ public class Keys extends CommandExecutor implements IKeys
 	 */
 	public int ttl(String key)
 	{
-		return integerReply(RedisCommandType.TTL, key);
+		return integerReply(RedisCommand.TTL, key);
 	}
 }

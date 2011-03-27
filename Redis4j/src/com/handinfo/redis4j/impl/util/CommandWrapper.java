@@ -1,11 +1,13 @@
 package com.handinfo.redis4j.impl.util;
 
+import java.util.ArrayList;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -19,21 +21,51 @@ public class CommandWrapper
 	private CountDownLatch latch;
 	private CyclicBarrier barrier;
 	private RedisClientException exception;
-	private Object[] result;
+	private Object[][] result;
+	private int resultIndex = 0;;
+	
+	private AtomicInteger totalOfCommand = new AtomicInteger();
 
 	private AtomicBoolean isPause = new AtomicBoolean(false);
 	private AtomicBoolean isResume = new AtomicBoolean(false);
+	private ArrayList<String[]> cmdList;
+
+	public ArrayList<String[]> getCmdList()
+	{
+		return cmdList;
+	}
 
 	public enum Type
 	{
 		SYNC, ASYNC;
 	}
 
-	public CommandWrapper(Type type, Object[] commandList)
+	public CommandWrapper(Type type, Object[] command)
 	{
 		this.type = type;
-		this.value = getBinaryCommand(commandList);
-		this.result = null;
+		this.value = getBinaryCommand(command);
+		this.totalOfCommand.set(1);
+		result = new Object[this.totalOfCommand.get()][];
+
+		this.exception = null;
+
+		if (this.type.equals(CommandWrapper.Type.SYNC))
+			this.latch = new CountDownLatch(1);
+		else
+			this.barrier = new CyclicBarrier(2);
+	}
+
+	public CommandWrapper(ArrayList<String[]> commandList)
+	{
+		cmdList = commandList;
+		this.type = CommandWrapper.Type.SYNC;
+		this.value = ChannelBuffers.dynamicBuffer();
+		for (String[] cmd : commandList)
+		{
+			this.value.writeBytes(getBinaryCommand(cmd));
+		}
+		this.totalOfCommand.set(commandList.size());
+		result = new Object[this.totalOfCommand.get()][];
 
 		this.exception = null;
 
@@ -95,8 +127,7 @@ public class CommandWrapper
 			{
 				latch.await();
 			}
-		}
-		else
+		} else
 		{
 			barrier.reset();
 			barrier.await();
@@ -111,14 +142,18 @@ public class CommandWrapper
 			{
 				latch.await(timeout, unit);
 			}
-		}
-		else
+		} else
 		{
 			barrier.reset();
 			barrier.await(timeout, unit);
 		}
 	}
 
+	public int surplusLockedCommand()
+	{
+		return this.totalOfCommand.decrementAndGet();
+	}
+	
 	public void resume() throws InterruptedException, BrokenBarrierException
 	{
 		if (type.equals(CommandWrapper.Type.SYNC))
@@ -127,8 +162,7 @@ public class CommandWrapper
 			{
 				latch.countDown();
 			}
-		}
-		else
+		} else
 		{
 			barrier.await();
 		}
@@ -144,13 +178,14 @@ public class CommandWrapper
 		this.exception = exception;
 	}
 
-	public Object[] getResult()
+	public Object[][] getResult()
 	{
 		return result;
 	}
 
-	public void setResult(Object[] result)
+	public void addResult(Object[] res)
 	{
-		this.result = result;
+		result[resultIndex] = res;
+		resultIndex++;
 	}
 }

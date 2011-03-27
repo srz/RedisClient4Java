@@ -1,5 +1,7 @@
 package com.handinfo.redis4j.api;
 
+import java.util.ArrayList;
+
 import com.handinfo.redis4j.api.classification.IConnection;
 import com.handinfo.redis4j.api.classification.IHashes;
 import com.handinfo.redis4j.api.classification.IKeys;
@@ -66,5 +68,7 @@ public interface IRedis4j
 	public IRedis4j clone();
 	
 	public IRedis4jAsync getAsyncClient();
+	
+	public ArrayList<String> batch(Batch batchCommand);
 
 }

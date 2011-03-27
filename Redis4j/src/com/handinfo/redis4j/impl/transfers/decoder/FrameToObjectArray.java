@@ -9,7 +9,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 
-import com.handinfo.redis4j.api.RedisResultType;
+import com.handinfo.redis4j.api.RedisResponseType;
 
 public class FrameToObjectArray extends OneToOneDecoder
 {
@@ -40,40 +40,41 @@ public class FrameToObjectArray extends OneToOneDecoder
 		// logger.info("received message,first byte is \"" + firstByte + "\"");
 
 		Object[] result = null;
-		switch (firstByte)
+
+		switch (RedisResponseType.fromChar(firstByte))
 		{
-		case RedisResultType.SingleLineReply:
+		case SingleLineReply:
 		{
 			// With a single line reply the first byte of the reply
 			// will be "+"
 			result = new Object[2];
-			result[0] = firstByte;
+			result[0] = RedisResponseType.SingleLineReply;
 			// 返回结果为+开头时,后面跟的一定是单行文本
 			result[1] = header;
 			return result;
 		}
-		case RedisResultType.ErrorReply:
+		case ErrorReply:
 		{
 			// With an error message the first byte of the reply
 			// will be "-"
 			result = new Object[2];
-			result[0] = firstByte;
+			result[0] = RedisResponseType.ErrorReply;
 			// 返回结果为-开头时,后面跟的一定是单行文本
 			result[1] = header;
 			return result;
 		}
-		case RedisResultType.IntegerReply:
+		case IntegerReply:
 		{
 			// With an integer number the first byte of the reply
 			// will be ":"
 			result = new Object[2];
-			result[0] = firstByte;
+			result[0] = RedisResponseType.IntegerReply;
 			result[1] = header;// binaryData.toString(1,
 			// binaryData.readableBytes() - 3,
 			// Charset.forName("UTF-8"));
 			return result;
 		}
-		case RedisResultType.BulkReplies:
+		case BulkReplies:
 		{
 			// With bulk reply the first byte of the reply will be
 			// "$"
@@ -82,7 +83,7 @@ public class FrameToObjectArray extends OneToOneDecoder
 			int lengthFiledOfHead = Integer.valueOf(header);
 
 			result = new Object[2];
-			result[0] = firstByte;
+			result[0] = RedisResponseType.BulkReplies;
 			if (lengthFiledOfHead == -1)
 			{
 				result[1] = null;
@@ -93,7 +94,7 @@ public class FrameToObjectArray extends OneToOneDecoder
 			}
 			return result;
 		}
-		case RedisResultType.MultiBulkReplies:
+		case MultiBulkReplies:
 		{
 			// With multi-bulk reply the first byte of the reply
 			// will be "*"
@@ -104,16 +105,16 @@ public class FrameToObjectArray extends OneToOneDecoder
 			if (lengthFiledOfHead == -1)
 			{
 				result = new Object[1];
-				result[0] = firstByte;
+				result[0] = RedisResponseType.MultiBulkReplies;
 			} else if (lengthFiledOfHead == 0)
 			{
 				result = new Object[2];
-				result[0] = firstByte;
+				result[0] = RedisResponseType.MultiBulkReplies;
 				result[1] = null;
 			} else
 			{
 				result = new Object[lengthFiledOfHead + 1];
-				result[0] = firstByte;
+				result[0] = RedisResponseType.MultiBulkReplies;
 
 				int indexOfDelimiter = 0;
 				int indexOfCR = 0;

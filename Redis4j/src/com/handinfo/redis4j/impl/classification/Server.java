@@ -1,8 +1,8 @@
 package com.handinfo.redis4j.impl.classification;
 
 import com.handinfo.redis4j.api.IConnector;
-import com.handinfo.redis4j.api.RedisCommandType;
-import com.handinfo.redis4j.api.RedisResultInfo;
+import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.classification.IServer;
 import com.handinfo.redis4j.impl.CommandExecutor;
 
@@ -18,7 +18,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public String bgrewriteaof()
 	{
-		return singleLineReplyForString(RedisCommandType.BGREWRITEAOF);
+		return singleLineReplyForString(RedisCommand.BGREWRITEAOF);
 	}
 	
 	/* (non-Javadoc)
@@ -26,7 +26,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public String bgsave()
 	{
-		return singleLineReplyForString(RedisCommandType.BGSAVE);
+		return singleLineReplyForString(RedisCommand.BGSAVE);
 	}
 	
 	/* (non-Javadoc)
@@ -34,7 +34,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public String[] config_get(String parameter)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.CONFIG, false, RedisCommandType.CONFIG_GET, parameter);
+		return (String[]) multiBulkReply(RedisCommand.CONFIG_GET, false, parameter);
 	}
 	
 	/* (non-Javadoc)
@@ -42,7 +42,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public boolean config_resetstat()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.CONFIG, RedisResultInfo.OK, RedisCommandType.CONFIG_RESETSTAT);
+		return singleLineReplyForBoolean(RedisCommand.CONFIG_RESETSTAT, RedisResponseMessage.OK);
 	}
 	
 	/* (non-Javadoc)
@@ -50,7 +50,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public boolean config_set(String parameter, String value)
 	{
-		return singleLineReplyForBoolean(RedisCommandType.CONFIG, RedisResultInfo.OK, RedisCommandType.CONFIG_SET, parameter, value);
+		return singleLineReplyForBoolean(RedisCommand.CONFIG_SET, RedisResponseMessage.OK, parameter, value);
 	}
 	
 	/* (non-Javadoc)
@@ -58,7 +58,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public int dbsize()
 	{
-		return integerReply(RedisCommandType.DBSIZE);
+		return integerReply(RedisCommand.DBSIZE);
 	}
 	
 	/* (non-Javadoc)
@@ -66,7 +66,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public String[] debug_object(String key)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.DEBUG, false, RedisCommandType.DEBUG_OBJECT, key);
+		return (String[]) multiBulkReply(RedisCommand.DEBUG_OBJECT, false, key);
 	}
 	
 	/* (non-Javadoc)
@@ -74,7 +74,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public String[] debug_segfault()
 	{
-		return (String[]) multiBulkReply(RedisCommandType.DEBUG, false, RedisCommandType.DEBUG_SEGFAULT);
+		return (String[]) multiBulkReply(RedisCommand.DEBUG_SEGFAULT, false);
 	}
 	
 	/* (non-Javadoc)
@@ -82,7 +82,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public boolean flushall()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.FLUSHALL, RedisResultInfo.OK);
+		return singleLineReplyForBoolean(RedisCommand.FLUSHALL, RedisResponseMessage.OK);
 	}
 	
 	/* (non-Javadoc)
@@ -90,7 +90,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public boolean flushdb()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.FLUSHDB, RedisResultInfo.OK);
+		return singleLineReplyForBoolean(RedisCommand.FLUSHDB, RedisResponseMessage.OK);
 	}
 	
 	/* (non-Javadoc)
@@ -98,7 +98,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public String info()
 	{
-		return (String)bulkReply(RedisCommandType.INFO, false);
+		return (String)bulkReply(RedisCommand.INFO, false);
 	}
 	
 	/* (non-Javadoc)
@@ -106,20 +106,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public int lastsave()
 	{
-		return integerReply(RedisCommandType.LASTSAVE);
-	}
-	
-	/* (non-Javadoc)
-	 * @see com.handinfo.redis4j.impl.IServer#monitor()
-	 */
-	public void monitor()
-	{
-		asyncBulkReply(RedisCommandType.MONITOR, false);
-	}
-	
-	public String getMonitorResult()
-	{
-		return asyncGetBulkReplyResult();
+		return integerReply(RedisCommand.LASTSAVE);
 	}
 	
 	/* (non-Javadoc)
@@ -127,7 +114,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public boolean save()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.SAVE, RedisResultInfo.OK);
+		return singleLineReplyForBoolean(RedisCommand.SAVE, RedisResponseMessage.OK);
 	}
 	
 	/* (non-Javadoc)
@@ -135,7 +122,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public boolean shutdown()
 	{
-		return !singleLineReplyForBoolean(RedisCommandType.SHUTDOWN, RedisResultInfo.SHUTDOWNERROR);
+		return !singleLineReplyForBoolean(RedisCommand.SHUTDOWN, RedisResponseMessage.SHUTDOWNERROR);
 	}
 	
 	/* (non-Javadoc)
@@ -143,7 +130,7 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public boolean slaveof()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.SLAVEOF, RedisResultInfo.OK);
+		return singleLineReplyForBoolean(RedisCommand.SLAVEOF, RedisResponseMessage.OK);
 	}
 	
 	/* (non-Javadoc)
@@ -151,6 +138,6 @@ public class Server extends CommandExecutor implements IServer
 	 */
 	public String[] sync()
 	{
-		return (String[]) multiBulkReply(RedisCommandType.SYNC, false);
+		return (String[]) multiBulkReply(RedisCommand.SYNC, false);
 	}
 }

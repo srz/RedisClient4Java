@@ -7,7 +7,7 @@ import javax.swing.SwingWorker;
 
 import com.handinfo.redis4j.api.IRedis4j;
 import com.handinfo.redis4j.api.IRedis4jAsync;
-import com.handinfo.redis4j.api.IRedis4jAsync.AsyncCommand;
+import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.IRedis4jAsync.Notify;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
@@ -28,7 +28,7 @@ public class RedisMonitor extends SwingWorker<String, String>
 	{
 		try
 		{
-			client.executeCommand(AsyncCommand.MONITOR, new Notify()
+			client.executeCommand(RedisCommand.MONITOR, new Notify()
 			{
 
 				@Override

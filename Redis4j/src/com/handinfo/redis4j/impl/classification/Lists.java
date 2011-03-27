@@ -1,8 +1,8 @@
 package com.handinfo.redis4j.impl.classification;
 
 import com.handinfo.redis4j.api.IConnector;
-import com.handinfo.redis4j.api.RedisCommandType;
-import com.handinfo.redis4j.api.RedisResultInfo;
+import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.classification.ILists;
 import com.handinfo.redis4j.impl.CommandExecutor;
 
@@ -19,7 +19,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public String[] blpop(String key, int timeout)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.BLPOP, false, key, timeout);
+		return (String[]) multiBulkReply(RedisCommand.BLPOP, false, key, timeout);
 	}
 	
 	/* (non-Javadoc)
@@ -27,7 +27,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public int llen(String key)
 	{
-		return integerReply(RedisCommandType.LLEN, key);
+		return integerReply(RedisCommand.LLEN, key);
 	}
 	
 	/* (non-Javadoc)
@@ -35,7 +35,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public int lrem(String key, int count, String value)
 	{
-		return integerReply(RedisCommandType.LREM, key, count, value);
+		return integerReply(RedisCommand.LREM, key, count, value);
 	}
 	
 	/* (non-Javadoc)
@@ -43,7 +43,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public int rpush(String key, String value)
 	{
-		return integerReply(RedisCommandType.RPUSH, key, value);
+		return integerReply(RedisCommand.RPUSH, key, value);
 	}
 	
 	/* (non-Javadoc)
@@ -51,7 +51,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public String[] brpop(String key, int timeout)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.BRPOP, false, key, timeout);
+		return (String[]) multiBulkReply(RedisCommand.BRPOP, false, key, timeout);
 	}
 	
 	/* (non-Javadoc)
@@ -59,7 +59,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public String lpop(String key)
 	{
-		return singleLineReplyForString(RedisCommandType.LPOP, key);
+		return singleLineReplyForString(RedisCommand.LPOP, key);
 	}
 	
 	/* (non-Javadoc)
@@ -67,7 +67,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public boolean lset(String key, int index, String value)
 	{
-		return singleLineReplyForBoolean(RedisCommandType.LSET, RedisResultInfo.OK, key, index, value);
+		return singleLineReplyForBoolean(RedisCommand.LSET, RedisResponseMessage.OK, key, index, value);
 	}
 	
 	/* (non-Javadoc)
@@ -75,7 +75,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public int rpushx(String key, String value)
 	{
-		return integerReply(RedisCommandType.RPUSHX, key, value);
+		return integerReply(RedisCommand.RPUSHX, key, value);
 	}
 	
 	/* (non-Javadoc)
@@ -83,7 +83,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public String brpoplpush(String source, String destination, int timeout)
 	{
-		return (String) bulkReply(RedisCommandType.BRPOPLPUSH, false, source, destination, timeout);
+		return (String) bulkReply(RedisCommand.BRPOPLPUSH, false, source, destination, timeout);
 	}
 	
 	/* (non-Javadoc)
@@ -91,7 +91,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public int lpush(String key, String value)
 	{
-		return integerReply(RedisCommandType.LPUSH, key, value);
+		return integerReply(RedisCommand.LPUSH, key, value);
 	}
 	
 	/* (non-Javadoc)
@@ -99,7 +99,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public boolean ltrim(String key, int start, int stop)
 	{
-		return singleLineReplyForBoolean(RedisCommandType.LTRIM, RedisResultInfo.OK, key, start, stop);
+		return singleLineReplyForBoolean(RedisCommand.LTRIM, RedisResponseMessage.OK, key, start, stop);
 	}
 	
 	/* (non-Javadoc)
@@ -107,7 +107,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public String lindex(String key, int index)
 	{
-		return singleLineReplyForString(RedisCommandType.LINDEX, key, index);
+		return singleLineReplyForString(RedisCommand.LINDEX, key, index);
 	}
 	
 	/* (non-Javadoc)
@@ -115,7 +115,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public int lpushx(String key, String value)
 	{
-		return integerReply(RedisCommandType.LPUSHX, key, value);
+		return integerReply(RedisCommand.LPUSHX, key, value);
 	}
 	
 	/* (non-Javadoc)
@@ -123,7 +123,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public String rpop(String key)
 	{
-		return (String) bulkReply(RedisCommandType.RPOP, false, key);
+		return (String) bulkReply(RedisCommand.RPOP, false, key);
 	}
 	
 	/* (non-Javadoc)
@@ -131,7 +131,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public int linsert(String key, String BEFORE_AFTER, String pivot, String value)
 	{
-		return integerReply(RedisCommandType.LINSERT, key, BEFORE_AFTER, pivot, value);
+		return integerReply(RedisCommand.LINSERT, key, BEFORE_AFTER, pivot, value);
 	}
 	
 	/* (non-Javadoc)
@@ -139,7 +139,7 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public String[] lrange(String key, int start, int stop)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.LRANGE, false, key, start, stop);
+		return (String[]) multiBulkReply(RedisCommand.LRANGE, false, key, start, stop);
 	}
 	
 	/* (non-Javadoc)
@@ -147,6 +147,6 @@ public class Lists extends CommandExecutor implements ILists
 	 */
 	public String rpoplpush(String source, String destination)
 	{
-		return (String) bulkReply(RedisCommandType.RPOPLPUSH, false, source, destination);
+		return (String) bulkReply(RedisCommand.RPOPLPUSH, false, source, destination);
 	}
 }

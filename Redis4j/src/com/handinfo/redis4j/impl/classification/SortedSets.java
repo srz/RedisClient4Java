@@ -1,7 +1,7 @@
 package com.handinfo.redis4j.impl.classification;
 
 import com.handinfo.redis4j.api.IConnector;
-import com.handinfo.redis4j.api.RedisCommandType;
+import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.classification.ISortedSets;
 import com.handinfo.redis4j.impl.CommandExecutor;
 
@@ -18,7 +18,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public Boolean zadd(String key, int score, String member)
 	{
-		return integerReply(RedisCommandType.ZADD, key, score, member)==1 ? true : false;
+		return integerReply(RedisCommand.ZADD, key, score, member)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -26,7 +26,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public int zinterstore(String...args)
 	{
-		return integerReply(RedisCommandType.ZINTERSTORE, args);
+		return integerReply(RedisCommand.ZINTERSTORE, args);
 	}
 	
 	/* (non-Javadoc)
@@ -34,7 +34,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public Boolean zrem(String key, String member)
 	{
-		return integerReply(RedisCommandType.ZREM, key, member)==1 ? true : false;
+		return integerReply(RedisCommand.ZREM, key, member)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -42,7 +42,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public String[] zrevrangebyscore(String...args)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.ZREVRANGEBYSCORE, false, args);
+		return (String[]) multiBulkReply(RedisCommand.ZREVRANGEBYSCORE, false, args);
 	}
 	
 	/* (non-Javadoc)
@@ -50,7 +50,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public int zcard(String key)
 	{
-		return integerReply(RedisCommandType.ZCARD, key);
+		return integerReply(RedisCommand.ZCARD, key);
 	}
 	
 	/* (non-Javadoc)
@@ -58,7 +58,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public String[] zrange(String key, int start, int stop)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.ZRANGE, false, key, start, stop);
+		return (String[]) multiBulkReply(RedisCommand.ZRANGE, false, key, start, stop);
 	}
 	
 	/* (non-Javadoc)
@@ -66,7 +66,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public int zremrangebyrank(String key, int start, int stop)
 	{
-		return integerReply(RedisCommandType.ZREMRANGEBYRANK, key, start, stop);
+		return integerReply(RedisCommand.ZREMRANGEBYRANK, key, start, stop);
 	}
 	
 	/* (non-Javadoc)
@@ -74,7 +74,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public int zrevrank(String key, String member)
 	{
-		return integerReply(RedisCommandType.ZREVRANK, key, member);
+		return integerReply(RedisCommand.ZREVRANK, key, member);
 	}
 	
 	/* (non-Javadoc)
@@ -82,7 +82,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public int zcount(String key, int min, int max)
 	{
-		return integerReply(RedisCommandType.ZCOUNT, key, min, max);
+		return integerReply(RedisCommand.ZCOUNT, key, min, max);
 	}
 	
 	/* (non-Javadoc)
@@ -90,7 +90,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public String[] zrangebyscore(String...args)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.ZRANGEBYSCORE, false, args);
+		return (String[]) multiBulkReply(RedisCommand.ZRANGEBYSCORE, false, args);
 	}
 	
 	/* (non-Javadoc)
@@ -98,7 +98,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public int zremrangebyscore(String key, int min, int max)
 	{
-		return integerReply(RedisCommandType.ZREMRANGEBYSCORE, key, min, max);
+		return integerReply(RedisCommand.ZREMRANGEBYSCORE, key, min, max);
 	}
 	
 	/* (non-Javadoc)
@@ -106,7 +106,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public String zscore(String key, String member)
 	{
-		return (String) bulkReply(RedisCommandType.ZSCORE, false, key, member);
+		return (String) bulkReply(RedisCommand.ZSCORE, false, key, member);
 	}
 	
 	/* (non-Javadoc)
@@ -114,7 +114,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public String zincrby(String key, int increment, String member)
 	{
-		return (String) bulkReply(RedisCommandType.ZINCRBY, false, key, increment, member);
+		return (String) bulkReply(RedisCommand.ZINCRBY, false, key, increment, member);
 	}
 	
 	/* (non-Javadoc)
@@ -122,7 +122,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public int zrank(String key, String member)
 	{
-		return integerReply(RedisCommandType.ZRANK, key, member);
+		return integerReply(RedisCommand.ZRANK, key, member);
 	}
 	
 	/* (non-Javadoc)
@@ -130,7 +130,7 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public String[] zrevrange(String key, int start, int stop)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.ZREVRANGE, false, key, start, stop);
+		return (String[]) multiBulkReply(RedisCommand.ZREVRANGE, false, key, start, stop);
 	}
 	
 	/* (non-Javadoc)
@@ -138,6 +138,6 @@ public class SortedSets extends CommandExecutor implements ISortedSets
 	 */
 	public int zunionstore(String...args)
 	{
-		return integerReply(RedisCommandType.ZUNIONSTORE, args);
+		return integerReply(RedisCommand.ZUNIONSTORE, args);
 	}
 }

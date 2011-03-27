@@ -1,11 +1,10 @@
 package com.handinfo.redis4j.impl.classification;
 
 import com.handinfo.redis4j.api.IConnector;
-import com.handinfo.redis4j.api.RedisCommandType;
-import com.handinfo.redis4j.api.RedisResultInfo;
+import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.classification.IConnection;
 import com.handinfo.redis4j.impl.CommandExecutor;
-import com.handinfo.redis4j.impl.transfers.Connector;
 
 public class Connection extends CommandExecutor implements IConnection
 {
@@ -27,7 +26,7 @@ public class Connection extends CommandExecutor implements IConnection
 	 */
 	public boolean auth(String password)//
 	{
-		return singleLineReplyForBoolean(RedisCommandType.AUTH, RedisResultInfo.OK, password);
+		return singleLineReplyForBoolean(RedisCommand.AUTH, RedisResponseMessage.OK, password);
 	}
 
 	/* (non-Javadoc)
@@ -35,7 +34,7 @@ public class Connection extends CommandExecutor implements IConnection
 	 */
 	public String echo(String message)
 	{
-		Object result = bulkReply(RedisCommandType.ECHO, false, message);
+		Object result = bulkReply(RedisCommand.ECHO, false, message);
 		if (result != null)
 		{
 			return (String) result;
@@ -49,7 +48,7 @@ public class Connection extends CommandExecutor implements IConnection
 	 */
 	public boolean ping()
 	{
-		return singleLineReplyForBoolean(RedisCommandType.PING, RedisResultInfo.PONG);
+		return singleLineReplyForBoolean(RedisCommand.PING, RedisResponseMessage.PING);
 	}
 
 	//
@@ -72,6 +71,6 @@ public class Connection extends CommandExecutor implements IConnection
 	@SuppressWarnings("unused")
 	private boolean select(int dbIndex)
 	{
-		return singleLineReplyForBoolean(RedisCommandType.SELECT, RedisResultInfo.OK, dbIndex);
+		return singleLineReplyForBoolean(RedisCommand.SELECT, RedisResponseMessage.OK, dbIndex);
 	}
 }

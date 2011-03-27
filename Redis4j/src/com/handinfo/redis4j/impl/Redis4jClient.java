@@ -1,8 +1,12 @@
 package com.handinfo.redis4j.impl;
 
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.handinfo.redis4j.api.Batch;
 import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.IRedis4j;
 import com.handinfo.redis4j.api.IRedis4jAsync;
@@ -25,7 +29,6 @@ import com.handinfo.redis4j.impl.classification.SortedSets;
 import com.handinfo.redis4j.impl.classification.Strings;
 import com.handinfo.redis4j.impl.classification.Transactions;
 import com.handinfo.redis4j.impl.transfers.Connector;
-import com.handinfo.redis4j.impl.transfers.handler.HeartbeatHandler;
 
 public class Redis4jClient implements IRedis4j
 {
@@ -202,6 +205,18 @@ public class Redis4jClient implements IRedis4j
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public ArrayList<String> batch(Batch batchCommand)
+	{
+		ArrayList<String> result = new ArrayList<String>();
+		Object[][] res = connector.executeBatch(batchCommand.getCommandList());
+		
+		for(int i=0; i<res.length; i++)
+		{
+			result.add(new String((byte[])res[i][1]));
+		}
+		return result;
 	}
 
 	// /*

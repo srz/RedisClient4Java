@@ -13,12 +13,7 @@ public interface IRedis4jAsync
 		public void onNotify(String result);
 	}
 	
-	public enum AsyncCommand
-	{
-		MONITOR, PUBLIC;
-	}
-	
-	public void executeCommand(AsyncCommand commandType, Notify notify) throws CleanLockedThreadException, ErrorCommandException, IllegalStateException, InterruptedException, BrokenBarrierException;
+	public void executeCommand(RedisCommand command, Notify notify) throws CleanLockedThreadException, ErrorCommandException, IllegalStateException, InterruptedException, BrokenBarrierException;
 
 	public void quit();
 

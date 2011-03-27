@@ -1,8 +1,8 @@
 package com.handinfo.redis4j.impl.classification;
 
 import com.handinfo.redis4j.api.IConnector;
-import com.handinfo.redis4j.api.RedisCommandType;
-import com.handinfo.redis4j.api.RedisResultInfo;
+import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.classification.IStrings;
 import com.handinfo.redis4j.impl.CommandExecutor;
 
@@ -19,7 +19,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public int append(String key, String value)
 	{
-		return integerReply(RedisCommandType.APPEND, key);
+		return integerReply(RedisCommand.APPEND, key);
 	}
 	
 	/* (non-Javadoc)
@@ -27,7 +27,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public String getrange(String key, int start, int end)
 	{
-		return (String) bulkReply(RedisCommandType.GETRANGE, false, start, end);
+		return (String) bulkReply(RedisCommand.GETRANGE, false, start, end);
 	}
 	
 	/* (non-Javadoc)
@@ -35,7 +35,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public Boolean mset(String key, String value)
 	{
-		return singleLineReplyForBoolean(RedisCommandType.MSET, RedisResultInfo.OK, value);
+		return singleLineReplyForBoolean(RedisCommand.MSET, RedisResponseMessage.OK, value);
 	}
 	
 	/* (non-Javadoc)
@@ -43,7 +43,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public Boolean setnx(String key, String value)
 	{
-		return integerReply(RedisCommandType.SETNX, key)==1 ? true : false;
+		return integerReply(RedisCommand.SETNX, key)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -51,7 +51,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public int decr(String key)
 	{
-		return integerReply(RedisCommandType.DECR, key);
+		return integerReply(RedisCommand.DECR, key);
 	}
 	
 	/* (non-Javadoc)
@@ -59,7 +59,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public String getset(String key, String value)
 	{
-		return (String) bulkReply(RedisCommandType.GETSET, false, value);
+		return (String) bulkReply(RedisCommand.GETSET, false, value);
 	}
 	
 	/* (non-Javadoc)
@@ -67,7 +67,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public Boolean msetnx(String key, String value)
 	{
-		return integerReply(RedisCommandType.MSETNX, key)==1 ? true : false;
+		return integerReply(RedisCommand.MSETNX, key)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -75,7 +75,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public int setrange(String key, int offset, String value)
 	{
-		return integerReply(RedisCommandType.SETRANGE, key, offset, value);
+		return integerReply(RedisCommand.SETRANGE, key, offset, value);
 	}
 	
 	/* (non-Javadoc)
@@ -83,7 +83,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public int decrby(String key, int decrement)
 	{
-		return integerReply(RedisCommandType.DECRBY, key, decrement);
+		return integerReply(RedisCommand.DECRBY, key, decrement);
 	}
 	
 	/* (non-Javadoc)
@@ -91,7 +91,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public int incr(String key)
 	{
-		return integerReply(RedisCommandType.INCR, key);
+		return integerReply(RedisCommand.INCR, key);
 	}
 	
 	/* (non-Javadoc)
@@ -99,7 +99,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public boolean set(String key, String value)
 	{
-		return singleLineReplyForBoolean(RedisCommandType.SET, RedisResultInfo.OK, key, value);
+		return singleLineReplyForBoolean(RedisCommand.SET, RedisResponseMessage.OK, key, value);
 	}
 	
 	/* (non-Javadoc)
@@ -107,7 +107,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public int strlen(String key)
 	{
-		return integerReply(RedisCommandType.STRLEN, key);
+		return integerReply(RedisCommand.STRLEN, key);
 	}
 	
 	/* (non-Javadoc)
@@ -115,7 +115,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public String get(String key)
 	{
-		return (String) bulkReply(RedisCommandType.GET, false, key);
+		return (String) bulkReply(RedisCommand.GET, false, key);
 	}
 	
 	/* (non-Javadoc)
@@ -123,7 +123,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public int incrby(String key, int increment)
 	{
-		return integerReply(RedisCommandType.INCRBY, key, increment);
+		return integerReply(RedisCommand.INCRBY, key, increment);
 	}
 	
 	/* (non-Javadoc)
@@ -131,7 +131,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public int setbit(String key, int offset, int value)
 	{
-		return integerReply(RedisCommandType.SETBIT, key, offset, value);
+		return integerReply(RedisCommand.SETBIT, key, offset, value);
 	}
 	
 	/* (non-Javadoc)
@@ -139,7 +139,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public int getbit(String key, int offset)
 	{
-		return integerReply(RedisCommandType.GETBIT, key, offset);
+		return integerReply(RedisCommand.GETBIT, key, offset);
 	}
 	
 	/* (non-Javadoc)
@@ -147,7 +147,7 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public String[] mget(String...keys)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.MGET, false, keys);
+		return (String[]) multiBulkReply(RedisCommand.MGET, false, keys);
 	}
 	
 	/* (non-Javadoc)
@@ -155,6 +155,6 @@ public class Strings extends CommandExecutor implements IStrings
 	 */
 	public boolean setex(String key, int seconds, String value)
 	{
-		return singleLineReplyForBoolean(RedisCommandType.SETEX, RedisResultInfo.OK, key, seconds, value);
+		return singleLineReplyForBoolean(RedisCommand.SETEX, RedisResponseMessage.OK, key, seconds, value);
 	}
 }

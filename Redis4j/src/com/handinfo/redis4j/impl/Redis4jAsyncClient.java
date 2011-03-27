@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.IRedis4jAsync;
+import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.transfers.Connector;
@@ -44,11 +45,15 @@ public class Redis4jAsyncClient implements IRedis4jAsync
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IRedis4jAsyncClient#executeCommand(com.handinfo.redis4j.api.IRedis4j.AsyncCommand, com.handinfo.redis4j.api.IRedis4j.Notify)
 	 */
-	public void executeCommand(AsyncCommand commandType, Notify notify) throws CleanLockedThreadException, ErrorCommandException, IllegalStateException, InterruptedException, BrokenBarrierException
+	public void executeCommand(RedisCommand command, Notify notify) throws CleanLockedThreadException, ErrorCommandException, IllegalStateException, InterruptedException, BrokenBarrierException
 	{
+		if(command.getOperateType() != RedisCommand.OperateType.ASYNC)
+		{
+			throw new IllegalStateException("please use async command! example monitor...");
+		}
 		if(!this.isExecute.getAndSet(true))
 		{
-			connector.executeAsyncCommand(notify, commandType.toString());
+			connector.executeAsyncCommand(notify, command);
 		}
 		else
 		{

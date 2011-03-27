@@ -13,9 +13,9 @@ public interface ICommandExecutor
 	 * @return 操作结果是否成功
 	 * @throws Exception 
 	 */
-	public boolean singleLineReplyForBoolean(String redisCommandType, String RedisResultInfo, Object... args) throws Exception;
+	public boolean singleLineReplyForBoolean(RedisCommand command, RedisResponseMessage RedisResultInfo, Object... args) throws Exception;
 
-	public String singleLineReplyForString(String redisCommandType, Object... args) throws Exception;
+	public String singleLineReplyForString(RedisCommand command, Object... args) throws Exception;
 
 	/**
 	 * 返回类型为状态码的命令统一执行此函数
@@ -27,7 +27,7 @@ public interface ICommandExecutor
 	 * @return 操作结果是否成功
 	 * @throws Exception 
 	 */
-	public int integerReply(String redisCommandType, Object... args) throws Exception;
+	public int integerReply(RedisCommand command, Object... args) throws Exception;
 
 	/**
 	 * 返回类型为单行数据的命令统一执行此函数
@@ -42,8 +42,8 @@ public interface ICommandExecutor
 	 *         因为解码时统一按照DataWrapper类型来解码
 	 * @throws Exception 
 	 */
-	public Object bulkReply(String redisCommandType, boolean isUseObjectDecoder, Object... args) throws Exception;
+	public Object bulkReply(RedisCommand command, boolean isUseObjectDecoder, Object... args) throws Exception;
 
-	public Object[] multiBulkReply(String redisCommandType, boolean isUseObjectDecoder, Object... args) throws Exception;
+	public Object[] multiBulkReply(RedisCommand command, boolean isUseObjectDecoder, Object... args) throws Exception;
 
 }

@@ -27,10 +27,6 @@ public interface IServer
 
 	public int lastsave();
 
-	public void monitor();
-	
-	public String getMonitorResult();
-
 	public boolean save();
 
 	public boolean shutdown();

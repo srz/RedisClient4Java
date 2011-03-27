@@ -1,6 +1,7 @@
 package com.handinfo.redis4j.impl.transfers;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.Executors;
@@ -21,8 +22,8 @@ import org.jboss.netty.util.Timer;
 
 import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.IRedis4jAsync;
-import com.handinfo.redis4j.api.RedisCommandType;
-import com.handinfo.redis4j.api.RedisResultType;
+import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.RedisResponseType;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.util.CommandWrapper;
@@ -163,7 +164,7 @@ public class Connector implements IConnector
 
 	private void selectDB(int indexDB) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
-		executeCommand(RedisCommandType.SELECT, indexDB);
+		executeCommand(RedisCommand.SELECT, indexDB);
 	}
 
 	/*
@@ -173,13 +174,13 @@ public class Connector implements IConnector
 	 * com.handinfo.redis4j.impl.transfers.IConnector#executeCommand(java.lang
 	 * .String, java.lang.Object)
 	 */
-	public Object[] executeCommand(String commandType, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public Object[] executeCommand(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		if (channel != null && channel.isConnected())
 		{
-			Object[] redisCommand = new Object[args.length + 1];
-			redisCommand[0] = commandType;
-			System.arraycopy(args, 0, redisCommand, 1, args.length);
+			Object[] redisCommand = new Object[args.length + command.getValue().length];
+			System.arraycopy(command.getValue(), 0, redisCommand, 0, command.getValue().length);
+			System.arraycopy(args, 0, redisCommand, command.getValue().length, args.length);
 
 			final CommandWrapper cmd = new CommandWrapper(CommandWrapper.Type.SYNC, redisCommand);
 
@@ -196,13 +197,13 @@ public class Connector implements IConnector
 				}
 			} else
 			{
-				Object[] result = cmd.getResult();
+				Object[] result = cmd.getResult()[0];
 				if (result != null && result.length > 1)
 				{
-					Character resultType = (Character) result[0];
-					if (resultType != RedisResultType.ErrorReply)
+					RedisResponseType resultType = (RedisResponseType) result[0];
+					if (resultType != RedisResponseType.ErrorReply)
 					{
-						return cmd.getResult();
+						return result;
 					}
 					else
 					{
@@ -217,14 +218,48 @@ public class Connector implements IConnector
 		} else
 			throw new IllegalStateException("connection has been disconnected.");
 	}
-
-	public void executeAsyncCommand(IRedis4jAsync.Notify notify, String commandType, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException
+	
+	public Object[][] executeBatch(ArrayList<String[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		if (channel != null && channel.isConnected())
 		{
-			Object[] redisCommand = new Object[args.length + 1];
-			redisCommand[0] = commandType;
-			System.arraycopy(args, 0, redisCommand, 1, args.length);
+			final CommandWrapper cmd = new CommandWrapper(commandList);
+
+			channel.write(cmd);
+
+			if (cmd.getException() != null)
+			{
+				if (cmd.getException() instanceof CleanLockedThreadException)
+				{
+					throw (CleanLockedThreadException) cmd.getException();
+				} else
+				{
+					throw cmd.getException();
+				}
+			} else
+			{
+				Object[][] result = cmd.getResult();
+
+				if (result != null && result.length > 0)
+				{
+					return result;
+				}
+				else
+				{
+					throw new ErrorCommandException("Error back value");
+				}
+			}
+		} else
+			throw new IllegalStateException("connection has been disconnected.");
+	}
+
+	public void executeAsyncCommand(IRedis4jAsync.Notify notify, RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException
+	{
+		if (channel != null && channel.isConnected())
+		{
+			Object[] redisCommand = new Object[args.length + command.getValue().length];
+			System.arraycopy(command.getValue(), 0, redisCommand, 0, command.getValue().length);
+			System.arraycopy(args, 0, redisCommand, command.getValue().length, args.length);
 
 			final CommandWrapper cmd = new CommandWrapper(CommandWrapper.Type.ASYNC, redisCommand);
 
@@ -256,13 +291,13 @@ public class Connector implements IConnector
 						}
 					} else
 					{
-						Object[] result = cmd.getResult();
+						Object[] result = cmd.getResult()[0];
 						if (result != null && result.length > 1)
 						{
-							Character resultType = (Character) result[0];
-							if (resultType != RedisResultType.ErrorReply)
+							RedisResponseType resultType = (RedisResponseType) result[0];
+							if (resultType != RedisResponseType.ErrorReply)
 							{
-								notify.onNotify(String.valueOf(cmd.getResult()[1]));
+								notify.onNotify(String.valueOf(result[1]));
 								cmd.pause();
 							}
 							else

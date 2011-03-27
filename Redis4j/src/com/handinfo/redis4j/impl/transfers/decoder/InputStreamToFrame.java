@@ -8,7 +8,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
-import com.handinfo.redis4j.api.RedisResultType;
+import com.handinfo.redis4j.api.RedisResponseType;
 
 public class InputStreamToFrame extends FrameDecoder
 {
@@ -24,7 +24,7 @@ public class InputStreamToFrame extends FrameDecoder
 		char firstByte = (char) buffer.getByte(buffer.readerIndex());
 		
 		//取保第一个readerIndex位置的字节是协议中约定的
-		if(!(firstByte == RedisResultType.SingleLineReply || firstByte == RedisResultType.ErrorReply || firstByte == RedisResultType.IntegerReply || firstByte == RedisResultType.BulkReplies || firstByte == RedisResultType.MultiBulkReplies))
+		if(!(firstByte == RedisResponseType.SingleLineReply.getValue() || firstByte == RedisResponseType.ErrorReply.getValue() || firstByte == RedisResponseType.IntegerReply.getValue() || firstByte == RedisResponseType.BulkReplies.getValue() || firstByte == RedisResponseType.MultiBulkReplies.getValue()))
 		{
 			//如不是协议中约定的字符,放弃第一个字符并重新处理
 			buffer.readByte();
@@ -42,9 +42,9 @@ public class InputStreamToFrame extends FrameDecoder
 
 		
 
-		switch (firstByte)
+		switch (RedisResponseType.fromChar(firstByte))
 		{
-		case RedisResultType.SingleLineReply:
+		case SingleLineReply:
 		{
 			// With a single line reply the first byte of the reply
 			// will be "+"
@@ -53,7 +53,7 @@ public class InputStreamToFrame extends FrameDecoder
 			
 		}
 			//break;
-		case RedisResultType.ErrorReply:
+		case ErrorReply:
 		{
 			// With an error message the first byte of the reply
 			// will be "-"
@@ -61,14 +61,14 @@ public class InputStreamToFrame extends FrameDecoder
 		}
 
 			//break;
-		case RedisResultType.IntegerReply:
+		case IntegerReply:
 		{
 			// With an integer number the first byte of the reply
 			// will be ":"
 			return buffer.readBytes(firstIndexLF+1);
 		}
 			//break;
-		case RedisResultType.BulkReplies:
+		case BulkReplies:
 		{
 			// With bulk reply the first byte of the reply will be
 			// "$"
@@ -95,7 +95,7 @@ public class InputStreamToFrame extends FrameDecoder
 				}
 			}
 		}
-		case RedisResultType.MultiBulkReplies:
+		case MultiBulkReplies:
 		{
 			// With multi-bulk reply the first byte of the reply
 			// will be "*"

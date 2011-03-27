@@ -1,7 +1,7 @@
 package com.handinfo.redis4j.impl.classification;
 
 import com.handinfo.redis4j.api.IConnector;
-import com.handinfo.redis4j.api.RedisCommandType;
+import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.classification.ISets;
 import com.handinfo.redis4j.impl.CommandExecutor;
 
@@ -18,7 +18,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public Boolean sadd(String key, String member)
 	{
-		return integerReply(RedisCommandType.SADD, key, member)==1 ? true : false;
+		return integerReply(RedisCommand.SADD, key, member)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -26,7 +26,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public String[] sinter(String...keys)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.SINTER, false, keys);
+		return (String[]) multiBulkReply(RedisCommand.SINTER, false, keys);
 	}
 	
 	/* (non-Javadoc)
@@ -34,7 +34,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public Boolean smove(String source, String destination, String member)
 	{
-		return integerReply(RedisCommandType.SMOVE, source, destination, member)==1 ? true : false;
+		return integerReply(RedisCommand.SMOVE, source, destination, member)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -42,7 +42,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public String[] sunion(String...keys)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.SUNION, false, keys);
+		return (String[]) multiBulkReply(RedisCommand.SUNION, false, keys);
 	}
 	
 	/* (non-Javadoc)
@@ -50,7 +50,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public int scard(String key)
 	{
-		return integerReply(RedisCommandType.SCARD, key);
+		return integerReply(RedisCommand.SCARD, key);
 	}
 	
 	/* (non-Javadoc)
@@ -58,7 +58,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public int sinterstore(String destination, String...keys)
 	{
-		return integerReply(RedisCommandType.SINTERSTORE, destination, keys);
+		return integerReply(RedisCommand.SINTERSTORE, destination, keys);
 	}
 	
 	/* (non-Javadoc)
@@ -66,7 +66,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public String spop(String key)
 	{
-		return (String) bulkReply(RedisCommandType.SPOP, false, key);
+		return (String) bulkReply(RedisCommand.SPOP, false, key);
 	}
 	
 	/* (non-Javadoc)
@@ -74,7 +74,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public int sunionstore(String destination, String...keys)
 	{
-		return integerReply(RedisCommandType.SUNIONSTORE, destination, keys);
+		return integerReply(RedisCommand.SUNIONSTORE, destination, keys);
 	}
 	
 	/* (non-Javadoc)
@@ -82,7 +82,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public String[] sdiff(String...keys)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.SDIFF, false, keys);
+		return (String[]) multiBulkReply(RedisCommand.SDIFF, false, keys);
 	}
 	
 	/* (non-Javadoc)
@@ -90,7 +90,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public Boolean sismember(String key, String member)
 	{
-		return integerReply(RedisCommandType.SISMEMBER, key, member)==1 ? true : false;
+		return integerReply(RedisCommand.SISMEMBER, key, member)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -98,7 +98,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public String srandmember(String key)
 	{
-		return (String) bulkReply(RedisCommandType.SRANDMEMBER, false, key);
+		return (String) bulkReply(RedisCommand.SRANDMEMBER, false, key);
 	}
 	
 	/* (non-Javadoc)
@@ -106,7 +106,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public int sdiffstore(String destination, String...keys)
 	{
-		return integerReply(RedisCommandType.SDIFFSTORE, destination, keys);
+		return integerReply(RedisCommand.SDIFFSTORE, destination, keys);
 	}
 	
 	/* (non-Javadoc)
@@ -114,7 +114,7 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public String[] smembers(String key)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.SMEMBERS, false, key);
+		return (String[]) multiBulkReply(RedisCommand.SMEMBERS, false, key);
 	}
 	
 	/* (non-Javadoc)
@@ -122,6 +122,6 @@ public class Sets extends CommandExecutor implements ISets
 	 */
 	public Boolean srem(String key, String member)
 	{
-		return integerReply(RedisCommandType.SREM, key, member)==1 ? true : false;
+		return integerReply(RedisCommand.SREM, key, member)==1 ? true : false;
 	}
 }

@@ -1,11 +1,14 @@
 package com.handinfo.redis4j.test;
 
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
+import com.handinfo.redis4j.api.Batch;
 import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.RedisResponseType;
 import com.handinfo.redis4j.impl.Redis4jClient;
 
-public class SimpleTest
+public class BatchTest
 {
 	private static CountDownLatch latch = new CountDownLatch(1);
 
@@ -15,9 +18,10 @@ public class SimpleTest
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		final IRedis4j client = new Redis4jClient("192.168.1.102", 6379, 10, 3, 3);
-		// System.out.println("------------");
-		// client.getConnection().echo("xxx");
+		final IRedis4j client = new Redis4jClient("192.168.1.103", 6379, 10, 30, 30);
+
+		System.out.println(RedisResponseType.BulkReplies.getValue());
+		
 		Thread t = new Thread(new Runnable()
 		{
 			@Override
@@ -25,22 +29,30 @@ public class SimpleTest
 			{
 				try
 				{
-					client.getStrings().set("qqq", "cxc");
+					long start = System.currentTimeMillis();
+//					for(int i=0; i<10000; i++)
+//					{
+//						client.getConnection().echo(String.valueOf(i));
+//					}
+					
+					Batch batch = new Batch();
+					for(int i=0; i<10; i++)
+					{
+						batch.addEcho(String.valueOf(i));
+					}
+					ArrayList<String> result = client.batch(batch);
+//					for(String s : result)
+//					{
+//						System.out.println(s);
+//					}
+					
+					System.out.println(System.currentTimeMillis()-start);
 				}
 				catch (Exception e)
 				{
 					 e.printStackTrace();
 				}
-//
-//				try
-//				{
-//					client.getConnection().echo("www");
-//				}
-//				catch (Exception e)
-//				{
-//					// e.printStackTrace();
-//				}
-
+				
 				latch.countDown();
 			}
 		});

@@ -1,8 +1,8 @@
 package com.handinfo.redis4j.impl.classification;
 
 import com.handinfo.redis4j.api.IConnector;
-import com.handinfo.redis4j.api.RedisCommandType;
-import com.handinfo.redis4j.api.RedisResultInfo;
+import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.classification.IHashes;
 import com.handinfo.redis4j.impl.CommandExecutor;
 
@@ -19,7 +19,7 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public Boolean hdel(String key, String field)
 	{
-		return integerReply(RedisCommandType.HDEL, key, field)==1 ? true : false;
+		return integerReply(RedisCommand.HDEL, key, field)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -27,7 +27,7 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public String[] hgetall(String key)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.HGETALL, false, key);
+		return (String[]) multiBulkReply(RedisCommand.HGETALL, false, key);
 	}
 	
 	/* (non-Javadoc)
@@ -35,7 +35,7 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public int hlen(String key)
 	{
-		return integerReply(RedisCommandType.HLEN, key);
+		return integerReply(RedisCommand.HLEN, key);
 	}
 	
 	/* (non-Javadoc)
@@ -43,7 +43,7 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public Boolean hset(String key, String field, String value)
 	{
-		return integerReply(RedisCommandType.HSET, key, field, value)==1 ? true : false;
+		return integerReply(RedisCommand.HSET, key, field, value)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -51,7 +51,7 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public Boolean hexists(String key, String field)
 	{
-		return integerReply(RedisCommandType.HEXISTS, key, field)==1 ? true : false;
+		return integerReply(RedisCommand.HEXISTS, key, field)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -59,7 +59,7 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public int hincrby(String key, String field, int increment)
 	{
-		return integerReply(RedisCommandType.HINCRBY, key, field, increment);
+		return integerReply(RedisCommand.HINCRBY, key, field, increment);
 	}
 	
 	/* (non-Javadoc)
@@ -67,7 +67,7 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public String[] hmget(String key, String field)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.HMGET, false, key, field);
+		return (String[]) multiBulkReply(RedisCommand.HMGET, false, key, field);
 	}
 	
 	/* (non-Javadoc)
@@ -75,7 +75,7 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public Boolean hsetnx(String key, String field, String value)
 	{
-		return integerReply(RedisCommandType.HSETNX, key, field, value)==1 ? true : false;
+		return integerReply(RedisCommand.HSETNX, key, field, value)==1 ? true : false;
 	}
 	
 	/* (non-Javadoc)
@@ -83,7 +83,7 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public String hget(String key, String field)
 	{
-		return (String) bulkReply(RedisCommandType.HGET, false, key, field);
+		return (String) bulkReply(RedisCommand.HGET, false, key, field);
 	}
 	
 	/* (non-Javadoc)
@@ -91,7 +91,7 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public String[] hkeys(String key)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.HKEYS, false, key);
+		return (String[]) multiBulkReply(RedisCommand.HKEYS, false, key);
 	}
 	
 	/* (non-Javadoc)
@@ -99,7 +99,7 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public boolean hmset(String key, String field, String value)
 	{
-		return singleLineReplyForBoolean(RedisCommandType.HMSET, RedisResultInfo.OK, key, field, value);
+		return singleLineReplyForBoolean(RedisCommand.HMSET, RedisResponseMessage.OK, key, field, value);
 	}
 	
 	/* (non-Javadoc)
@@ -107,6 +107,6 @@ public class Hashes extends CommandExecutor implements IHashes
 	 */
 	public String[] hvals(String key)
 	{
-		return (String[]) multiBulkReply(RedisCommandType.HVALS, false, key);
+		return (String[]) multiBulkReply(RedisCommand.HVALS, false, key);
 	}
 }

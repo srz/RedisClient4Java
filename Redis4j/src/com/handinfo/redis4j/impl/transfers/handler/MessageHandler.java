@@ -11,6 +11,7 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 
 import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
+import com.handinfo.redis4j.impl.Redis4jClient;
 import com.handinfo.redis4j.impl.util.CommandWrapper;
 
 public class MessageHandler extends SimpleChannelHandler
@@ -30,53 +31,58 @@ public class MessageHandler extends SimpleChannelHandler
 	@Override
 	public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception
 	{
-		if (e.getChannel().isWritable())
+		CommandWrapper cmd = (CommandWrapper) e.getMessage();
+
+		connector.getLock().lock();
+		try
 		{
-			CommandWrapper cmd = (CommandWrapper) e.getMessage();
-
-			connector.getLock().lock();
-			try
-			{
-				if (connector.getIsAllowWrite().get() && e.getChannel().isConnected())
-				{
-					ctx.sendDownstream(e);
-					commandQueue.add(cmd);
-				} else
-				{
-					cmd.setException(new CleanLockedThreadException());
-				}
-			}
-			finally
-			{
-				connector.getLock().unlock();
-			}
-
 			if (connector.getIsAllowWrite().get() && e.getChannel().isConnected())
-				cmd.pause();
+			{
+				ctx.sendDownstream(e);
+				commandQueue.add(cmd);
+			} else
+			{
+				cmd.setException(new CleanLockedThreadException());
+			}
+		} finally
+		{
+			connector.getLock().unlock();
 		}
+
+		if (connector.getIsAllowWrite().get() && e.getChannel().isConnected())
+			cmd.pause();
 	}
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
 	{
 		CommandWrapper cmd = null;
-		try
+		while (true)
 		{
-			cmd = this.commandQueue.take();
-		}
-		catch (InterruptedException ex)
-		{
-			ex.printStackTrace();
-			Thread.currentThread().interrupt();
+			cmd = this.commandQueue.peek();
+			if(cmd != null)
+			{
+				break;
+			}
 		}
 		if (cmd != null)
 		{
-			if(cmd.getType().equals(CommandWrapper.Type.ASYNC))
+			
+			if (cmd.getType().equals(CommandWrapper.Type.ASYNC))
 			{
-				this.commandQueue.put(cmd);
+				cmd.addResult((Object[]) e.getMessage());
+				cmd.resume();
 			}
-			cmd.setResult((Object[]) e.getMessage());
-			cmd.resume();
+			else
+			{
+
+				cmd.addResult((Object[]) e.getMessage());
+				if(cmd.surplusLockedCommand() == 0)
+				{
+					this.commandQueue.remove(cmd);
+					cmd.resume();
+				}
+			}
 		} else
 		{
 			printMsg(Level.WARNING, "If you found this,please tell me,this is a bug!");
@@ -86,6 +92,7 @@ public class MessageHandler extends SimpleChannelHandler
 
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception
 	{
+		e.getCause().printStackTrace();
 		ctx.sendDownstream(e);
 	}
 
