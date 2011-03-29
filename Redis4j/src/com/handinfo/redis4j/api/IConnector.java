@@ -35,11 +35,11 @@ public interface IConnector
 	
 	public boolean getIsStartClose();
 
-	public Object[] executeCommand(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
+	public RedisResponse executeCommand(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
 
 	public void executeAsyncCommand(IRedis4jAsync.Notify notify, RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException;
 	
-	public Object[][] executeBatch(ArrayList<String[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
+	public RedisResponse[] executeBatch(ArrayList<String[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
 	
 	public void disConnect();
 	

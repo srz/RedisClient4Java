@@ -18,7 +18,7 @@ public class DataCheck
 
 	public static void main(String[] args) throws Exception
 	{
-		final Redis4jClient client = new Redis4jClient("192.168.1.103", 6379, 10, 10, 1);
+		final Redis4jClient client = new Redis4jClient("192.2.9.223", 6379, 10, 10, 1);
 		
 		for(int i=0; i<keys.length; i++)
 		{

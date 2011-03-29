@@ -1,16 +1,15 @@
 package com.handinfo.redis4j.impl;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.Batch;
+import com.handinfo.redis4j.api.IConnection;
 import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.IRedis4j;
 import com.handinfo.redis4j.api.IRedis4jAsync;
-import com.handinfo.redis4j.api.classification.IConnection;
+import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.classification.IHashes;
 import com.handinfo.redis4j.api.classification.IKeys;
 import com.handinfo.redis4j.api.classification.ILists;
@@ -210,13 +209,19 @@ public class Redis4jClient implements IRedis4j
 	public ArrayList<String> batch(Batch batchCommand)
 	{
 		ArrayList<String> result = new ArrayList<String>();
-		Object[][] res = connector.executeBatch(batchCommand.getCommandList());
+		RedisResponse[] responseList = connector.executeBatch(batchCommand.getCommandList());
 		
-		for(int i=0; i<res.length; i++)
+		for(int i=0; i<responseList.length; i++)
 		{
-			result.add(new String((byte[])res[i][1]));
+			//TODO 此处需要区分不同类型的Response,暂时只按Bulk类型处理
+			result.add( new String(responseList[i].getBulkValue()) );
 		}
 		return result;
+	}
+	
+	public void quit()
+	{
+		this.getConnection().quit();
 	}
 
 	// /*

@@ -22,6 +22,14 @@ public class Batch
 		echo[RedisCommand.ECHO.getValue().length] = value;
 		commandList.add(echo);
 	}
+	
+	public void addCommand(RedisCommand command, String...args)
+	{
+		String[] cmd = new String[command.getValue().length + args.length];
+		System.arraycopy(command.getValue(), 0, cmd, 0, command.getValue().length);
+		System.arraycopy(args, 0, cmd, command.getValue().length, args.length);
+		commandList.add(cmd);
+	}
 
 	public ArrayList<String[]> getCommandList()
 	{

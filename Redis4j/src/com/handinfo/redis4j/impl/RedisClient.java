@@ -1,6 +1,8 @@
 package com.handinfo.redis4j.impl;
 
-import com.handinfo.redis4j.api.ICommandExecutor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
@@ -8,28 +10,79 @@ import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.RedisResponseType;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
+import com.handinfo.redis4j.impl.transfers.Connector;
 import com.handinfo.redis4j.impl.util.ObjectWrapper;
 
-public abstract class CommandExecutor implements ICommandExecutor
+public abstract class RedisClient
 {
-	private IConnector connector;
+	private static final Logger logger = Logger.getLogger(RedisClient.class.getName());
+	protected IConnector connector;
+	private String host;
+	private int port;
+	private int indexDB;
+	private int heartbeatTime;
+	private int reconnectDelay;
 
-	/**
-	 * @param connector
-	 */
-	public CommandExecutor(IConnector connector)
+	public RedisClient(String host, int port, int indexDB, int heartbeatTime, int reconnectDelay)
 	{
-		this.connector = connector;
+		this.host = host;
+		this.port = port;
+		this.indexDB = indexDB;
+		this.heartbeatTime = heartbeatTime;
+		this.reconnectDelay = reconnectDelay;
+
+		connector = new Connector(this.host, this.port, this.indexDB, this.heartbeatTime, this.reconnectDelay, true);
+
+		if (!connector.connect())
+		{
+			logger.log(Level.WARNING, "can not connect to server,client will reconnect after " + this.reconnectDelay + " s");
+		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.handinfo.redis4j.impl.ICommandExecutor#singleLineReplyForBoolean(
-	 * java.lang.String, java.lang.String, java.lang.Object)
+	/**
+	 * @return the host 主机地址
 	 */
-	public boolean singleLineReplyForBoolean(RedisCommand command, RedisResponseMessage RedisResultInfo, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public String getHost()
+	{
+		return host;
+	}
+
+	/**
+	 * @return the port 主机端口
+	 */
+	public int getPort()
+	{
+		return port;
+	}
+
+	/**
+	 * @return the indexDB 连接到的数据库
+	 */
+	public int getIndexDB()
+	{
+		return indexDB;
+	}
+
+	/**
+	 * @return the heartbeatTime 心跳时间
+	 */
+	public int getHeartbeatTime()
+	{
+		return heartbeatTime;
+	}
+
+	/**
+	 * @return the reconnectDelay 断网重连间隔时间
+	 */
+	public int getReconnectDelay()
+	{
+		return reconnectDelay;
+	}
+
+	/**
+	 * 返回类型
+	 */
+	public boolean singleLineReplyForBoolean(RedisCommand command, RedisResponseMessage redisResultInfo, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		RedisResponse response = connector.executeCommand(command, args);
 
@@ -37,7 +90,7 @@ public abstract class CommandExecutor implements ICommandExecutor
 		{
 			if (response.getType() == RedisResponseType.SingleLineReply)
 			{
-				if (response.getTextValue().equalsIgnoreCase(RedisResultInfo.getValue()))
+				if (response.getTextValue().equalsIgnoreCase(redisResultInfo.getValue()))
 				{
 					return true;
 				}
@@ -163,7 +216,8 @@ public abstract class CommandExecutor implements ICommandExecutor
 						for (int i = 0; i < returnValueLength; i++)
 						{
 							// TODO getMultiBulkValue很复杂,需要再考虑
-							//returnValue[i] = new String(response.getMultiBulkValue().get(i).getBulkValue());
+							// returnValue[i] = new
+							// String(response.getMultiBulkValue().get(i).getBulkValue());
 							RedisResponse sonResponse = response.getMultiBulkValue().get(i);
 							switch (sonResponse.getType())
 							{
@@ -184,13 +238,13 @@ public abstract class CommandExecutor implements ICommandExecutor
 							}
 							case BulkReplies:
 							{
-								returnValue[i] =  new String(sonResponse.getBulkValue());
+								returnValue[i] = new String(sonResponse.getBulkValue());
 								break;
 							}
 							case MultiBulkReplies:
 							{
 								returnValue[i] = "";
-								for(RedisResponse res : sonResponse.getMultiBulkValue())
+								for (RedisResponse res : sonResponse.getMultiBulkValue())
 								{
 									returnValue[i] += new String(res.getBulkValue()) + " ";
 								}
@@ -210,9 +264,49 @@ public abstract class CommandExecutor implements ICommandExecutor
 		return null;
 	}
 
-	public <T> T reply(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	private <T> T abc(Class<T> classType, String arg)
+	{
+		if (classType.equals(Integer.class))
+			return classType.cast(Integer.valueOf(arg));
+		else if (classType.equals(Boolean.class))
+			return classType.cast(Boolean.valueOf(arg));
+		else if (classType.equals(String.class))
+			return classType.cast(arg);
+		else
+			return null;
+	}
+	public <T> T sendRequest(Class<T> classType, RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		RedisResponse response = connector.executeCommand(command, args);
+
+		if (response != null)
+		{
+			switch (command.getResponseType())
+			{
+			case SingleLineReply:
+			{
+				return classType.cast(Integer.valueOf(response.getTextValue()));
+			}
+			case IntegerReply:
+			{
+				return abc(classType, response.getTextValue());
+			}
+			case BulkReplies:
+			{
+				return classType.cast(response.getBulkValue());
+			}
+			case MultiBulkReplies:
+			{
+				return null;
+			}
+			case ErrorReply:
+			{
+				throw new ErrorCommandException(response.getTextValue());
+			}
+			default:
+				return null;
+			}
+		}
 
 		if (response != null)
 		{
@@ -220,7 +314,8 @@ public abstract class CommandExecutor implements ICommandExecutor
 			{
 			case SingleLineReply:
 			{
-				return null;
+				Object obj = null;
+				return classType.cast(response.getTextValue());
 			}
 			case IntegerReply:
 			{
@@ -236,7 +331,7 @@ public abstract class CommandExecutor implements ICommandExecutor
 			}
 			case ErrorReply:
 			{
-				return null;
+				throw new ErrorCommandException(response.getTextValue());
 			}
 			default:
 				return null;

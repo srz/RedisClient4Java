@@ -5,6 +5,7 @@ import java.util.concurrent.CountDownLatch;
 
 import com.handinfo.redis4j.api.Batch;
 import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponseType;
 import com.handinfo.redis4j.impl.Redis4jClient;
 
@@ -18,7 +19,7 @@ public class BatchTest
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		final IRedis4j client = new Redis4jClient("192.168.1.103", 6379, 10, 30, 30);
+		final IRedis4j client = new Redis4jClient("192.2.9.223", 6379, 10, 30, 30);
 
 		System.out.println(RedisResponseType.BulkReplies.getValue());
 		
@@ -36,10 +37,18 @@ public class BatchTest
 //					}
 					
 					Batch batch = new Batch();
-					for(int i=0; i<10; i++)
-					{
-						batch.addEcho(String.valueOf(i));
-					}
+//					for(int i=0; i<10; i++)
+//					{
+//						//batch.addEcho(String.valueOf(i));
+//						batch.addCommand(RedisCommand.ECHO, String.valueOf(i));
+//					}
+					batch.addCommand(RedisCommand.MULTI);
+					batch.addCommand(RedisCommand.MULTI);
+					batch.addCommand(RedisCommand.INCR, "abcde");
+					batch.addCommand(RedisCommand.KEYS, "*");
+					batch.addCommand(RedisCommand.EXEC);
+					batch.addCommand(RedisCommand.EXEC);
+					
 					ArrayList<String> result = client.batch(batch);
 //					for(String s : result)
 //					{

@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
+import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.exception.RedisClientException;
 
 public class CommandWrapper
@@ -21,7 +22,7 @@ public class CommandWrapper
 	private CountDownLatch latch;
 	private CyclicBarrier barrier;
 	private RedisClientException exception;
-	private Object[][] result;
+	private RedisResponse[] result;
 	private int resultIndex = 0;;
 	
 	private AtomicInteger totalOfCommand = new AtomicInteger();
@@ -45,7 +46,7 @@ public class CommandWrapper
 		this.type = type;
 		this.value = getBinaryCommand(command);
 		this.totalOfCommand.set(1);
-		result = new Object[this.totalOfCommand.get()][];
+		result = new RedisResponse[this.totalOfCommand.get()];
 
 		this.exception = null;
 
@@ -65,7 +66,7 @@ public class CommandWrapper
 			this.value.writeBytes(getBinaryCommand(cmd));
 		}
 		this.totalOfCommand.set(commandList.size());
-		result = new Object[this.totalOfCommand.get()][];
+		result = new RedisResponse[this.totalOfCommand.get()];
 
 		this.exception = null;
 
@@ -178,14 +179,14 @@ public class CommandWrapper
 		this.exception = exception;
 	}
 
-	public Object[][] getResult()
+	public RedisResponse[] getResult()
 	{
 		return result;
 	}
 
-	public void addResult(Object[] res)
+	public void addResult(RedisResponse response)
 	{
-		result[resultIndex] = res;
+		result[resultIndex] = response;
 		resultIndex++;
 	}
 }

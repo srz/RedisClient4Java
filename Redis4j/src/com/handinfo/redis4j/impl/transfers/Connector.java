@@ -23,6 +23,7 @@ import org.jboss.netty.util.Timer;
 import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.IRedis4jAsync;
 import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.RedisResponseType;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
@@ -174,7 +175,7 @@ public class Connector implements IConnector
 	 * com.handinfo.redis4j.impl.transfers.IConnector#executeCommand(java.lang
 	 * .String, java.lang.Object)
 	 */
-	public Object[] executeCommand(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public RedisResponse executeCommand(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		if (channel != null && channel.isConnected())
 		{
@@ -182,32 +183,31 @@ public class Connector implements IConnector
 			System.arraycopy(command.getValue(), 0, redisCommand, 0, command.getValue().length);
 			System.arraycopy(args, 0, redisCommand, command.getValue().length, args.length);
 
-			final CommandWrapper cmd = new CommandWrapper(CommandWrapper.Type.SYNC, redisCommand);
+			final CommandWrapper cmdWrapper = new CommandWrapper(CommandWrapper.Type.SYNC, redisCommand);
 
-			channel.write(cmd);
+			channel.write(cmdWrapper);
 
-			if (cmd.getException() != null)
+			if (cmdWrapper.getException() != null)
 			{
-				if (cmd.getException() instanceof CleanLockedThreadException)
+				if (cmdWrapper.getException() instanceof CleanLockedThreadException)
 				{
-					throw (CleanLockedThreadException) cmd.getException();
+					throw (CleanLockedThreadException) cmdWrapper.getException();
 				} else
 				{
-					throw cmd.getException();
+					throw cmdWrapper.getException();
 				}
 			} else
 			{
-				Object[] result = cmd.getResult()[0];
-				if (result != null && result.length > 1)
+				RedisResponse response = cmdWrapper.getResult()[0];
+				if (response != null)
 				{
-					RedisResponseType resultType = (RedisResponseType) result[0];
-					if (resultType != RedisResponseType.ErrorReply)
+					if (response.getType() != RedisResponseType.ErrorReply)
 					{
-						return result;
+						return response;
 					}
 					else
 					{
-						throw new ErrorCommandException((String) result[1]);
+						throw new ErrorCommandException(response.getTextValue());
 					}
 				}
 				else
@@ -219,26 +219,26 @@ public class Connector implements IConnector
 			throw new IllegalStateException("connection has been disconnected.");
 	}
 	
-	public Object[][] executeBatch(ArrayList<String[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public RedisResponse[] executeBatch(ArrayList<String[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		if (channel != null && channel.isConnected())
 		{
-			final CommandWrapper cmd = new CommandWrapper(commandList);
+			final CommandWrapper cmdWrapper = new CommandWrapper(commandList);
 
-			channel.write(cmd);
+			channel.write(cmdWrapper);
 
-			if (cmd.getException() != null)
+			if (cmdWrapper.getException() != null)
 			{
-				if (cmd.getException() instanceof CleanLockedThreadException)
+				if (cmdWrapper.getException() instanceof CleanLockedThreadException)
 				{
-					throw (CleanLockedThreadException) cmd.getException();
+					throw (CleanLockedThreadException) cmdWrapper.getException();
 				} else
 				{
-					throw cmd.getException();
+					throw cmdWrapper.getException();
 				}
 			} else
 			{
-				Object[][] result = cmd.getResult();
+				RedisResponse[] result = cmdWrapper.getResult();
 
 				if (result != null && result.length > 0)
 				{
@@ -291,17 +291,28 @@ public class Connector implements IConnector
 						}
 					} else
 					{
-						Object[] result = cmd.getResult()[0];
-						if (result != null && result.length > 1)
+						RedisResponse response = cmd.getResult()[0];
+						if (response != null)
 						{
-							RedisResponseType resultType = (RedisResponseType) result[0];
-							if (resultType != RedisResponseType.ErrorReply)
+							if (response.getType() != RedisResponseType.ErrorReply)
 							{
-								notify.onNotify(String.valueOf(result[1]));
+								String result = null;
+								if (response.getType() == RedisResponseType.BulkReplies)
+								{
+									result = String.valueOf(response.getBulkValue());
+								}else if (response.getType() == RedisResponseType.MultiBulkReplies)
+								{
+									result = "";
+								}
+								else
+								{
+									result = response.getTextValue();
+								}
+								notify.onNotify(result);
 								cmd.pause();
 							}
 							else
-								throw new ErrorCommandException((String) result[1]);
+								throw new ErrorCommandException(response.getTextValue());
 						}
 						else
 						{

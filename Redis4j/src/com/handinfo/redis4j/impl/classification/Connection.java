@@ -1,9 +1,9 @@
 package com.handinfo.redis4j.impl.classification;
 
+import com.handinfo.redis4j.api.IConnection;
 import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponseMessage;
-import com.handinfo.redis4j.api.classification.IConnection;
 import com.handinfo.redis4j.impl.CommandExecutor;
 
 public class Connection extends CommandExecutor implements IConnection
@@ -48,7 +48,7 @@ public class Connection extends CommandExecutor implements IConnection
 	 */
 	public boolean ping()
 	{
-		return singleLineReplyForBoolean(RedisCommand.PING, RedisResponseMessage.PING);
+		return singleLineReplyForBoolean(RedisCommand.PING, RedisResponseMessage.PONG);
 	}
 
 	//

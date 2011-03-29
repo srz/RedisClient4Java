@@ -10,8 +10,8 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 
 import com.handinfo.redis4j.api.IConnector;
+import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
-import com.handinfo.redis4j.impl.Redis4jClient;
 import com.handinfo.redis4j.impl.util.CommandWrapper;
 
 public class MessageHandler extends SimpleChannelHandler
@@ -31,7 +31,7 @@ public class MessageHandler extends SimpleChannelHandler
 	@Override
 	public void writeRequested(ChannelHandlerContext ctx, MessageEvent e) throws Exception
 	{
-		CommandWrapper cmd = (CommandWrapper) e.getMessage();
+		CommandWrapper cmdWrapper = (CommandWrapper) e.getMessage();
 
 		connector.getLock().lock();
 		try
@@ -39,10 +39,10 @@ public class MessageHandler extends SimpleChannelHandler
 			if (connector.getIsAllowWrite().get() && e.getChannel().isConnected())
 			{
 				ctx.sendDownstream(e);
-				commandQueue.add(cmd);
+				commandQueue.add(cmdWrapper);
 			} else
 			{
-				cmd.setException(new CleanLockedThreadException());
+				cmdWrapper.setException(new CleanLockedThreadException());
 			}
 		} finally
 		{
@@ -50,37 +50,36 @@ public class MessageHandler extends SimpleChannelHandler
 		}
 
 		if (connector.getIsAllowWrite().get() && e.getChannel().isConnected())
-			cmd.pause();
+			cmdWrapper.pause();
 	}
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
 	{
-		CommandWrapper cmd = null;
+		CommandWrapper cmdWrapper = null;
 		while (true)
 		{
-			cmd = this.commandQueue.peek();
-			if(cmd != null)
+			cmdWrapper = this.commandQueue.peek();
+			if(cmdWrapper != null)
 			{
 				break;
 			}
 		}
-		if (cmd != null)
+		if (cmdWrapper != null)
 		{
-			
-			if (cmd.getType().equals(CommandWrapper.Type.ASYNC))
+			if (cmdWrapper.getType().equals(CommandWrapper.Type.ASYNC))
 			{
-				cmd.addResult((Object[]) e.getMessage());
-				cmd.resume();
+				cmdWrapper.addResult((RedisResponse) e.getMessage());
+				cmdWrapper.resume();
 			}
 			else
 			{
 
-				cmd.addResult((Object[]) e.getMessage());
-				if(cmd.surplusLockedCommand() == 0)
+				cmdWrapper.addResult((RedisResponse) e.getMessage());
+				if(cmdWrapper.surplusLockedCommand() == 0)
 				{
-					this.commandQueue.remove(cmd);
-					cmd.resume();
+					this.commandQueue.remove(cmdWrapper);
+					cmdWrapper.resume();
 				}
 			}
 		} else

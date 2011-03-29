@@ -1,6 +1,7 @@
 package com.handinfo.redis4j.impl.transfers.decoder;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -9,6 +10,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneDecoder;
 
+import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.RedisResponseType;
 
 public class FrameToObjectArray extends OneToOneDecoder
@@ -39,7 +41,8 @@ public class FrameToObjectArray extends OneToOneDecoder
 
 		// logger.info("received message,first byte is \"" + firstByte + "\"");
 
-		Object[] result = null;
+		//Object[] result = null;
+		RedisResponse response = null;
 
 		switch (RedisResponseType.fromChar(firstByte))
 		{
@@ -47,52 +50,54 @@ public class FrameToObjectArray extends OneToOneDecoder
 		{
 			// With a single line reply the first byte of the reply
 			// will be "+"
-			result = new Object[2];
+			/*result = new Object[2];
 			result[0] = RedisResponseType.SingleLineReply;
 			// 返回结果为+开头时,后面跟的一定是单行文本
-			result[1] = header;
-			return result;
+			result[1] = header;*/
+			response = new RedisResponse(RedisResponseType.SingleLineReply);
+			response.setTextValue(header);
+			return response;// result;
 		}
 		case ErrorReply:
 		{
 			// With an error message the first byte of the reply
 			// will be "-"
-			result = new Object[2];
+			/*result = new Object[2];
 			result[0] = RedisResponseType.ErrorReply;
 			// 返回结果为-开头时,后面跟的一定是单行文本
-			result[1] = header;
-			return result;
+			result[1] = header;*/
+			response = new RedisResponse(RedisResponseType.ErrorReply);
+			response.setTextValue(header);
+			return response;//result;
 		}
 		case IntegerReply:
 		{
 			// With an integer number the first byte of the reply
 			// will be ":"
-			result = new Object[2];
+			/*result = new Object[2];
 			result[0] = RedisResponseType.IntegerReply;
-			result[1] = header;// binaryData.toString(1,
-			// binaryData.readableBytes() - 3,
-			// Charset.forName("UTF-8"));
-			return result;
+			result[1] = header;*/
+			response = new RedisResponse(RedisResponseType.IntegerReply);
+			response.setTextValue(header);
+			return response;//result;
 		}
 		case BulkReplies:
 		{
 			// With bulk reply the first byte of the reply will be
 			// "$"
-
 			// 头中描述的内容长度
 			int lengthFiledOfHead = Integer.valueOf(header);
 
-			result = new Object[2];
-			result[0] = RedisResponseType.BulkReplies;
+			response = new RedisResponse(RedisResponseType.BulkReplies);
 			if (lengthFiledOfHead == -1)
 			{
-				result[1] = null;
+				response.setBulkValue(null);
 			} else
 			{
 				// 返回结果为$开头时,返回后面的bytes
-				result[1] = binaryData.copy(firstIndexLF + 1, lengthFiledOfHead).array();
+				response.setBulkValue(binaryData.copy(firstIndexLF + 1, lengthFiledOfHead).array());
 			}
-			return result;
+			return response;//result;
 		}
 		case MultiBulkReplies:
 		{
@@ -102,67 +107,183 @@ public class FrameToObjectArray extends OneToOneDecoder
 			// 头中描述的元素个数
 			int lengthFiledOfHead = Integer.valueOf(header);
 
+			response = new RedisResponse(RedisResponseType.MultiBulkReplies);
 			if (lengthFiledOfHead == -1)
 			{
-				result = new Object[1];
-				result[0] = RedisResponseType.MultiBulkReplies;
+				response.setMultiBulkValue(null);
 			} else if (lengthFiledOfHead == 0)
 			{
-				result = new Object[2];
-				result[0] = RedisResponseType.MultiBulkReplies;
-				result[1] = null;
+				response.setMultiBulkValue(new ArrayList<RedisResponse>());
 			} else
 			{
-				result = new Object[lengthFiledOfHead + 1];
-				result[0] = RedisResponseType.MultiBulkReplies;
-
-				int indexOfDelimiter = 0;
-				int indexOfCR = 0;
-				int indexOfLF = 0;
-				int resultIndex = 1;
-
-				// 遍历顺序取出元素
-				for (int i = firstIndexLF + 1; i < binaryData.readableBytes();)
-				{
-					if (binaryData.getByte(i) == '$')
-					{
-						indexOfDelimiter = i;
-					}
-
-					if (binaryData.getByte(i) == '\r')
-					{
-						indexOfCR = i;
-					}
-					if (binaryData.getByte(i) == '\n')
-					{
-						indexOfLF = i;
-					}
-					if (indexOfCR + 1 == indexOfLF)
-					{
-						int dataLength = Integer.valueOf(binaryData.toString(indexOfDelimiter + 1, indexOfCR - indexOfDelimiter - 1, Charset.forName("UTF-8")));
-						if (dataLength == 0)
-						{
-							result[resultIndex++] = null;
-							i++;
-						} else
-						{
-							result[resultIndex++] = binaryData.copy(indexOfLF + 1, dataLength).array();
-						}
-
-						i = i + dataLength + 3;
-						indexOfCR = 0;
-						indexOfLF = 0;
-					} else
-					{
-						i++;
-					}
-				}
+				ArrayList<RedisResponse> responseList = new ArrayList<RedisResponse>();
+				getMultiBulkLineLastIndex(binaryData, binaryData.readerIndex(), responseList);
+				response.setMultiBulkValue(responseList);
 			}
 
-			return result;
+			return response;
 		}
 		default:
 			return null;
 		}
+	}
+	
+	private int getMultiBulkLineLastIndex(ChannelBuffer buffer, int currentIndex, ArrayList<RedisResponse> responseList)
+	{
+		int firstIndexLF = findFirstCRLFIndex(buffer, currentIndex);
+		if (firstIndexLF == -1)
+		{
+			return -1;
+		}
+
+		int objectTotal = Integer.valueOf(buffer.toString(currentIndex + 1, firstIndexLF - 2 - currentIndex, Charset.forName("UTF-8")));
+
+		int currentObject = 0;
+		int byteIndex = firstIndexLF;
+		int objectFirstIndex = 0;
+		while (true)
+		{
+			// 游标+1
+			byteIndex++;
+			
+			if (byteIndex >= buffer.writerIndex())
+			{
+				return -1;
+			}
+			
+			objectFirstIndex = byteIndex;
+
+			// 获取新游标位置的字符，如果是5种数据约定的开头字符，则记录
+			switch (RedisResponseType.fromChar((char)buffer.getByte(byteIndex)))
+			{
+			case SingleLineReply:
+			{
+				byteIndex = findFirstCRLFIndex(buffer, byteIndex);
+				if (byteIndex == -1)
+				{
+					return -1;
+				}
+				currentObject++;
+				RedisResponse response = new RedisResponse(RedisResponseType.SingleLineReply);
+				response.setTextValue(buffer.toString(objectFirstIndex+1, byteIndex - objectFirstIndex - 2, Charset.forName("UTF-8")));
+				responseList.add(response);
+				break;
+			}
+			case ErrorReply:
+			{
+				byteIndex = findFirstCRLFIndex(buffer, byteIndex);
+				if (byteIndex == -1)
+				{
+					return -1;
+				}
+				currentObject++;
+				RedisResponse response = new RedisResponse(RedisResponseType.ErrorReply);
+				response.setTextValue(buffer.toString(objectFirstIndex+1, byteIndex - objectFirstIndex - 2, Charset.forName("UTF-8")));
+				responseList.add(response);
+				break;
+			}
+			case IntegerReply:
+			{
+				byteIndex = findFirstCRLFIndex(buffer, byteIndex);
+				if (byteIndex == -1)
+				{
+					return -1;
+				}
+				currentObject++;
+				RedisResponse response = new RedisResponse(RedisResponseType.IntegerReply);
+				response.setTextValue(buffer.toString(objectFirstIndex+1, byteIndex - objectFirstIndex - 2, Charset.forName("UTF-8")));
+				responseList.add(response);
+				break;
+			}
+			case BulkReplies:
+			{
+				byteIndex = getBulkLineLastIndex(buffer, byteIndex, responseList);
+				if (byteIndex == -1)
+				{
+					return -1;
+				}
+				currentObject++;
+				break;
+			}
+			case MultiBulkReplies:
+			{
+				RedisResponse response = new RedisResponse(RedisResponseType.MultiBulkReplies);
+				response.setMultiBulkValue(new ArrayList<RedisResponse>());
+				// 递归计算
+				byteIndex = getMultiBulkLineLastIndex(buffer, byteIndex, response.getMultiBulkValue());
+				responseList.add(response);
+				if (byteIndex == -1)
+				{
+					return -1;
+				}
+				currentObject++;
+				break;
+			}
+			default:
+				break;
+			}
+
+			// 获取完全部对象时退出
+			if (currentObject == objectTotal)
+				break;
+		}
+
+		return byteIndex;
+	}
+
+	private int getBulkLineLastIndex(ChannelBuffer buffer, int currentIndex, ArrayList<RedisResponse> responseList)
+	{
+		int firstIndexLF = findFirstCRLFIndex(buffer, currentIndex);
+		if (firstIndexLF == -1)
+		{
+			return -1;
+		}
+
+		int contentLength = Integer.valueOf(buffer.toString(currentIndex + 1, firstIndexLF - 2 - currentIndex, Charset.forName("UTF-8")));
+
+		if (contentLength == -1)
+		{
+			// 返回的头内容为 -1，说明无后续数据
+			return firstIndexLF;
+		} else
+		{
+			if (firstIndexLF + contentLength + 2 >= buffer.writerIndex())
+			{
+				return -1;
+			} else
+			{
+				RedisResponse response = new RedisResponse(RedisResponseType.BulkReplies);
+				response.setBulkValue(buffer.copy(firstIndexLF + 1, contentLength).array());
+				responseList.add(response);
+				return firstIndexLF + contentLength + 2;
+			}
+		}
+	}
+
+	private int findFirstCRLFIndex(ChannelBuffer buffer, int currentIndex)
+	{
+		int firstIndexCR = currentIndex;
+		int firstIndexLF = currentIndex;
+		while (true)
+		{
+			if (currentIndex >= buffer.writerIndex())
+			{
+				return -1;
+			}
+			if (buffer.getByte(currentIndex) == '\r')
+			{
+				firstIndexCR = currentIndex;
+			}
+			if (buffer.getByte(currentIndex) == '\n')
+			{
+				firstIndexLF = currentIndex;
+			}
+			currentIndex++;
+
+			// \r\n挨着时结束
+			if (firstIndexCR + 1 == firstIndexLF)
+				break;
+		}
+		return firstIndexLF;
 	}
 }
