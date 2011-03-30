@@ -167,9 +167,11 @@ public class NavigationTree extends JPanel implements TreeSelectionListener
 		firstLevel.add(secondLevel);
 		
 		//三级
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Get information", new NavigationData("INFO", "com.handinfo.redis4j.api.IServer", "info"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Get information", new NavigationData("INFO", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "info"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Listen for all requests",  new NavigationData("MONITOR", "com.handinfo.redis4j.api.IServer", "monitor"), false, true));
+		
+		//TODO monitor方法换地方了，这里无法执行，需要修改
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Listen for all requests",  new NavigationData("MONITOR", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "monitor"), false, true));
 		secondLevel.add(thirdLevel);
 
 		//二级
@@ -177,31 +179,31 @@ public class NavigationTree extends JPanel implements TreeSelectionListener
 		firstLevel.add(secondLevel);
 		
 		//三级
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Asynchronously rewrite the append-only file", new NavigationData("BGREWRITEAOF", "com.handinfo.redis4j.api.IServer", "bgrewriteaof"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Asynchronously rewrite the append-only file", new NavigationData("BGREWRITEAOF", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "backgroundRewriteAOF"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Asynchronously save the dataset to disk", new NavigationData("BGSAVE", "com.handinfo.redis4j.api.IServer", "bgsave"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Asynchronously save the dataset to disk", new NavigationData("BGSAVE", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "backgroundSave"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Get the value of a configuration parameter", new NavigationData("CONFIG_GET", "com.handinfo.redis4j.api.IServer", "config_get"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Get the value of a configuration parameter", new NavigationData("CONFIG_GET", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "configGet"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Set a configuration parameter to the given value", new NavigationData("CONFIG_SET", "com.handinfo.redis4j.api.IServer", "config_set"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Set a configuration parameter to the given value", new NavigationData("CONFIG_SET", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "configSet"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Reset the stats returned by INFO", new NavigationData("CONFIG RESETSTAT", "com.handinfo.redis4j.api.IServer", "config_resetstat"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Reset the stats returned by INFO", new NavigationData("CONFIG RESETSTAT", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "configResetStat"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Get debugging information about a key", new NavigationData("DEBUG_OBJECT", "com.handinfo.redis4j.api.IServer", "debug_object"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Get debugging information about a key", new NavigationData("DEBUG_OBJECT", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "debugObject"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Make the server crash", new NavigationData("DEBUG_SEGFAULT", "com.handinfo.redis4j.api.IServer", "debug_segfault"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Make the server crash", new NavigationData("DEBUG_SEGFAULT", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "debugSegfault"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Remove all keys from all databases", new NavigationData("FLUSHALL", "com.handinfo.redis4j.api.IServer", "flushall"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Remove all keys from all databases", new NavigationData("FLUSHALL", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "flushAllDB"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Get the UNIX time stamp of the last successful save to disk", new NavigationData("LASTSAVE", "com.handinfo.redis4j.api.IServer", "lastsave"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Get the UNIX time stamp of the last successful save to disk", new NavigationData("LASTSAVE", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "lastSave"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Synchronously save the dataset to dis", new NavigationData("SAVE", "com.handinfo.redis4j.api.IServer", "save"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Synchronously save the dataset to dis", new NavigationData("SAVE", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "save"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Synchronously save the dataset to disk and then shut down the server", new NavigationData("SHUTDOWN", "com.handinfo.redis4j.api.IServer", "shutdown"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Synchronously save the dataset to disk and then shut down the server", new NavigationData("SHUTDOWN", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "shutdown"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Make the server a slave of another instance, or promote it as master", new NavigationData("SLAVEOF", "com.handinfo.redis4j.api.IServer", "slaveof"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Make the server a slave of another instance, or promote it as master", new NavigationData("SLAVEOF", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "slaveof"), false, true));
 		secondLevel.add(thirdLevel);
-		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Internal command used for replicatio", new NavigationData("SYNC", "com.handinfo.redis4j.api.IServer", "sync"), false, true));
+		thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Internal command used for replicatio", new NavigationData("SYNC", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "sync"), false, true));
 		secondLevel.add(thirdLevel);
 
 		//一级
@@ -229,7 +231,7 @@ public class NavigationTree extends JPanel implements TreeSelectionListener
 	
 	private void createTreeForAllDB(DefaultMutableTreeNode node)
 	{
-		String[] info = parent.getClient().getServer().info().split("\r\n");
+		String[] info = parent.getClient().info().split("\r\n");
 
 		DefaultMutableTreeNode secondLevel = null;
 		DefaultMutableTreeNode thirdLevel = null;
@@ -243,9 +245,9 @@ public class NavigationTree extends JPanel implements TreeSelectionListener
 				node.add(secondLevel);
 				
 				//三级
-				thirdLevel = new DefaultMutableTreeNode(new NavigationNode("The number of keys", new NavigationData("DBSIZE", "com.handinfo.redis4j.api.IServer", "dbsize"), false, true));
+				thirdLevel = new DefaultMutableTreeNode(new NavigationNode("The number of keys", new NavigationData("DBSIZE", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "dbSize"), false, true));
 				secondLevel.add(thirdLevel);
-				thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Remove all keys from the current database", new NavigationData("FLUSHDB", "com.handinfo.redis4j.api.IServer", "flushdb"), false, true));
+				thirdLevel = new DefaultMutableTreeNode(new NavigationNode("Remove all keys from the current database", new NavigationData("FLUSHDB", "com.handinfo.redis4j.api.database.IRedisDatabaseClient", "flushCurrentDB"), false, true));
 				secondLevel.add(thirdLevel);
 			}
 		}

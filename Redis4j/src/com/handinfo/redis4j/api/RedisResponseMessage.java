@@ -5,7 +5,9 @@ public enum RedisResponseMessage
 	PONG("PONG", 0),
 	OK("OK", 1),
 	SHUTDOWNERROR("0", 2),
-	QUEUE("0", 3);
+	QUEUE("QUEUE", 3),
+	INTEGER_1("1", 4),
+	INTEGER_0("0", 5);
 
 	private String value;
 	

@@ -1,4 +1,4 @@
-package com.handinfo.redis4j.api.classification;
+package com.handinfo.redis4j.api.async;
 
 /**
  * 异步命令

@@ -7,24 +7,24 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.handinfo.redis4j.api.IRedis4j;
-import com.handinfo.redis4j.impl.Redis4jClient;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class TestConnection
 {
-	private static IRedis4j client;
+	private static IRedisDatabaseClient client;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
-		client = new Redis4jClient("192.2.8.164", 6379, 10, 10, 10);
+		client = new RedisDatabaseClient("192.2.9.223", 6379, 10);
 		//System.out.println("connect to RedisServer... back=" + client.connect());;
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception
 	{
-		client.getConnection().quit();
+		client.quit();
 	}
 
 //	@Before
@@ -40,22 +40,16 @@ public class TestConnection
 //	}
 
 	@Test
-	public void testAuth() throws Exception
-	{
-		assertTrue(client.getConnection().auth("pwd"));
-	}
-
-	@Test
 	public void testEcho() throws Exception
 	{
 		String str = "i am server response echo!";
-		assertEquals("there is a bug in here!", str, client.getConnection().echo("i am server response echo!"));
+		assertEquals("there is a bug in here!", str, client.echo("i am server response echo!"));
 	}
 
 	@Test
 	public void testPing() throws Exception
 	{
-		assertTrue(client.getConnection().ping());
+		assertTrue(client.ping());
 	}
 
 //	@Test

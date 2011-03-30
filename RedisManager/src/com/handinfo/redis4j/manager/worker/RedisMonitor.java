@@ -5,10 +5,10 @@ import java.util.concurrent.BrokenBarrierException;
 
 import javax.swing.SwingWorker;
 
-import com.handinfo.redis4j.api.IRedis4j;
 import com.handinfo.redis4j.api.IRedis4jAsync;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.IRedis4jAsync.Notify;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 
@@ -17,9 +17,10 @@ public class RedisMonitor extends SwingWorker<String, String>
 	private IResult result;
 	private IRedis4jAsync client;
 
-	public RedisMonitor(IRedis4j client, IResult result)
+	public RedisMonitor(IRedisDatabaseClient client, IResult result)
 	{
-		this.client = client.getAsyncClient();
+		//TODO 还没处理
+		//this.client = client.getAsyncClient();
 		this.result = result;
 	}
 

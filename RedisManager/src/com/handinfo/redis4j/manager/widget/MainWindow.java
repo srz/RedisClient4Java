@@ -7,16 +7,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
-import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 
 public class MainWindow extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	private WorkerPanel workerPanel;
 	private NavigationTree tree;
-	private IRedis4j client;
+	private IRedisDatabaseClient client;
 
-	public MainWindow(String serverName, IRedis4j client)
+	public MainWindow(String serverName, IRedisDatabaseClient client)
 	{
 		super(new GridLayout(1, 0));
 		this.client = client;
@@ -45,7 +45,7 @@ public class MainWindow extends JPanel
 	/**
 	 * @return the client
 	 */
-	public IRedis4j getClient()
+	public IRedisDatabaseClient getClient()
 	{
 		return client;
 	}

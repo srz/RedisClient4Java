@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 
-import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.manager.widget.MainWindow;
 import com.handinfo.redis4j.manager.widget.Menu;
 import com.handinfo.redis4j.manager.widget.NewConnection;
@@ -30,7 +30,7 @@ public class RedisManager
 		return newConnection;
 	}
 	
-	public static void addNewTab(String tabName, IRedis4j client)
+	public static void addNewTab(String tabName, IRedisDatabaseClient client)
 	{
 		MainWindow mainWindow = new MainWindow(tabName, client);
 		tabbedPane.addTab(null, mainWindow);

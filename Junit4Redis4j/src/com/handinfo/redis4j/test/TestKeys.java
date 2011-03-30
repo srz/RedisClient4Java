@@ -8,53 +8,51 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.handinfo.redis4j.api.IRedis4j;
-import com.handinfo.redis4j.impl.Redis4jClient;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class TestKeys
 {
-	private static IRedis4j client;
+	private static IRedisDatabaseClient client;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
-		client = new Redis4jClient("127.0.0.1", 6379, 10, 10, 10);
-		//System.out.println("connect to RedisServer... back = " + client.connect());
-		//client.select(10);
+		client = new RedisDatabaseClient("192.2.9.223", 6379, 10);
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception
 	{
-		client.getConnection().quit();
+		client.quit();
 	}
 
 	@Before
 	public void setUp() throws Exception
 	{
 		//TODO 调用flushdb清空所有数据
-		System.out.println("setUp flushdb 10 = " + client.getServer().flushdb());
+		System.out.println("setUp flushCurrentDB = " + client.flushCurrentDB());
 	}
 
 	@After
 	public void tearDown() throws Exception
 	{
 		//TODO 调用flushdb清空所有数据
-		System.out.println("tearDown flushdb 10 = " + client.getServer().flushdb());
+		System.out.println("tearDown flushCurrentDB  = " + client.flushCurrentDB());
 	}
 
 	@Test
 	public void testDelForNoExistKey() throws Exception
 	{
-		assertTrue(client.getKeys().del("NoExistKey")==0);
+		assertTrue(client.del("NoExistKey")==0);
 	}
 	
 	@Test
 	public void testDelForOneKey() throws Exception
 	{
 		String key = "WillBeDeletedKey";
-		boolean b = client.getStrings().set(key, "I am WillBeDeletedKey");
-		assertTrue(client.getKeys().del(key)==1);
+		boolean b = client.set(key, "I am WillBeDeletedKey");
+		assertTrue(client.del(key)==1);
 	}
 	
 	@Test
@@ -63,10 +61,10 @@ public class TestKeys
 		String key_1 = "WillBeDeletedKey1";
 		String key_2 = "WillBeDeletedKey2";
 		String key_3 = "WillBeDeletedKey3";
-		client.getStrings().set(key_1, "I am WillBeDeletedKey 1");
-		client.getStrings().set(key_2, "I am WillBeDeletedKey 2");
-		client.getStrings().set(key_3, "I am WillBeDeletedKey 3");
-		assertTrue(client.getKeys().del(key_1, key_2, key_3)==3);
+		client.set(key_1, "I am WillBeDeletedKey 1");
+		client.set(key_2, "I am WillBeDeletedKey 2");
+		client.set(key_3, "I am WillBeDeletedKey 3");
+		assertTrue(client.del(key_1, key_2, key_3)==3);
 	}
 
 	@Test
@@ -75,11 +73,11 @@ public class TestKeys
 		String key_1 = "WillBeRenamedKey_1";
 		String value = "I am WillBeRenamedKey";
 		String key_2 = "WillBeRenamedKey_2";
-		client.getStrings().set(key_1, value);
-		client.getKeys().rename(key_1, key_2);
-		Object str_1 = client.getStrings().get(key_1);
-		Object str_2 = client.getStrings().get(key_2);
-		client.getKeys().del(key_1, key_2);
+		client.set(key_1, value);
+		client.rename(key_1, key_2);
+		Object str_1 = client.get(key_1);
+		Object str_2 = client.get(key_2);
+		client.del(key_1, key_2);
 
 		assertTrue(str_1==null && str_2.toString().equalsIgnoreCase(value));
 	}
@@ -88,7 +86,7 @@ public class TestKeys
 	public void testKeys() throws Exception
 	{
 		int successStep = 0;
-		String[] keys = client.getKeys().keys("*");
+		String[] keys = client.keys("*");
 		if(keys == null)
 		{
 			successStep++;
@@ -97,13 +95,13 @@ public class TestKeys
 		int allKeyNumber = 100;
 		for(int i=0; i<allKeyNumber; i++)
 		{
-			client.getStrings().set("key" + i, String.valueOf(i));
+			client.set("key" + i, String.valueOf(i));
 		}
 		
-		keys = client.getKeys().keys("*");
+		keys = client.keys("*");
 		if(keys != null)
 		{
-			if(client.getKeys().keys("*").length == allKeyNumber)
+			if(client.keys("*").length == allKeyNumber)
 			{
 				successStep++;
 			}
@@ -120,21 +118,21 @@ public class TestKeys
 		String key_list = "list";
 		String key_set = "set";
 		
-		client.getStrings().set("key_str", key_str);
-		client.getStrings().set("key_list", key_list);
-		client.getStrings().set("key_set", key_set);
+		client.set("key_str", key_str);
+		client.set("key_list", key_list);
+		client.set("key_set", key_set);
 		
-		if(client.getKeys().type("key_str").equalsIgnoreCase(key_str))
+		if(client.type("key_str").equalsIgnoreCase(key_str))
 		{
 			successStep++;
 		}
 		
-		if(client.getKeys().type("key_list").equalsIgnoreCase(key_list))
+		if(client.type("key_list").equalsIgnoreCase(key_list))
 		{
 			successStep++;
 		}
 		
-		if(client.getKeys().type("key_set").equalsIgnoreCase(key_set))
+		if(client.type("key_set").equalsIgnoreCase(key_set))
 		{
 			successStep++;
 		}

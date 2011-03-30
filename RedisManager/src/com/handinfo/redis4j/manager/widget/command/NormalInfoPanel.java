@@ -11,7 +11,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
 
-import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.manager.widget.CommandExecutePanel;
 import com.handinfo.redis4j.manager.worker.IResult;
 import com.handinfo.redis4j.manager.worker.RedisInfo;
@@ -23,7 +23,7 @@ public class NormalInfoPanel extends CommandExecutePanel implements IResult
 	private boolean isAutomaticUpdate;
 	private JMenuItem menuItem;
 
-	public NormalInfoPanel(String cmd, JLayeredPane parent, IRedis4j client)
+	public NormalInfoPanel(String cmd, JLayeredPane parent, IRedisDatabaseClient client)
 	{
 		super(cmd, parent, client);
 		this.isAutomaticUpdate = false;

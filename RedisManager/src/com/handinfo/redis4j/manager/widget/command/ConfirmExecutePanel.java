@@ -7,7 +7,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
 
-import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.manager.widget.CommandExecutePanel;
 import com.handinfo.redis4j.manager.worker.IExecuteCommand;
 import com.handinfo.redis4j.manager.worker.IResult;
@@ -19,7 +19,7 @@ public class ConfirmExecutePanel extends CommandExecutePanel implements IResult
 	private OnlyExecuteOnceWorker worker;
 
 
-	public ConfirmExecutePanel(String cmd, JLayeredPane parent, IRedis4j client, IExecuteCommand executor)
+	public ConfirmExecutePanel(String cmd, JLayeredPane parent, IRedisDatabaseClient client, IExecuteCommand executor)
 	{
 		super(cmd, parent, client);
 

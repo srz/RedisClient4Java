@@ -6,8 +6,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
@@ -21,7 +19,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 
 public abstract class CommandExecutePanel extends JPanel
 {
@@ -38,10 +36,10 @@ public abstract class CommandExecutePanel extends JPanel
 	private int labelX = 0;
 	private int labelY = 0;
 	private String title;
-	private IRedis4j client;
+	private IRedisDatabaseClient client;
 	private JPopupMenu popupMenu;
 
-	public CommandExecutePanel(String cmd, final JLayeredPane parent, IRedis4j client)
+	public CommandExecutePanel(String cmd, final JLayeredPane parent, IRedisDatabaseClient client)
 	{
 		GridBagLayout gridbag = new GridBagLayout();
 		this.setLayout(gridbag);
@@ -116,7 +114,7 @@ public abstract class CommandExecutePanel extends JPanel
 		return redisResult;
 	}
 
-	protected IRedis4j getRedisClient()
+	protected IRedisDatabaseClient getRedisClient()
 	{
 		return client;
 	}

@@ -18,8 +18,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-import com.handinfo.redis4j.api.IRedis4j;
-import com.handinfo.redis4j.api.classification.IServer;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.manager.widget.command.ConfirmExecutePanel;
 import com.handinfo.redis4j.manager.widget.command.LongConnectionPanel;
 import com.handinfo.redis4j.manager.widget.command.NormalInfoPanel;
@@ -63,7 +62,7 @@ public class WorkerPanel extends JPanel
 				{
 					// 此控件被删除,销毁数据库连接
 					workerLayer.removeAll();
-					WorkerPanel.this.mainWindow.getClient().getConnection().quit();
+					WorkerPanel.this.mainWindow.getClient().quit();
 				}
 			}
 		});
@@ -135,22 +134,17 @@ public class WorkerPanel extends JPanel
 					panel = new ConfirmExecutePanel(command.getTitle(), workerLayer, mainWindow.getClient(), new IExecuteCommand()
 					{
 						@Override
-						public String executeCommand(IRedis4j client)
+						public String executeCommand(IRedisDatabaseClient client)
 						{
 							String result = "";
 							Object instance = null;
-
-							if(executor.getDeclaringClass().equals(IServer.class))
-							{
-								instance = client.getServer();
-							}
 							
 							if(instance != null)
 							{
 								try
 								{
 									//执行命令
-									result = String.valueOf(executor.invoke(instance));
+									result = String.valueOf(executor.invoke(client));
 								}
 								catch (SecurityException e)
 								{

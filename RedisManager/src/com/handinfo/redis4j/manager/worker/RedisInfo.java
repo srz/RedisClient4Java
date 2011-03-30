@@ -5,16 +5,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.SwingWorker;
 
-import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 
 public class RedisInfo extends SwingWorker<String, String>
 {
 	private IResult result;
-	private IRedis4j client;
+	private IRedisDatabaseClient client;
 	private AtomicBoolean isCycle;
 	private boolean isStartOnce;
 
-	public RedisInfo(IRedis4j client, IResult result, boolean isAutomaticUpdate)
+	public RedisInfo(IRedisDatabaseClient client, IResult result, boolean isAutomaticUpdate)
 	{
 		this.isStartOnce = false;
 		this.result = result;
@@ -39,7 +39,7 @@ public class RedisInfo extends SwingWorker<String, String>
 					publish("-------------------------------\n");
 					try
 					{
-						publish(client.getServer().info());
+						publish(client.info());
 					}
 					catch (Exception ex)
 					{

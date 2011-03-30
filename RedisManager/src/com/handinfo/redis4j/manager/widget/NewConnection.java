@@ -15,8 +15,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.handinfo.redis4j.api.IRedis4j;
-import com.handinfo.redis4j.impl.Redis4jClient;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class NewConnection extends JDialog implements ActionListener, PropertyChangeListener
 {
@@ -30,7 +30,7 @@ public class NewConnection extends JDialog implements ActionListener, PropertyCh
 	private String btnConfirm = "连接";
 	private String btnCancle = "取消";
 
-	private IRedis4j client;
+	private IRedisDatabaseClient client;
 
 	/**
 	 * Returns null if the typed string was invalid; otherwise, returns the
@@ -41,7 +41,7 @@ public class NewConnection extends JDialog implements ActionListener, PropertyCh
 		return tabName;
 	}
 	
-	public IRedis4j getNewClient()
+	public IRedisDatabaseClient getNewClient()
 	{
 		return client;
 	}
@@ -129,8 +129,8 @@ public class NewConnection extends JDialog implements ActionListener, PropertyCh
 					JOptionPane.showMessageDialog(NewConnection.this, "输入的IP或端口号无效", "Try again", JOptionPane.ERROR_MESSAGE);
 				} else
 				{
-					client = new Redis4jClient(this.ipAddress.getText().trim(), Integer.valueOf(this.port.getText().trim()), 10, 10, 10);
-					if (client.getIsConnected())
+					client = new RedisDatabaseClient(this.ipAddress.getText().trim(), Integer.valueOf(this.port.getText().trim()), 10, 10, 10);
+					if (client.isConnected())
 					{
 						tabName = ipAddress.getText().trim() + ":" + port.getText().trim();
 						clearAndHide();

@@ -5,15 +5,20 @@ public interface IConnection
 	/**
 	 * 默认检测连接空闲发送ping的间隔时间,单位是秒
 	 */
-	public final static int IDEL_TIMEOUT_PING = 10;
+	public final static int IDEL_TIMEOUT_PING = 60;
 	
 	/**
 	 * 默认断网重连间隔时间,单位是秒
 	 */
-	public final static int RECONNECT_DELAY = 10;
+	public final static int RECONNECT_DELAY = 60;
 	
 	/**
 	 * 退出客户端程序
 	 */
 	public boolean quit();
+	
+	/**
+	 * 检查网络连接状态
+	 */
+	public boolean isConnected();
 }

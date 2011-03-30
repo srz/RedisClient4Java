@@ -1,21 +1,19 @@
 package com.handinfo.redis4j.manager.worker;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 
-import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 
 public class OnlyExecuteOnceWorker extends SwingWorker<String, String>
 {
 	private IResult result;
-	private IRedis4j client;
+	private IRedisDatabaseClient client;
 	private IExecuteCommand executor;
 
 
-	public OnlyExecuteOnceWorker(IRedis4j client, IResult result, IExecuteCommand executor)
+	public OnlyExecuteOnceWorker(IRedisDatabaseClient client, IResult result, IExecuteCommand executor)
 	{
 		this.result = result;
 		this.client = client;

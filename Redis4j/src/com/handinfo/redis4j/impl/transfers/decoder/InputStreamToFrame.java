@@ -189,6 +189,9 @@ public class InputStreamToFrame extends FrameDecoder
 
 		int objectTotal = Integer.valueOf(buffer.toString(currentIndex + 1, firstIndexLF - 2 - currentIndex, Charset.forName("UTF-8")));
 
+		if(objectTotal == 0)
+			return firstIndexLF;
+		
 		int currentObject = 0;
 		int byteIndex = firstIndexLF;
 		while (true)

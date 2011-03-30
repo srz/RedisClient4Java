@@ -2,7 +2,6 @@ package com.handinfo.redis4j.manager.widget.command;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -12,7 +11,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
 
-import com.handinfo.redis4j.api.IRedis4j;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.manager.widget.CommandExecutePanel;
 import com.handinfo.redis4j.manager.worker.IResult;
 import com.handinfo.redis4j.manager.worker.RedisMonitor;
@@ -23,7 +22,7 @@ public class LongConnectionPanel extends CommandExecutePanel implements IResult
 	private RedisMonitor redisMonitor;
 	private JMenuItem menuItem;
 
-	public LongConnectionPanel(String cmd, JLayeredPane parent, IRedis4j client)
+	public LongConnectionPanel(String cmd, JLayeredPane parent, IRedisDatabaseClient client)
 	{
 		super(cmd, parent, client);
 		this.redisMonitor = new RedisMonitor(this.getRedisClient(), this);

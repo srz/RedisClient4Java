@@ -5,7 +5,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.handinfo.redis4j.impl.Redis4jClient;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class DataCheck
 {
@@ -18,7 +19,7 @@ public class DataCheck
 
 	public static void main(String[] args) throws Exception
 	{
-		final Redis4jClient client = new Redis4jClient("192.2.9.223", 6379, 10, 10, 1);
+		final IRedisDatabaseClient client = new RedisDatabaseClient("192.2.9.223", 6379, 10);
 		
 		for(int i=0; i<keys.length; i++)
 		{
@@ -45,7 +46,7 @@ public class DataCheck
 						String result = null;;
 						try
 						{
-							result = client.getConnection().echo(key);
+							result = client.echo(key);
 						} catch (Exception ex)
 						{
 							ex.printStackTrace();
@@ -82,7 +83,7 @@ public class DataCheck
 		System.out.println("AllTimes=" + numberOfAllExecute.get());
 		System.out.println("TPS=" + (int)(((double)numberOfAllExecute.get()/(double)allTime)*1000) + " /s");
 
-		client.getConnection().quit();
+		client.quit();
 	}
 
 }

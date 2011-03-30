@@ -1,13 +1,11 @@
 package com.handinfo.redis4j.test;
 
-import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
-import com.handinfo.redis4j.api.Batch;
-import com.handinfo.redis4j.api.IRedis4j;
-import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponseType;
-import com.handinfo.redis4j.impl.Redis4jClient;
+import com.handinfo.redis4j.api.database.IDatabaseBatch;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class BatchTest
 {
@@ -19,7 +17,7 @@ public class BatchTest
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		final IRedis4j client = new Redis4jClient("192.2.9.223", 6379, 10, 30, 30);
+		final IRedisDatabaseClient client = new RedisDatabaseClient("192.2.9.223", 6379, 10);
 
 		System.out.println(RedisResponseType.BulkReplies.getValue());
 		
@@ -31,29 +29,16 @@ public class BatchTest
 				try
 				{
 					long start = System.currentTimeMillis();
-//					for(int i=0; i<10000; i++)
-//					{
-//						client.getConnection().echo(String.valueOf(i));
-//					}
 					
-					Batch batch = new Batch();
-//					for(int i=0; i<10; i++)
-//					{
-//						//batch.addEcho(String.valueOf(i));
-//						batch.addCommand(RedisCommand.ECHO, String.valueOf(i));
-//					}
-					batch.addCommand(RedisCommand.MULTI);
-					batch.addCommand(RedisCommand.MULTI);
-					batch.addCommand(RedisCommand.INCR, "abcde");
-					batch.addCommand(RedisCommand.KEYS, "*");
-					batch.addCommand(RedisCommand.EXEC);
-					batch.addCommand(RedisCommand.EXEC);
+					IDatabaseBatch batch = client.getBatch();
 					
-					ArrayList<String> result = client.batch(batch);
-//					for(String s : result)
-//					{
-//						System.out.println(s);
-//					}
+					for(int i=0; i<10; i++)
+					{
+						batch.echo(String.valueOf(i));
+					}
+
+					batch.execute();
+
 					
 					System.out.println(System.currentTimeMillis()-start);
 				}
@@ -65,23 +50,15 @@ public class BatchTest
 				latch.countDown();
 			}
 		});
-		t.setName("srz");
-		t.start();
+		t.setName("NewThread");
 		System.out.println("run.......");
+		t.start();
 
 		latch.await();
-		System.out.println("thread srz is over");
+		System.out.println("thread " + t.getName() + " is finished");
 
-		//Thread.sleep(20000);
-		System.out.println("sleep is over");
-		try
-		{
-			System.out.println("---" + client.getStrings().get("qqq"));
-		}
-		catch (Exception e)
-		{
-		}
-		client.getConnection().quit();
+
+		client.quit();
 	}
 
 }

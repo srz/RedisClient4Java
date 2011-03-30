@@ -15,73 +15,46 @@ public class SimpleTest
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		//final IRedis4j client = new Redis4jClient("192.2.9.223", 6379, 0, 60, 60);
-		final IRedisDatabaseClient client = new RedisDatabaseClient("192.2.9.223", 6379, 0, 60, 60);
-		// System.out.println("------------");
-		// client.getConnection().echo("xxx");
+		final IRedisDatabaseClient client = new RedisDatabaseClient("192.2.9.223", 6379, 0);
+
 		Thread t = new Thread(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				// try
-				// {
-				// //client.getStrings().set("qqq", "cxc");
-				// System.out.println(client.getConnection().echo("xxxx"));
-				// System.out.println(client.getConnection().echo("yyyy"));
-				// }
-				// catch (Exception e)
-				// {
-				// e.printStackTrace();
-				// }
-				//
-//				try
-//				{
-//					System.out.println("1......." + client.getTransactions().multi());
-//					System.out.println("2......." + client.getStrings().incr("aaa"));
-//					System.out.println("3......." + client.getKeys().keys("*"));
-//
-//				}
-//				catch (Exception e)
-//				{
-//					e.printStackTrace();
-//				}
-				
 				try
 				{
-					System.out.println("1.......---" + client.append("ppp", "zzzzzz"));
-
-
+//					boolean b = client.set("qqq", "cxc1");
+//					System.out.println(b);
+//					System.out.println(client.get("qqq"));
+					int b = client.listLeftPush("list_a", "aaaa");
+					System.out.println(b);
+					b = client.listLeftPush("list_a", "bbbb");
+					System.out.println(b);
+					b = client.listLeftPush("list_a", "cccc");
+					System.out.println(b);
+					b = client.listLeftPush("list_a", "dddd");
+					System.out.println(b);
+					b = client.listLeftPush("list_a", "eeee");
+					System.out.println(b);
+					String[] s = client.listBlockLeftPop(1, "list_a");
+					System.out.println("==" + s[0]);
 				}
 				catch (Exception e)
 				{
 					e.printStackTrace();
 				}
 
-				System.out.println("4.......");
 				latch.countDown();
 			}
 		});
-		t.setName("srz");
-		t.start();
+		t.setName("NewThread");
 		System.out.println("run.......");
+		t.start();
 
 		latch.await();
-		System.out.println("thread srz is over");
-//		for (String s : client.getTransactions().exec())
-//		{
-//			System.out.println("5......." + s);
-//		}
+		System.out.println("thread " + t.getName() + " is finished");
 
-		// Thread.sleep(20000);
-		System.out.println("sleep is over");
-		// try
-		// {
-		// System.out.println("---" + client.getStrings().get("qqq"));
-		// }
-		// catch (Exception e)
-		// {
-		// }
 		client.quit();
 	}
 

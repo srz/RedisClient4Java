@@ -6,8 +6,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.handinfo.redis4j.api.Batch;
-import com.handinfo.redis4j.impl.Redis4jClient;
+import com.handinfo.redis4j.api.database.IDatabaseBatch;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class DataCheckOfBatch
 {
@@ -20,7 +21,7 @@ public class DataCheckOfBatch
 
 	public static void main(String[] args) throws Exception
 	{
-		final Redis4jClient client = new Redis4jClient("192.2.9.223", 6379, 10, 100, 100);
+		final IRedisDatabaseClient client = new RedisDatabaseClient("192.2.9.223", 6379, 10);
 		
 		for(int i=0; i<keys.length; i++)
 		{
@@ -44,38 +45,38 @@ public class DataCheckOfBatch
 					{
 						String[] key = new String[100];
 
-						ArrayList<String> result = null;;
 						try
 						{
-							Batch batch = new Batch();
+							IDatabaseBatch  batch = client.getBatch();
 							for (int j = 0; j < key.length; j++)
 							{
 								key[j] = keys[(int)(Math.random()*keys.length)];
-								batch.addEcho(key[j]);
+								batch.echo(key[j]);
 							}
-							result = client.batch(batch);
-							//numberOfAllExecute.incrementAndGet();
+							batch.execute();
+							numberOfAllExecute.incrementAndGet();
 						} catch (Exception ex)
 						{
 							ex.printStackTrace();
+							break;
 							//System.out.println("error: key=|" + key[0] + "|"+ key[1]+ "|"+ key[2] + "|error: threadID=|" + Thread.currentThread().getId() + "|times=" + i);
 						}
-						if (result != null)
-						{
-							for (int j = 0; j < key.length; j++)
-							{
-								if(!result.get(j).equalsIgnoreCase(key[j]))
-								{
-									System.out.println("error: key=|" + key + "|return=" + result + "|error: threadID=|" + Thread.currentThread().getId() + "|times=" + i);
-									break;
-								}
-							}
-							numberOfAllExecute.incrementAndGet();
-						}
-						else
-						{
-							break;
-						}
+//						if (result != null)
+//						{
+//							for (int j = 0; j < key.length; j++)
+//							{
+//								if(!result.get(j).equalsIgnoreCase(key[j]))
+//								{
+//									System.out.println("error: key=|" + key + "|return=" + result + "|error: threadID=|" + Thread.currentThread().getId() + "|times=" + i);
+//									break;
+//								}
+//							}
+//							numberOfAllExecute.incrementAndGet();
+//						}
+//						else
+//						{
+//							break;
+//						}
 
 						try
 						{
@@ -99,7 +100,7 @@ public class DataCheckOfBatch
 		System.out.println("AllTimes=" + numberOfAllExecute.get());
 		System.out.println("TPS=" + (int)(((double)numberOfAllExecute.get()/(double)allTime)*1000) + " /s");
 
-		client.getConnection().quit();
+		client.quit();
 	}
 
 }

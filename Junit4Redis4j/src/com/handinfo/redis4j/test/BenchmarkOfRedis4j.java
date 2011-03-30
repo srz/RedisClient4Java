@@ -5,8 +5,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.handinfo.redis4j.api.IRedis4j;
-import com.handinfo.redis4j.impl.Redis4jClient;
+import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class BenchmarkOfRedis4j
 {
@@ -28,14 +28,14 @@ public class BenchmarkOfRedis4j
 		}
 		final String tmp = s;
 		
-		final IRedis4j client = new Redis4jClient("192.2.9.223", 6379, 10);
+		final IRedisDatabaseClient client = new RedisDatabaseClient("192.2.9.223", 6379, 10);
 		
 		for(int i=0; i<keys.length; i++)
 		{
 			keys[i] = "key_" + i;
-			//client.getStrings().set(keys[i], keys[i]);
+			//client.set(keys[i], keys[i]);
 		}
-		
+		//System.exit(0);
 		
 		final ExecutorService pool = Executors.newFixedThreadPool(corePoolSize);
 		latch = new CountDownLatch(corePoolSize);
@@ -60,7 +60,7 @@ public class BenchmarkOfRedis4j
 							boolean result = false;
 							try
 							{
-								result = client.getStrings().set(key, value);
+								result = client.set(key, value);
 							} catch (Exception e2)
 							{
 								e2.printStackTrace();
@@ -78,7 +78,7 @@ public class BenchmarkOfRedis4j
 							String b = "";
 							try
 							{
-								b = client.getStrings().get(key);
+								b = client.get(key);
 							} catch (Exception e2)
 							{
 								e2.printStackTrace();
@@ -108,8 +108,8 @@ public class BenchmarkOfRedis4j
 		System.out.println("AllTimes=" + numberOfAllExecute.get());
 		System.out.println("TPS=" + (int)(((double)numberOfAllExecute.get()/(double)allTime)*1000) + " /s");
 
-		client.getServer().flushall();
-		client.getConnection().quit();
+		client.flushAllDB();
+		client.quit();
 	}
 
 }
