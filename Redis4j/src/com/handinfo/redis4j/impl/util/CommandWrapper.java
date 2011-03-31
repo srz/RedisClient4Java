@@ -29,9 +29,9 @@ public class CommandWrapper
 
 	private AtomicBoolean isPause = new AtomicBoolean(false);
 	private AtomicBoolean isResume = new AtomicBoolean(false);
-	private ArrayList<String[]> cmdList;
+	private ArrayList<Object[]> cmdList;
 
-	public ArrayList<String[]> getCmdList()
+	public ArrayList<Object[]> getCmdList()
 	{
 		return cmdList;
 	}
@@ -50,18 +50,18 @@ public class CommandWrapper
 
 		this.exception = null;
 
-		if (this.type.equals(CommandWrapper.Type.SYNC))
+		if (this.type == CommandWrapper.Type.SYNC)
 			this.latch = new CountDownLatch(1);
 		else
 			this.barrier = new CyclicBarrier(2);
 	}
 
-	public CommandWrapper(ArrayList<String[]> commandList)
+	public CommandWrapper(ArrayList<Object[]> commandList)
 	{
 		cmdList = commandList;
 		this.type = CommandWrapper.Type.SYNC;
 		this.value = ChannelBuffers.dynamicBuffer();
-		for (String[] cmd : commandList)
+		for (Object[] cmd : commandList)
 		{
 			this.value.writeBytes(getBinaryCommand(cmd));
 		}
@@ -70,7 +70,7 @@ public class CommandWrapper
 
 		this.exception = null;
 
-		if (this.type.equals(CommandWrapper.Type.SYNC))
+		if (this.type == CommandWrapper.Type.SYNC)
 			this.latch = new CountDownLatch(1);
 		else
 			this.barrier = new CyclicBarrier(2);
@@ -122,7 +122,7 @@ public class CommandWrapper
 
 	public void pause() throws InterruptedException, BrokenBarrierException
 	{
-		if (type.equals(CommandWrapper.Type.SYNC))
+		if (type == CommandWrapper.Type.SYNC)
 		{
 			if (!isPause.getAndSet(true))
 			{
@@ -137,7 +137,7 @@ public class CommandWrapper
 
 	public void pause(long timeout, TimeUnit unit) throws InterruptedException, BrokenBarrierException, TimeoutException
 	{
-		if (type.equals(CommandWrapper.Type.SYNC))
+		if (type == CommandWrapper.Type.SYNC)
 		{
 			if (!isPause.getAndSet(true))
 			{
@@ -157,7 +157,7 @@ public class CommandWrapper
 	
 	public void resume() throws InterruptedException, BrokenBarrierException
 	{
-		if (type.equals(CommandWrapper.Type.SYNC))
+		if (type == CommandWrapper.Type.SYNC)
 		{
 			if (!isResume.getAndSet(true))
 			{

@@ -47,7 +47,7 @@ public class DataCheckOfBatch
 
 						try
 						{
-							IDatabaseBatch  batch = client.getBatch();
+							IDatabaseBatch  batch = client.getNewBatch();
 							for (int j = 0; j < key.length; j++)
 							{
 								key[j] = keys[(int)(Math.random()*keys.length)];

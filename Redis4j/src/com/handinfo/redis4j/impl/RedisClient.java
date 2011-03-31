@@ -1,5 +1,6 @@
 package com.handinfo.redis4j.impl;
 
+import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -83,22 +84,24 @@ public abstract class RedisClient
 		return reconnectDelay;
 	}
 
-	private <T,V> T castResult(Class<T> classType, V arg, RedisResponseMessage compareValue)
+	private <T, V> T castResult(Class<T> classType, V arg, RedisResponseMessage compareValue)
 	{
 		if (arg == null)
 			return null;
-		if (classType.equals(Integer.class))
+		if (classType == String.class)
+		{
+			return classType.cast(arg);
+		}
+		else if (classType == Integer.class)
 			return classType.cast(Integer.valueOf((String) arg));
-		else if (classType.equals(Boolean.class))
+		else if (classType == Boolean.class)
 		{
 			if (compareValue != null)
 				return classType.cast(Boolean.valueOf(((String) arg).equalsIgnoreCase(compareValue.getValue())));
 			else
 				return classType.cast(Boolean.FALSE);
-		} else if (classType.equals(String.class))
+		} else if (classType == String[].class)
 			return classType.cast(arg);
-		 else if (classType.equals(String[].class))
-				return classType.cast(arg);
 		else
 			return null;
 	}
@@ -144,18 +147,20 @@ public abstract class RedisClient
 					if (response.getBulkValue() == null)
 						return null;
 					else
-						return castResult(classType, new String(response.getBulkValue()), compareValue);
+					{
+						return castResult(classType, new String(response.getBulkValue(), Charset.forName("UTF-8")), compareValue);
+					}
 				}
 				case MultiBulkReplies:
 				{
-					if(response.getMultiBulkValue().size() == 0)
+					if (response.getMultiBulkValue().size() == 0)
 						return null;
-					
+
 					String[] result = new String[response.getMultiBulkValue().size()];
-					int i=0;
-					for(RedisResponse res : response.getMultiBulkValue())
+					int i = 0;
+					for (RedisResponse res : response.getMultiBulkValue())
 					{
-						result[i] = new String(res.getBulkValue());
+						result[i] = new String(res.getBulkValue(), Charset.forName("UTF-8"));
 						i++;
 					}
 					return castResult(classType, result, null);
@@ -172,5 +177,17 @@ public abstract class RedisClient
 		}
 
 		return null;
+	}
+	
+	
+	
+	
+	
+	
+	public String sendRequest(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	{
+		RedisResponse response = connector.executeCommand(command, args);
+
+		return new String(response.getBulkValue());
 	}
 }

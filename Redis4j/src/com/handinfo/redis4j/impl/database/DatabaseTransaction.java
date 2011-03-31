@@ -22,21 +22,21 @@ public class DatabaseTransaction extends BatchCommandlist implements IDatabaseTr
 	@Override
 	public boolean discard()
 	{
-		// TODO Auto-generated method stub
+		super.addCommand(RedisCommand.DISCARD);
 		return false;
 	}
 
 	@Override
 	public boolean unwatch()
 	{
-		// TODO Auto-generated method stub
+		super.addCommand(RedisCommand.UNWATCH);
 		return false;
 	}
 
 	@Override
 	public boolean watch()
 	{
-		// TODO Auto-generated method stub
+		super.addCommand(RedisCommand.WATCH);
 		return false;
 	}
 }

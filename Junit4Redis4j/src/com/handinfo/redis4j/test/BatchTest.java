@@ -30,7 +30,7 @@ public class BatchTest
 				{
 					long start = System.currentTimeMillis();
 					
-					IDatabaseBatch batch = client.getBatch();
+					IDatabaseBatch batch = client.getNewBatch();
 					
 					for(int i=0; i<10; i++)
 					{

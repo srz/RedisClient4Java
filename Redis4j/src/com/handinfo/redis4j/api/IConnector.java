@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
@@ -39,7 +38,7 @@ public interface IConnector
 
 	public void executeAsyncCommand(IRedis4jAsync.Notify notify, RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException;
 	
-	public RedisResponse[] executeBatch(ArrayList<String[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
+	public RedisResponse[] executeBatch(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
 	
 	public void disConnect();
 	

@@ -219,7 +219,7 @@ public class Connector implements IConnector
 			throw new IllegalStateException("connection has been disconnected.");
 	}
 	
-	public RedisResponse[] executeBatch(ArrayList<String[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public RedisResponse[] executeBatch(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		if (channel != null && channel.isConnected())
 		{

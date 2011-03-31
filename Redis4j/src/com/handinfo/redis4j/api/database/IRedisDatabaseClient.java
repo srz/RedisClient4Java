@@ -8,10 +8,10 @@ public interface IRedisDatabaseClient extends IDatabase, IConnection
 	/**
 	 * 获取一个批处理对象,此批处理不是事物类型
 	 */
-	public IDatabaseBatch getBatch();
+	public IDatabaseBatch getNewBatch();
 	
 	/**
 	 * 获取一个事物对象
 	 */
-	public IDatabaseTransaction getTransaction();
+	public IDatabaseTransaction getNewTransaction();
 }

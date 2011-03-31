@@ -6,21 +6,22 @@ import java.util.HashMap;
 import com.handinfo.redis4j.api.IConnector;
 import com.handinfo.redis4j.api.IDatabase;
 import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.impl.util.ParameterConvert;
 
 public abstract class BatchCommandlist implements IDatabase
 {
-	protected ArrayList<String[]> commandList;
+	protected ArrayList<Object[]> commandList;
 	protected IConnector connector;
 
 	public BatchCommandlist(IConnector connector)
 	{
 		this.connector = connector;
-		this.commandList = new ArrayList<String[]>();
+		this.commandList = new ArrayList<Object[]>();
 	}
 
-	protected void addCommand(RedisCommand command, String... args)
+	protected void addCommand(RedisCommand command, Object... args)
 	{
-		String[] cmd = new String[command.getValue().length + args.length];
+		Object[] cmd = new Object[command.getValue().length + args.length];
 		System.arraycopy(command.getValue(), 0, cmd, 0, command.getValue().length);
 		System.arraycopy(args, 0, cmd, command.getValue().length, args.length);
 		this.commandList.add(cmd);
@@ -47,7 +48,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String backgroundRewriteAOF()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.BGREWRITEAOF);
 		return null;
 	}
 
@@ -59,7 +60,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String backgroundSave()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.BGSAVE);
 		return null;
 	}
 
@@ -71,7 +72,11 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] listBlockLeftPop(int timeout, String... keys)
 	{
-		// TODO Auto-generated method stub
+		Object[] args = new Object[keys.length+1];
+		System.arraycopy(keys, 0, args, 0, keys.length);
+		args[keys.length] = timeout;
+		
+		this.addCommand(RedisCommand.BLPOP, args);
 		return null;
 	}
 
@@ -83,7 +88,11 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] listBlockRightPop(int timeout, String... keys)
 	{
-		// TODO Auto-generated method stub
+		Object[] args = new Object[keys.length+1];
+		System.arraycopy(keys, 0, args, 0, keys.length);
+		args[keys.length] = timeout;
+		
+		this.addCommand(RedisCommand.BRPOP, args);
 		return null;
 	}
 
@@ -96,7 +105,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String listBlockRightPopLeftPush(String source, String destination, int timeout)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.BRPOPLPUSH, source, destination, timeout);
 		return null;
 	}
 
@@ -108,7 +117,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] configGet(String parameter)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.CONFIG_GET, parameter);
 		return null;
 	}
 
@@ -120,7 +129,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean configResetStat()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.CONFIG_RESETSTAT);
 		return false;
 	}
 
@@ -133,7 +142,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean configSet(String parameter, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.CONFIG_SET, parameter, value);
 		return false;
 	}
 
@@ -145,7 +154,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int dbSize()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.DBSIZE);
 		return 0;
 	}
 
@@ -157,7 +166,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] debugObject(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.DEBUG_OBJECT, key);
 		return null;
 	}
 
@@ -169,7 +178,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] debugSegfault()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.DEBUG_SEGFAULT);
 		return null;
 	}
 
@@ -181,7 +190,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int decrement(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.DECR, key);
 		return 0;
 	}
 
@@ -193,7 +202,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int decrementByValue(String key, int decrement)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.DECRBY, key, decrement);
 		return 0;
 	}
 
@@ -205,7 +214,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int del(String... keys)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.DEL, (Object[])keys);
 		return 0;
 	}
 
@@ -217,7 +226,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String echo(String message)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ECHO, message);
 		return null;
 	}
 
@@ -229,7 +238,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean exists(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.EXISTS, key);
 		return false;
 	}
 
@@ -241,7 +250,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean expire(String key, int seconds)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.EXPIRE, key, seconds);
 		return false;
 	}
 
@@ -253,7 +262,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean expireAsTimestamp(String key, long timestamp)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.EXPIREAT, key, timestamp);
 		return false;
 	}
 
@@ -265,7 +274,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean flushAllDB()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.FLUSHALL);
 		return false;
 	}
 
@@ -277,7 +286,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean flushCurrentDB()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.FLUSHDB);
 		return false;
 	}
 
@@ -289,7 +298,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String get(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.GET, key);
 		return null;
 	}
 
@@ -301,7 +310,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int getBit(String key, int offset)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.GETBIT, key, offset);
 		return 0;
 	}
 
@@ -314,7 +323,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String getRange(String key, int start, int end)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.GETRANGE, key, start, end);
 		return null;
 	}
 
@@ -327,7 +336,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String getSet(String key, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.GETSET, key, value);
 		return null;
 	}
 
@@ -340,7 +349,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean hashesDel(String key, String field)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.HDEL, key, field);
 		return false;
 	}
 
@@ -353,7 +362,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean hashesExists(String key, String field)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.HEXISTS, key, field);
 		return false;
 	}
 
@@ -366,7 +375,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String hashesGet(String key, String field)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.HGET, key, field);
 		return null;
 	}
 
@@ -378,7 +387,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] hashesGetAllValue(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.HVALS, key);
 		return null;
 	}
 
@@ -391,7 +400,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int hashesIncrementByValue(String key, String field, int increment)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.HINCRBY, key, field, increment);
 		return 0;
 	}
 
@@ -403,7 +412,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] hashesGetAllField(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.HKEYS, key);
 		return null;
 	}
 
@@ -415,7 +424,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int hashesLength(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.HLEN, key);
 		return 0;
 	}
 
@@ -428,7 +437,10 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] hashesMultipleFieldGet(String key, String... fields)
 	{
-		// TODO Auto-generated method stub
+		Object[] args = new Object[fields.length+1];
+		args[0] = key;
+		System.arraycopy(fields, 0, args, 1, fields.length);
+		this.addCommand(RedisCommand.HMGET, args);
 		return null;
 	}
 
@@ -441,7 +453,12 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean hashesMultipleSet(String key, HashMap<String, String> fieldAndValue)
 	{
-		// TODO Auto-generated method stub
+		String[] allKey = ParameterConvert.mapToStringArray(fieldAndValue);
+		Object[] args = new Object[allKey.length+1];
+		args[0] = key;
+		System.arraycopy(allKey, 0, args, 1, allKey.length);
+		
+		this.addCommand(RedisCommand.HMSET, args);
 		return false;
 	}
 
@@ -454,7 +471,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean hashesSet(String key, String field, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.HSET, key, field, value);
 		return false;
 	}
 
@@ -467,7 +484,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean hashesSetNotExistField(String key, String field, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.HSETNX, key, field, value);
 		return false;
 	}
 
@@ -479,7 +496,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public HashMap<String, String> hashesGetAll(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.HGETALL, key);
 		return null;
 	}
 
@@ -491,7 +508,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int increment(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.INCR, key);
 		return 0;
 	}
 
@@ -503,7 +520,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int incrementByValue(String key, int increment)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.INCRBY, key, increment);
 		return 0;
 	}
 
@@ -515,7 +532,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String info()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.INFO);
 		return null;
 	}
 
@@ -527,7 +544,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] keys(String pattern)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.KEYS, pattern);
 		return null;
 	}
 
@@ -539,7 +556,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int lastSave()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.LASTSAVE);
 		return 0;
 	}
 
@@ -551,7 +568,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String listIndex(String key, int index)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.LINDEX, key, index);
 		return null;
 	}
 
@@ -564,7 +581,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int listLeftInsert(String key, String BEFORE_AFTER, String pivot, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.LINSERT, key, BEFORE_AFTER, pivot, value);
 		return 0;
 	}
 
@@ -576,7 +593,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int listLength(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.LLEN, key);
 		return 0;
 	}
 
@@ -588,7 +605,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String listLeftPop(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.LPOP, key);
 		return null;
 	}
 
@@ -601,7 +618,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int listLeftPush(String key, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.LPUSH, key, value);
 		return 0;
 	}
 
@@ -614,7 +631,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int listLeftPushOnExist(String key, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.LPUSHX, key, value);
 		return 0;
 	}
 
@@ -627,7 +644,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] listRange(String key, int start, int stop)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.LRANGE, key, start, stop);
 		return null;
 	}
 
@@ -640,7 +657,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int listRemove(String key, int count, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.LREM, count, value);
 		return 0;
 	}
 
@@ -653,7 +670,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean listSet(String key, int index, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.LSET, key, index, value);
 		return false;
 	}
 
@@ -665,7 +682,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean listTrim(String key, int start, int stop)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.LTRIM, key, start, stop);
 		return false;
 	}
 
@@ -677,7 +694,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] multipleGet(String... keys)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.MGET, (Object[])keys);
 		return null;
 	}
 
@@ -689,7 +706,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean move(String key, int indexDB)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.MOVE, key, indexDB);
 		return false;
 	}
 
@@ -702,7 +719,8 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public Boolean multipleSet(HashMap<String, String> keyAndValue)
 	{
-		// TODO Auto-generated method stub
+		Object[] allKey = ParameterConvert.mapToStringArray(keyAndValue);
+		this.addCommand(RedisCommand.MSET, allKey);
 		return null;
 	}
 
@@ -715,7 +733,8 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public Boolean multipleSetOnNotExist(HashMap<String, String> keyAndValue)
 	{
-		// TODO Auto-generated method stub
+		Object[] allKey = ParameterConvert.mapToStringArray(keyAndValue);
+		this.addCommand(RedisCommand.MSETNX, allKey);
 		return null;
 	}
 
@@ -727,7 +746,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean persist(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.PERSIST, key);
 		return false;
 	}
 
@@ -739,7 +758,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean ping()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.PING);
 		return false;
 	}
 
@@ -751,7 +770,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String randomKey()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.RANDOMKEY);
 		return null;
 	}
 
@@ -764,7 +783,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean rename(String key, String newKey)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.RENAME, key, newKey);
 		return false;
 	}
 
@@ -777,7 +796,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean renameOnNotExistNewKey(String key, String newKey)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.RENAMENX, key, newKey);
 		return false;
 	}
 
@@ -789,7 +808,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String listRightPop(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.RPOP, key);
 		return null;
 	}
 
@@ -802,7 +821,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String listRightPopLeftPush(String source, String destination)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.RPOPLPUSH, source, destination);
 		return null;
 	}
 
@@ -815,7 +834,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int listRightPush(String key, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.RPUSH, key, value);
 		return 0;
 	}
 
@@ -828,7 +847,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int listRightPushOnExist(String key, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.RPUSHX, key, value);
 		return 0;
 	}
 
@@ -841,7 +860,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public Boolean setsAdd(String key, String member)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SADD, key, member);
 		return null;
 	}
 
@@ -853,7 +872,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean save()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SAVE);
 		return false;
 	}
 
@@ -865,7 +884,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int setsCard(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SCARD, key);
 		return 0;
 	}
 
@@ -877,7 +896,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] setsDiff(String... keys)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SDIFF, (Object[])keys);
 		return null;
 	}
 
@@ -890,7 +909,11 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int setsDiffStore(String destination, String... keys)
 	{
-		// TODO Auto-generated method stub
+		Object[] args = new Object[keys.length+1];
+		args[0] = destination;
+		System.arraycopy(keys, 0, args, 1, keys.length);
+		
+		this.addCommand(RedisCommand.SDIFFSTORE, args);
 		return 0;
 	}
 
@@ -903,7 +926,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean set(String key, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SET, key, value);
 		return false;
 	}
 
@@ -916,7 +939,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int setBit(String key, int offset, int value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SETBIT, key, offset, value);
 		return 0;
 	}
 
@@ -929,7 +952,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean setAndExpire(String key, int seconds, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SETEX, key, seconds, value);
 		return false;
 	}
 
@@ -942,7 +965,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public Boolean setOnNotExist(String key, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SETNX, key, value);
 		return null;
 	}
 
@@ -955,7 +978,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int setRange(String key, int offset, String value)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SETRANGE, key, offset, value);
 		return 0;
 	}
 
@@ -967,7 +990,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean shutdown()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SHUTDOWN);
 		return false;
 	}
 
@@ -979,7 +1002,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] setsInter(String... keys)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SINTER, (Object[])keys);
 		return null;
 	}
 
@@ -992,7 +1015,11 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int setsInterStore(String destination, String... keys)
 	{
-		// TODO Auto-generated method stub
+		Object[] args = new Object[keys.length+1];
+		args[0] = destination;
+		System.arraycopy(keys, 0, args, 1, keys.length);
+		
+		this.addCommand(RedisCommand.SINTERSTORE, args);
 		return 0;
 	}
 
@@ -1005,7 +1032,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public Boolean setsIsMember(String key, String member)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SISMEMBER, key, member);
 		return null;
 	}
 
@@ -1017,7 +1044,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public boolean slaveOf()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SLAVEOF);
 		return false;
 	}
 
@@ -1029,7 +1056,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] setsMembers(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SMEMBERS, key);
 		return null;
 	}
 
@@ -1042,7 +1069,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public Boolean setsMove(String source, String destination, String member)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SMOVE, source, destination, member);
 		return null;
 	}
 
@@ -1053,9 +1080,13 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String[])
 	 */
 	@Override
-	public Object[] sort(String key, String... args)
+	public Object[] sort(String key, String... params)
 	{
-		// TODO Auto-generated method stub
+		Object[] args = new Object[params.length+1];
+		args[0] = key;
+		System.arraycopy(params, 0, args, 1, params.length);
+		
+		this.addCommand(RedisCommand.SORT, args);
 		return null;
 	}
 
@@ -1067,7 +1098,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String setsPop(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SPOP, key);
 		return null;
 	}
 
@@ -1079,7 +1110,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String setsRandMember(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SRANDMEMBER, key);
 		return null;
 	}
 
@@ -1092,7 +1123,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public Boolean setsRemove(String key, String member)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SREM, key, member);
 		return null;
 	}
 
@@ -1104,7 +1135,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int strLength(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.STRLEN, key);
 		return 0;
 	}
 
@@ -1116,7 +1147,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] setsUnion(String... keys)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SUNION, (Object[])keys);
 		return null;
 	}
 
@@ -1129,7 +1160,11 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int setsUnionStore(String destination, String... keys)
 	{
-		// TODO Auto-generated method stub
+		Object[] args = new Object[keys.length+1];
+		args[0] = destination;
+		System.arraycopy(keys, 0, args, 1, keys.length);
+		
+		this.addCommand(RedisCommand.SUNIONSTORE, args);
 		return 0;
 	}
 
@@ -1141,7 +1176,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] sync()
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.SYNC);
 		return null;
 	}
 
@@ -1153,7 +1188,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int timeToLive(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.TTL, key);
 		return 0;
 	}
 
@@ -1165,7 +1200,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String type(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.TYPE, key);
 		return null;
 	}
 
@@ -1178,7 +1213,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public Boolean sortedSetsAdd(String key, int score, String member)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZADD, key, score, member);
 		return null;
 	}
 
@@ -1190,7 +1225,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int sortedSetsCard(String key)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZCARD, key);
 		return 0;
 	}
 
@@ -1203,7 +1238,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int sortedSetsCount(String key, int min, int max)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZCOUNT, key, min, max);
 		return 0;
 	}
 
@@ -1216,7 +1251,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String sortedSetsIncrementByValue(String key, int increment, String member)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZINCRBY, key, increment, member);
 		return null;
 	}
 
@@ -1228,7 +1263,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int sortedSetsInterStore(String... args)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZINTERSTORE, (Object[])args);
 		return 0;
 	}
 
@@ -1241,7 +1276,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] sortedSetsRange(String key, int start, int stop)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZRANGE, key, start, stop);
 		return null;
 	}
 
@@ -1253,7 +1288,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] sortedSetsRangeByScore(String... args)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZRANGEBYSCORE, (Object[])args);
 		return null;
 	}
 
@@ -1266,7 +1301,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int sortedSetsRank(String key, String member)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZRANK, key, member);
 		return 0;
 	}
 
@@ -1279,7 +1314,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public Boolean sortedSetsRem(String key, String member)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZREM, key, member);
 		return null;
 	}
 
@@ -1292,7 +1327,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int sortedSetsRemoveRangeByRank(String key, int start, int stop)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZREMRANGEBYRANK, key, start, stop);
 		return 0;
 	}
 
@@ -1306,7 +1341,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int sortedSetsRemoveRangeByScore(String key, int min, int max)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZREMRANGEBYSCORE, key, min, max);
 		return 0;
 	}
 
@@ -1319,7 +1354,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] sortedSetsRevRange(String key, int start, int stop)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZREVRANGE, key, start, stop);
 		return null;
 	}
 
@@ -1332,7 +1367,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String[] sortedSetsRevRangeByScore(String... args)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZREVRANGEBYSCORE, (Object[])args);
 		return null;
 	}
 
@@ -1345,7 +1380,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int sortedSetsRevRank(String key, String member)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZREVRANK, key, member);
 		return 0;
 	}
 
@@ -1358,7 +1393,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public String sortedSetsScore(String key, String member)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZSCORE, key, member);
 		return null;
 	}
 
@@ -1370,7 +1405,7 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public int sortedSetsUnionStore(String... args)
 	{
-		// TODO Auto-generated method stub
+		this.addCommand(RedisCommand.ZUNIONSTORE, (Object[])args);
 		return 0;
 	}
 }

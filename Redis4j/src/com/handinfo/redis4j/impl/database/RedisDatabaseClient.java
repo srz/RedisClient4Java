@@ -4,9 +4,6 @@
 package com.handinfo.redis4j.impl.database;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponseMessage;
@@ -37,7 +34,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	 * @see com.handinfo.redis4j.api.database.IRedisDatabaseClient#getBatch()
 	 */
 	@Override
-	public IDatabaseBatch getBatch()
+	public IDatabaseBatch getNewBatch()
 	{
 		return new DatabaseBatch(super.connector);
 	}
@@ -49,7 +46,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	 * com.handinfo.redis4j.api.database.IRedisDatabaseClient#getBatch(boolean)
 	 */
 	@Override
-	public IDatabaseTransaction getTransaction()
+	public IDatabaseTransaction getNewTransaction()
 	{
 		return new DatabaseTransaction(super.connector);
 	}
@@ -96,8 +93,6 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] listBlockLeftPop(int timeout, String... keys)
 	{
-		// TODO 稍后实现,需要把keys和timeout合并到一个数组中,并且keys要在前,timeout在后
-		//return super.sendRequest(String[].class, null, RedisCommand.KEYS, pattern);
 		Object[] args = new Object[keys.length+1];
 		System.arraycopy(keys, 0, args, 0, keys.length);
 		args[keys.length] = timeout;
@@ -112,8 +107,10 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] listBlockRightPop(int timeout, String... keys)
 	{
-		// TODO 稍后实现,需要把keys和timeout合并到一个数组中,并且keys要在前,timeout在后
-		return null;
+		Object[] args = new Object[keys.length+1];
+		System.arraycopy(keys, 0, args, 0, keys.length);
+		args[keys.length] = timeout;
+		return super.sendRequest(String[].class, null, RedisCommand.BRPOP, args);
 	}
 
 	/*
@@ -136,8 +133,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] configGet(String parameter)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.CONFIG_GET, parameter);
 	}
 
 	/*
@@ -182,8 +178,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] debugObject(String key)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.DEBUG_OBJECT, key);
 	}
 
 	/*
@@ -194,8 +189,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] debugSegfault()
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.DEBUG_SEGFAULT);
 	}
 
 	/*
@@ -387,8 +381,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] hashesGetAllValue(String key)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.HGETALL, key);
 	}
 
 	/*
@@ -411,8 +404,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] hashesGetAllField(String key)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.HKEYS, key);
 	}
 
 	/*
@@ -435,8 +427,11 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] hashesMultipleFieldGet(String key, String... fields)
 	{
-		// TODO 稍后实现
-		return null;
+		Object[] args = new Object[fields.length+1];
+		args[0] = key;
+		System.arraycopy(fields, 0, args, 1, fields.length);
+		
+		return super.sendRequest(String[].class, null, RedisCommand.HMGET, args);
 	}
 
 	/*
@@ -483,13 +478,18 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.handinfo.redis4j.api.IDatabase#hvals(java.lang.String)
+	 * @see com.handinfo.redis4j.api.IDatabase#hashesGetAll(java.lang.String)
 	 */
 	@Override
 	public HashMap<String, String> hashesGetAll(String key)
 	{
-		// TODO 稍后实现
-		return null;
+		String[] resultList = super.sendRequest(String[].class, null, RedisCommand.HGETALL, key);
+		HashMap<String, String> result = new HashMap<String, String>();
+		for(int i=0; i<resultList.length; i+=2)
+		{
+			result.put(resultList[i], resultList[i+1]);
+		}
+		return result;
 	}
 
 	/*
@@ -625,8 +625,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] listRange(String key, int start, int stop)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.LRANGE, key, start, stop);
 	}
 
 	/*
@@ -672,8 +671,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] multipleGet(String... keys)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.MGET, (Object[])keys);
 	}
 
 	/*
@@ -860,8 +858,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] setsDiff(String... keys)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.SDIFF, (Object[])keys);
 	}
 
 	/*
@@ -873,7 +870,11 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public int setsDiffStore(String destination, String... keys)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.SDIFFSTORE, destination, keys);
+		Object[] args = new Object[keys.length+1];
+		args[0] = destination;
+		System.arraycopy(keys, 0, args, 1, keys.length);
+
+		return super.sendRequest(Integer.class, null, RedisCommand.SDIFFSTORE, args);
 	}
 
 	/*
@@ -955,8 +956,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] setsInter(String... keys)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.SINTER, (Object[])keys);
 	}
 
 	/*
@@ -968,7 +968,11 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public int setsInterStore(String destination, String... keys)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.SINTERSTORE, destination, keys);
+		Object[] args = new Object[keys.length+1];
+		args[0] = destination;
+		System.arraycopy(keys, 0, args, 1, keys.length);
+		
+		return super.sendRequest(Integer.class, null, RedisCommand.SINTERSTORE, destination, args);
 	}
 
 	/*
@@ -1002,8 +1006,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] setsMembers(String key)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.SMEMBERS, key);
 	}
 
 	/*
@@ -1025,10 +1028,14 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	 * java.lang.String[])
 	 */
 	@Override
-	public Object[] sort(String key, String... args)
+	public Object[] sort(String key, String... params)
 	{
-		// TODO 稍后实现
-		return null;
+		Object[] args = new Object[params.length+1];
+		args[0] = key;
+		System.arraycopy(params, 0, args, 1, params.length);
+
+		
+		return super.sendRequest(String[].class, null, RedisCommand.SORT, args);
 	}
 
 	/*
@@ -1084,8 +1091,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] setsUnion(String... keys)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.SUNION, (Object[])keys);
 	}
 
 	/*
@@ -1097,7 +1103,11 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public int setsUnionStore(String destination, String... keys)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.SUNIONSTORE, destination, keys);
+		Object[] args = new Object[keys.length+1];
+		args[0] = destination;
+		System.arraycopy(keys, 0, args, 1, keys.length);
+		
+		return super.sendRequest(Integer.class, null, RedisCommand.SUNIONSTORE, args);
 	}
 
 	/*
@@ -1108,8 +1118,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] sync()
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.SYNC);
 	}
 
 	/*
@@ -1201,8 +1210,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] sortedSetsRange(String key, int start, int stop)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.ZRANGE, key, start, stop);
 	}
 
 	/*
@@ -1213,8 +1221,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] sortedSetsRangeByScore(String... args)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.ZRANGEBYSCORE, (Object[])args);
 	}
 
 	/*
@@ -1275,8 +1282,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] sortedSetsRevRange(String key, int start, int stop)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.ZREVRANGE, key, start, stop);
 	}
 
 	/*
@@ -1288,8 +1294,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public String[] sortedSetsRevRangeByScore(String... args)
 	{
-		// TODO 稍后实现
-		return null;
+		return super.sendRequest(String[].class, null, RedisCommand.ZREVRANGEBYSCORE, (Object[])args);
 	}
 
 	/*

@@ -1,8 +1,6 @@
 package com.handinfo.redis4j.impl.transfers.handler;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
@@ -16,8 +14,6 @@ import com.handinfo.redis4j.impl.util.CommandWrapper;
 
 public class MessageHandler extends SimpleChannelHandler
 {
-
-	private static final Logger logger = Logger.getLogger(MessageHandler.class.getName());
 	private BlockingQueue<CommandWrapper> commandQueue;
 	private IConnector connector;
 
@@ -57,6 +53,7 @@ public class MessageHandler extends SimpleChannelHandler
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception
 	{
 		CommandWrapper cmdWrapper = null;
+		
 		while (true)
 		{
 			cmdWrapper = this.commandQueue.peek();
@@ -64,28 +61,25 @@ public class MessageHandler extends SimpleChannelHandler
 			{
 				break;
 			}
+			Thread.sleep(0);
 		}
-		if (cmdWrapper != null)
+		
+		if (cmdWrapper.getType() == CommandWrapper.Type.ASYNC)
 		{
-			if (cmdWrapper.getType().equals(CommandWrapper.Type.ASYNC))
+			cmdWrapper.addResult((RedisResponse) e.getMessage());
+			cmdWrapper.resume();
+		}
+		else
+		{
+
+			cmdWrapper.addResult((RedisResponse) e.getMessage());
+			if(cmdWrapper.surplusLockedCommand() == 0)
 			{
-				cmdWrapper.addResult((RedisResponse) e.getMessage());
+				this.commandQueue.remove(cmdWrapper);
 				cmdWrapper.resume();
 			}
-			else
-			{
-
-				cmdWrapper.addResult((RedisResponse) e.getMessage());
-				if(cmdWrapper.surplusLockedCommand() == 0)
-				{
-					this.commandQueue.remove(cmdWrapper);
-					cmdWrapper.resume();
-				}
-			}
-		} else
-		{
-			printMsg(Level.WARNING, "If you found this,please tell me,this is a bug!");
 		}
+		
 		super.messageReceived(ctx, e);
 	}
 
@@ -94,10 +88,4 @@ public class MessageHandler extends SimpleChannelHandler
 		e.getCause().printStackTrace();
 		ctx.sendDownstream(e);
 	}
-
-	private void printMsg(Level level, String msg)
-	{
-		logger.log(level, "Thread name:" + Thread.currentThread().getName() + " - ID:" + Thread.currentThread().getId() + " - " + msg);
-	}
-
 }

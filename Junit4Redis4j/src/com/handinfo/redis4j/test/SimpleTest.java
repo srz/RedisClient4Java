@@ -24,21 +24,21 @@ public class SimpleTest
 			{
 				try
 				{
-//					boolean b = client.set("qqq", "cxc1");
+					boolean b = client.set("qqq", "cxc1");
+					System.out.println(b);
+					System.out.println(client.get("qqq"));
+//					int b = client.listLeftPush("list_a", "aaaa");
 //					System.out.println(b);
-//					System.out.println(client.get("qqq"));
-					int b = client.listLeftPush("list_a", "aaaa");
-					System.out.println(b);
-					b = client.listLeftPush("list_a", "bbbb");
-					System.out.println(b);
-					b = client.listLeftPush("list_a", "cccc");
-					System.out.println(b);
-					b = client.listLeftPush("list_a", "dddd");
-					System.out.println(b);
-					b = client.listLeftPush("list_a", "eeee");
-					System.out.println(b);
-					String[] s = client.listBlockLeftPop(1, "list_a");
-					System.out.println("==" + s[0]);
+//					b = client.listLeftPush("list_a", "bbbb");
+//					System.out.println(b);
+//					b = client.listLeftPush("list_a", "cccc");
+//					System.out.println(b);
+//					b = client.listLeftPush("list_a", "dddd");
+//					System.out.println(b);
+//					b = client.listLeftPush("list_a", "eeee");
+//					System.out.println(b);
+//					String[] s = client.listBlockLeftPop(1, "list_a");
+//					System.out.println("==" + s[0]);
 				}
 				catch (Exception e)
 				{
