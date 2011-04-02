@@ -7,7 +7,7 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 
-import com.handinfo.redis4j.api.IConnector;
+import com.handinfo.redis4j.api.ISession;
 import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.impl.util.CommandWrapper;
@@ -15,13 +15,13 @@ import com.handinfo.redis4j.impl.util.CommandWrapper;
 public class MessageHandler extends SimpleChannelHandler
 {
 	private BlockingQueue<CommandWrapper> commandQueue;
-	private IConnector connector;
+	private ISession session;
 
-	public MessageHandler(IConnector connector)
+	public MessageHandler(ISession session)
 	{
 		super();
-		this.connector = connector;
-		commandQueue = connector.getCommandQueue();
+		this.session = session;
+		commandQueue = session.getCommandQueue();
 	}
 
 	@Override
@@ -29,10 +29,10 @@ public class MessageHandler extends SimpleChannelHandler
 	{
 		CommandWrapper cmdWrapper = (CommandWrapper) e.getMessage();
 
-		connector.getLock().lock();
+		session.getChannelSyncLock().lock();
 		try
 		{
-			if (connector.getIsAllowWrite().get() && e.getChannel().isConnected())
+			if (session.isAllowWrite().get() && e.getChannel().isConnected())
 			{
 				ctx.sendDownstream(e);
 				commandQueue.add(cmdWrapper);
@@ -42,10 +42,10 @@ public class MessageHandler extends SimpleChannelHandler
 			}
 		} finally
 		{
-			connector.getLock().unlock();
+			session.getChannelSyncLock().unlock();
 		}
 
-		if (connector.getIsAllowWrite().get() && e.getChannel().isConnected())
+		if (session.isAllowWrite().get() && e.getChannel().isConnected())
 			cmdWrapper.pause();
 	}
 

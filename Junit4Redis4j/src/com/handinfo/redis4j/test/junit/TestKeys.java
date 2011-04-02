@@ -1,4 +1,4 @@
-package com.handinfo.redis4j.test;
+package com.handinfo.redis4j.test.junit;
 
 import static org.junit.Assert.assertTrue;
 
@@ -9,6 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.RedisClientBuilder;
 import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class TestKeys
@@ -18,7 +19,7 @@ public class TestKeys
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
-		client = new RedisDatabaseClient("192.2.9.223", 6379, 10);
+		client = RedisClientBuilder.buildDatabaseClient("192.2.9.223", 6379, 0, "");
 	}
 
 	@AfterClass

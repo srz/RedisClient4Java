@@ -3,7 +3,7 @@
  */
 package com.handinfo.redis4j.impl.database;
 
-import com.handinfo.redis4j.api.IConnector;
+import com.handinfo.redis4j.api.IDataBaseConnector;
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.exception.NullBatchException;
 
@@ -12,7 +12,7 @@ import com.handinfo.redis4j.api.exception.NullBatchException;
  */
 public class DatabaseBatch extends BatchCommandlist implements IDatabaseBatch
 {
-	public DatabaseBatch(IConnector connector)
+	public DatabaseBatch(IDataBaseConnector connector)
 	{
 		super(connector);
 	}

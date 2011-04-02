@@ -6,12 +6,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.RedisClientBuilder;
 import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class DataCheck
 {
 	static int repeats = 200;//每个线程循环执行的次数
-	static int corePoolSize = 500;//测试程序启动的工作线程数
+	static int corePoolSize = 1500;//测试程序启动的工作线程数
 	
 	static CountDownLatch cdl;
 	static AtomicInteger numberOfAllExecute = new AtomicInteger(0);
@@ -19,7 +20,7 @@ public class DataCheck
 
 	public static void main(String[] args) throws Exception
 	{
-		final IRedisDatabaseClient client = new RedisDatabaseClient("192.2.9.223", 6379, 10);
+		final IRedisDatabaseClient client = RedisClientBuilder.buildDatabaseClient("192.2.9.223", 6379, 0, "");
 		
 		for(int i=0; i<keys.length; i++)
 		{

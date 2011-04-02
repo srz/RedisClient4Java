@@ -1,11 +1,12 @@
-package com.handinfo.redis4j.test;
+package com.handinfo.redis4j.test.cache;
 
 import java.util.concurrent.CountDownLatch;
 
-import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
-import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
+import com.handinfo.redis4j.api.cache.IRedisCacheClient;
+import com.handinfo.redis4j.impl.RedisClientBuilder;
+import com.handinfo.redis4j.test.User;
 
-public class SimpleTest
+public class SimpleCacheTest
 {
 	private static CountDownLatch latch = new CountDownLatch(1);
 
@@ -15,7 +16,11 @@ public class SimpleTest
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		final IRedisDatabaseClient client = new RedisDatabaseClient("192.2.9.223", 6379, 0);
+		RedisClientBuilder builder = new RedisClientBuilder();
+		builder.addSharding("192.2.9.223", 6380, 1, "");
+		//builder.addSharding("192.2.9.223", 6379, 2, "");
+		//builder.addSharding("192.2.9.223", 6380, 3, "");
+		final IRedisCacheClient client = builder.buildCacheClient();
 
 		Thread t = new Thread(new Runnable()
 		{
@@ -24,9 +29,13 @@ public class SimpleTest
 			{
 				try
 				{
-					boolean b = client.set("qqq", "cxc1");
+					User user = new User();
+					user.setId(11);
+					user.setName("srz");
+					boolean b = client.set("qqq", user);
 					System.out.println(b);
-					System.out.println(client.get("qqq"));
+					User s = client.get("qqq");
+					System.out.println(s.getName());
 //					int b = client.listLeftPush("list_a", "aaaa");
 //					System.out.println(b);
 //					b = client.listLeftPush("list_a", "bbbb");
@@ -53,6 +62,7 @@ public class SimpleTest
 		t.start();
 
 		latch.await();
+		//Thread.sleep(50000000);
 		System.out.println("thread " + t.getName() + " is finished");
 
 		client.quit();

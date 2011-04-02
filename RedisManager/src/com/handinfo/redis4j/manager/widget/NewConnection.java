@@ -130,7 +130,7 @@ public class NewConnection extends JDialog implements ActionListener, PropertyCh
 				} else
 				{
 					client = new RedisDatabaseClient(this.ipAddress.getText().trim(), Integer.valueOf(this.port.getText().trim()), 10, 10, 10);
-					if (client.isConnected())
+					if (client.totalOfConnected())
 					{
 						tabName = ipAddress.getText().trim() + ":" + port.getText().trim();
 						clearAndHide();

@@ -93,7 +93,8 @@ public class CommandWrapper
 			if (value instanceof ObjectWrapper<?>)
 			{
 				bytes = ((ObjectWrapper<?>) value).getByteArray();
-			} else
+			}
+			else
 			{
 				bytes = String.valueOf(value).getBytes();
 			}

@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.RedisClientBuilder;
 import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class DataCheckOfBatch
@@ -21,7 +22,7 @@ public class DataCheckOfBatch
 
 	public static void main(String[] args) throws Exception
 	{
-		final IRedisDatabaseClient client = new RedisDatabaseClient("192.2.9.223", 6379, 10);
+		final IRedisDatabaseClient client = RedisClientBuilder.buildDatabaseClient("192.2.9.223", 6379, 0, "");
 		
 		for(int i=0; i<keys.length; i++)
 		{

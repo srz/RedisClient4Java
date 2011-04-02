@@ -1,12 +1,12 @@
 package com.handinfo.redis4j.impl.database;
 
-import com.handinfo.redis4j.api.IConnector;
+import com.handinfo.redis4j.api.IDataBaseConnector;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.database.IDatabaseTransaction;
 
 public class DatabaseTransaction extends BatchCommandlist implements IDatabaseTransaction
 {
-	public DatabaseTransaction(IConnector connector)
+	public DatabaseTransaction(IDataBaseConnector connector)
 	{
 		super(connector);
 		super.addCommand(RedisCommand.MULTI);

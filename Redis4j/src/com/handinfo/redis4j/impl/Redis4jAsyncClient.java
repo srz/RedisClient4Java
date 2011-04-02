@@ -5,40 +5,31 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.handinfo.redis4j.api.IConnector;
+import com.handinfo.redis4j.api.IDataBaseConnector;
 import com.handinfo.redis4j.api.IRedis4jAsync;
 import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
-import com.handinfo.redis4j.impl.transfers.Connector;
+import com.handinfo.redis4j.impl.database.DatabaseConnector;
 
 public class Redis4jAsyncClient implements IRedis4jAsync
 {
 	private static final Logger logger = Logger.getLogger(Redis4jAsyncClient.class.getName());
 	private AtomicBoolean isExecute;
-	private IConnector connector;
-	private String host;
-	private int port;
-	private int indexDB;
-	private int heartbeatTime;
-	private int reconnectDelay;
-	private final static int IDEL_TIMEOUT_PING = 10;//默认检测连接空闲发送ping的间隔时间,单位是秒
-	private final static int RECONNECT_DELAY = 10;//默认断网重连间隔时间,单位是秒
+	private IDataBaseConnector connector;
 	
-	public Redis4jAsyncClient(String host, int port, int indexDB, int heartbeatTime, int reconnectDelay) //throws Exception
+	public Redis4jAsyncClient(Sharding sharding) //throws Exception
 	{
-		this.host = host;
-		this.port = port;
-		this.indexDB = indexDB;
-		this.heartbeatTime = heartbeatTime;
-		this.reconnectDelay = reconnectDelay;
 		this.isExecute = new AtomicBoolean(false);
+		sharding.setUseHeartbeat(false);
 		
-		connector = new Connector(host, port, indexDB, heartbeatTime, reconnectDelay, false);
+		connector = new DatabaseConnector(sharding);
 		
-		if(!connector.connect())
+		connector.connect();
+		if (!connector.isConnected())
 		{
-			logger.log(Level.WARNING, "can not connect to server,client will reconnect after " + this.reconnectDelay + " s");
+			logger.log(Level.WARNING, "can not connect to server,client will reconnect after " + sharding.getReconnectDelay() + " s");
 		}
 	}
 	

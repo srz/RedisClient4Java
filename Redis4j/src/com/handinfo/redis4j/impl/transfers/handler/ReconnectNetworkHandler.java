@@ -8,55 +8,58 @@ import java.util.logging.Logger;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
+import org.jboss.netty.channel.LifeCycleAwareChannelHandler;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.util.Timeout;
 import org.jboss.netty.util.Timer;
 import org.jboss.netty.util.TimerTask;
 
-import com.handinfo.redis4j.api.IConnector;
+import com.handinfo.redis4j.api.ISession;
 
 public class ReconnectNetworkHandler extends SimpleChannelUpstreamHandler
 {
 	private static final Logger logger = Logger.getLogger(ReconnectNetworkHandler.class.getName());
 	private final Timer timer;
 	private long startTime = -1;
-	private IConnector connector;
+	private ISession session;
+	
 
-	public ReconnectNetworkHandler(IConnector connector, Timer timer)
+	public ReconnectNetworkHandler(ISession session, Timer timer)
 	{
-		this.connector = connector;
+		this.session = session;
 		this.timer = timer;
 	}
 
 	@Override
 	public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e)
 	{
-		printMsg(Level.WARNING, "Disconnected from: " + connector.getRemoteAddress() + " RUN TIME: " + ((System.currentTimeMillis() - startTime) / 1000) + "s");
-		
+		printMsg(Level.WARNING, "Disconnected from: " + session.getRemoteAddress() + " RUN TIME: " + ((System.currentTimeMillis() - startTime) / 1000) + "s");
+
 	}
 
 	@Override
 	public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e)
 	{
-		this.connector.cleanCommandQueue();
-		if (!connector.getIsStartClose())
+		this.session.cleanCommandQueue();
+		if (!session.isStartClose())
 		{
-			printMsg(Level.WARNING, "After " + connector.getReconnectDelay() + "s to reconnect...");
+			printMsg(Level.WARNING, "After " + session.getReconnectDelay() + "s to reconnect...");
 			timer.newTimeout(new TimerTask()
 			{
 				public void run(Timeout timeout) throws Exception
 				{
-					printMsg(Level.INFO, "Reconnecting to: " + connector.getRemoteAddress());
+					printMsg(Level.INFO, "Reconnecting to: " + session.getRemoteAddress());
 
 					try
 					{
-						connector.connect();
+						session.reConnect();
 					}
 					catch (Exception ex)
 					{
+						ex.printStackTrace();
 					}
 				}
-			}, connector.getReconnectDelay(), TimeUnit.SECONDS);
+			}, session.getReconnectDelay(), TimeUnit.SECONDS);
 		}
 	}
 
@@ -68,7 +71,7 @@ public class ReconnectNetworkHandler extends SimpleChannelUpstreamHandler
 			startTime = System.currentTimeMillis();
 		}
 
-		printMsg(Level.INFO, "Connected to: " + connector.getRemoteAddress());
+		printMsg(Level.INFO, "Connected to: " + ctx.getChannel().getRemoteAddress());
 	}
 
 	@Override
@@ -78,7 +81,7 @@ public class ReconnectNetworkHandler extends SimpleChannelUpstreamHandler
 		if (cause instanceof ConnectException)
 		{
 			startTime = -1;
-			printMsg(Level.WARNING, "Failed to connect: " + connector.getRemoteAddress() + " Error message : " + cause.getMessage());
+			printMsg(Level.WARNING, "Failed to connect: " + session.getRemoteAddress() + " Error message : " + cause.getMessage());
 			ctx.getChannel().close();
 		} else
 		{

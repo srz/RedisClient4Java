@@ -1,4 +1,4 @@
-package com.handinfo.redis4j.test;
+package com.handinfo.redis4j.test.benchmark;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.RedisClientBuilder;
 import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class BenchmarkOfRedis4j
@@ -29,7 +30,7 @@ public class BenchmarkOfRedis4j
 		}
 		final String tmp = s;
 
-		final IRedisDatabaseClient client = new RedisDatabaseClient("192.2.9.223", 6379, 10);
+		final IRedisDatabaseClient client = RedisClientBuilder.buildDatabaseClient("192.2.9.223", 6379, 0, "");
 
 		int numOfBatch = 1000;
 		IDatabaseBatch batch = client.getNewBatch();

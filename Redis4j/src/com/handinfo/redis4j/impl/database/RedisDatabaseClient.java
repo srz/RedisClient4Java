@@ -7,25 +7,20 @@ import java.util.HashMap;
 
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponseMessage;
+import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IDatabaseTransaction;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
-import com.handinfo.redis4j.impl.RedisClient;
 import com.handinfo.redis4j.impl.util.ParameterConvert;
 
 /**
  * Database版本客户端
  */
-public final class RedisDatabaseClient extends RedisClient implements IRedisDatabaseClient
+public final class RedisDatabaseClient extends DatabaseClient implements IRedisDatabaseClient
 {
-	public RedisDatabaseClient(String host, int port, int indexDB, int heartbeatTime, int reconnectDelay)
+	public RedisDatabaseClient(Sharding sharding)
 	{
-		super(host, port, indexDB, heartbeatTime, reconnectDelay);
-	}
-	
-	public RedisDatabaseClient(String host, int port, int indexDB)
-	{
-		super(host, port, indexDB, IDEL_TIMEOUT_PING, RECONNECT_DELAY);
+		super(sharding);
 	}
 
 	/*
@@ -200,7 +195,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public int decrement(String key)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.DECR);
+		return super.sendRequest(Integer.class, null, RedisCommand.DECR, key);
 	}
 
 	/*
@@ -211,7 +206,7 @@ public final class RedisDatabaseClient extends RedisClient implements IRedisData
 	@Override
 	public int decrementByValue(String key, int decrement)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.DECRBY);
+		return super.sendRequest(Integer.class, null, RedisCommand.DECRBY, key, decrement);
 	}
 
 	/*

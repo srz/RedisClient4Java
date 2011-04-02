@@ -9,18 +9,18 @@ import org.jboss.netty.handler.timeout.IdleState;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
 
-import com.handinfo.redis4j.api.IConnector;
+import com.handinfo.redis4j.api.ISession;
 import com.handinfo.redis4j.api.RedisCommand;
 
 public class HeartbeatHandler extends IdleStateAwareChannelHandler
 {
 	private static final Logger logger = Logger.getLogger(HeartbeatHandler.class.getName());
-	private IConnector connector;
+	private ISession session;
 
-	public HeartbeatHandler(IConnector connector)
+	public HeartbeatHandler(ISession session)
 	{
 		super();
-		this.connector = connector;
+		this.session = session;
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class HeartbeatHandler extends IdleStateAwareChannelHandler
 			printMsg(Level.INFO, "Idel " + idelTime + "s,send PING...");
 			try
 			{
-				this.connector.executeCommand(RedisCommand.PING);
+				this.session.executeCommand(RedisCommand.PING);
 			}
 			catch (Exception ex)
 			{

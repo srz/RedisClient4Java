@@ -3,7 +3,7 @@ package com.handinfo.redis4j.impl.database;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.handinfo.redis4j.api.IConnector;
+import com.handinfo.redis4j.api.IDataBaseConnector;
 import com.handinfo.redis4j.api.IDatabase;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.impl.util.ParameterConvert;
@@ -11,9 +11,9 @@ import com.handinfo.redis4j.impl.util.ParameterConvert;
 public abstract class BatchCommandlist implements IDatabase
 {
 	protected ArrayList<Object[]> commandList;
-	protected IConnector connector;
+	protected IDataBaseConnector connector;
 
-	public BatchCommandlist(IConnector connector)
+	public BatchCommandlist(IDataBaseConnector connector)
 	{
 		this.connector = connector;
 		this.commandList = new ArrayList<Object[]>();

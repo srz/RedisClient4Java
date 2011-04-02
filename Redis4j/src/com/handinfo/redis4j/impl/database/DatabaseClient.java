@@ -1,87 +1,46 @@
-package com.handinfo.redis4j.impl;
+package com.handinfo.redis4j.impl.database;
 
 import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.handinfo.redis4j.api.IConnector;
+import com.handinfo.redis4j.api.IDataBaseConnector;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.RedisResponseType;
+import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
-import com.handinfo.redis4j.impl.transfers.Connector;
 
-public abstract class RedisClient
+public abstract class DatabaseClient
 {
-	private static final Logger logger = Logger.getLogger(RedisClient.class.getName());
-	protected IConnector connector;
-	private String host;
-	private int port;
-	private int indexDB;
-	private int heartbeatTime;
-	private int reconnectDelay;
-
-	public RedisClient(String host, int port, int indexDB, int heartbeatTime, int reconnectDelay)
+	private static final Logger logger = Logger.getLogger(DatabaseClient.class.getName());
+	protected IDataBaseConnector connector;
+	private Sharding sharding;
+	
+	public DatabaseClient(Sharding sharding)
 	{
-		this.host = host;
-		this.port = port;
-		this.indexDB = indexDB;
-		this.heartbeatTime = heartbeatTime;
-		this.reconnectDelay = reconnectDelay;
-
-		connector = new Connector(this.host, this.port, this.indexDB, this.heartbeatTime, this.reconnectDelay, true);
-
-		if (!connector.connect())
+		this.sharding = sharding;
+		connector = new DatabaseConnector(sharding);
+		connector.connect();
+		if (!connector.isConnected())
 		{
-			logger.log(Level.WARNING, "can not connect to server,client will reconnect after " + this.reconnectDelay + " s");
+			logger.log(Level.WARNING, "can not connect to server,client will reconnect after " + this.sharding.getReconnectDelay() + " s");
 		}
 	}
 
-	public boolean isConnected()
+	public int totalOfConnected()
 	{
-		return connector.getIsConnected();
+		return connector.isConnected() ? 1 : 0;
 	}
 
 	/**
-	 * @return the host 主机地址
+	 * @return the host 连接信息
 	 */
-	public String getHost()
+	public Sharding getSharding()
 	{
-		return host;
-	}
-
-	/**
-	 * @return the port 主机端口
-	 */
-	public int getPort()
-	{
-		return port;
-	}
-
-	/**
-	 * @return the indexDB 连接到的数据库
-	 */
-	public int getIndexDB()
-	{
-		return indexDB;
-	}
-
-	/**
-	 * @return the heartbeatTime 心跳时间
-	 */
-	public int getHeartbeatTime()
-	{
-		return heartbeatTime;
-	}
-
-	/**
-	 * @return the reconnectDelay 断网重连间隔时间
-	 */
-	public int getReconnectDelay()
-	{
-		return reconnectDelay;
+		return this.sharding.clone();
 	}
 
 	private <T, V> T castResult(Class<T> classType, V arg, RedisResponseMessage compareValue)
@@ -177,17 +136,5 @@ public abstract class RedisClient
 		}
 
 		return null;
-	}
-	
-	
-	
-	
-	
-	
-	public String sendRequest(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
-	{
-		RedisResponse response = connector.executeCommand(command, args);
-
-		return new String(response.getBulkValue());
 	}
 }
