@@ -2,6 +2,7 @@ package com.handinfo.redis4j.impl.transfers;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -13,12 +14,12 @@ import java.util.logging.Logger;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelPipeline;
 
-import com.handinfo.redis4j.api.IRedis4jAsync;
 import com.handinfo.redis4j.api.ISession;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.RedisResponseType;
 import com.handinfo.redis4j.api.Sharding;
+import com.handinfo.redis4j.api.async.IRedisAsyncClient;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
@@ -36,11 +37,13 @@ public class Session implements ISession
 	private Sharding sharding;
 	private ChannelPipeline pipeline;
 	private SessionManager manager;
+	private String name;
 
 	public Session(SessionManager manager, Sharding sharding)
 	{
 		this.sharding = sharding;
 		this.manager = manager;
+		this.name = this.sharding.getName();
 	}
 
 	/**
@@ -116,7 +119,7 @@ public class Session implements ISession
 	public void setChannel(Channel channel)
 	{
 		this.channel = channel;
-		//executeCommand(RedisCommand.SELECT, this.sharding.getDefaultIndexDB());
+		executeCommand(RedisCommand.SELECT, this.sharding.getDefaultIndexDB());
 	}
 
 	@Override
@@ -155,16 +158,10 @@ public class Session implements ISession
 				}
 			} else
 			{
-				RedisResponse response = cmdWrapper.getResult()[0];
+				RedisResponse response = cmdWrapper.getSyncResult();
 				if (response != null)
 				{
-					if (response.getType() != RedisResponseType.ErrorReply)
-					{
-						return response;
-					} else
-					{
-						throw new ErrorCommandException(response.getTextValue());
-					}
+					return response;
 				} else
 				{
 					throw new ErrorCommandException("Error back value");
@@ -204,7 +201,7 @@ public class Session implements ISession
 				}
 			} else
 			{
-				RedisResponse response = cmdWrapper.getResult()[0];
+				RedisResponse response = cmdWrapper.getSyncResult();
 				if (response != null)
 				{
 					if (response.getType() != RedisResponseType.ErrorReply)
@@ -222,9 +219,9 @@ public class Session implements ISession
 		} else
 			throw new IllegalStateException("connection has been disconnected.");
 	}
-	
+
 	@Override
-	public RedisResponse[] executeBatch(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public List<RedisResponse> executeBatch(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		if (channel != null && channel.isConnected())
 		{
@@ -243,13 +240,12 @@ public class Session implements ISession
 				}
 			} else
 			{
-				RedisResponse[] result = cmdWrapper.getResult();
+				RedisResponse result = cmdWrapper.getSyncResult();
 
-				if (result != null && result.length > 0)
+				if (result != null)
 				{
-					return result;
-				}
-				else
+					return result.getMultiBulkValue();
+				} else
 				{
 					throw new ErrorCommandException("Error back value");
 				}
@@ -259,7 +255,7 @@ public class Session implements ISession
 	}
 
 	@Override
-	public void executeAsyncCommand(IRedis4jAsync.Notify notify, RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException
+	public void executeAsyncCommand(IRedisAsyncClient.Result notify, RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException
 	{
 		if (channel != null && channel.isConnected())
 		{
@@ -272,20 +268,22 @@ public class Session implements ISession
 			boolean isFirstWrite = true;
 			while (true)
 			{
-				if(isStartQuit.get())
+				if (isStartQuit.get())
 					break;
-				if(isFirstWrite)
+				if (isFirstWrite)
 				{
 					isFirstWrite = false;
 					channel.write(cmd);
 				}
 				if (channel == null || !channel.isConnected())
 				{
-					notify.onNotify("Connection has been disconnected, please wait to auto reconnect or quit the client...");
-					Thread.sleep(this.sharding.getReconnectDelay()*1000);
+					notify.doInCurrentThread("Connection has been disconnected, please wait to auto reconnect or quit the client...");
+					Thread.sleep(this.sharding.getReconnectDelay() * 1000);
 					isFirstWrite = true;
 				} else
 				{
+					RedisResponse response = cmd.getAsyncResult();
+
 					if (cmd.getException() != null)
 					{
 						if (cmd.getException() instanceof CleanLockedThreadException)
@@ -297,7 +295,6 @@ public class Session implements ISession
 						}
 					} else
 					{
-						RedisResponse response = cmd.getResult()[0];
 						if (response != null)
 						{
 							if (response.getType() != RedisResponseType.ErrorReply)
@@ -306,25 +303,22 @@ public class Session implements ISession
 								if (response.getType() == RedisResponseType.BulkReplies)
 								{
 									result = String.valueOf(response.getBulkValue());
-								}else if (response.getType() == RedisResponseType.MultiBulkReplies)
+								} else if (response.getType() == RedisResponseType.MultiBulkReplies)
 								{
 									result = "";
-								}
-								else
+								} else
 								{
 									result = response.getTextValue();
 								}
-								notify.onNotify(result);
-								cmd.pause();
-							}
-							else
+								notify.doInCurrentThread(result);
+								// cmd.pause();
+							} else
 								throw new ErrorCommandException(response.getTextValue());
-						}
-						else
+						} else
 						{
 							throw new ErrorCommandException("Error back value");
 						}
-						
+
 					}
 				}
 			}
@@ -349,7 +343,8 @@ public class Session implements ISession
 
 						for (CommandWrapper cmd : commandQueue)
 						{
-							cmd.resume();
+							if (cmd.getType() == CommandWrapper.Type.SYNC)
+								cmd.resume();
 						}
 						commandQueue.clear();
 
@@ -374,7 +369,7 @@ public class Session implements ISession
 			clean.start();
 		}
 	}
-	
+
 	private void printMsg(Level level, String msg)
 	{
 		logger.log(level, "Thread name:" + Thread.currentThread().getName() + " - ID:" + Thread.currentThread().getId() + " - " + msg);
@@ -384,5 +379,11 @@ public class Session implements ISession
 	public void close()
 	{
 		this.isStartQuit.set(true);
+	}
+
+	@Override
+	public String getName()
+	{
+		return this.name;
 	}
 }

@@ -2,7 +2,7 @@ package com.handinfo.redis4j.api;
 
 public enum RedisResponseType
 {
-	SingleLineReply('+'), ErrorReply('-'), IntegerReply(':'), BulkReplies('$'), MultiBulkReplies('*');
+	SingleLineReply('+'), ErrorReply('-'), IntegerReply(':'), BulkReplies('$'), MultiBulkReplies('*'), NONE('#');
 
 	private char value;
 

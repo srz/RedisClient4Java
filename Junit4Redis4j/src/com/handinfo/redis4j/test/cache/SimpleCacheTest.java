@@ -4,7 +4,7 @@ import java.util.concurrent.CountDownLatch;
 
 import com.handinfo.redis4j.api.cache.IRedisCacheClient;
 import com.handinfo.redis4j.impl.RedisClientBuilder;
-import com.handinfo.redis4j.test.User;
+import com.handinfo.redis4j.test.Helper;
 
 public class SimpleCacheTest
 {
@@ -16,11 +16,7 @@ public class SimpleCacheTest
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		RedisClientBuilder builder = new RedisClientBuilder();
-		builder.addSharding("192.2.9.223", 6380, 1, "");
-		//builder.addSharding("192.2.9.223", 6379, 2, "");
-		//builder.addSharding("192.2.9.223", 6380, 3, "");
-		final IRedisCacheClient client = builder.buildCacheClient();
+		final IRedisCacheClient client = Helper.getRedisCacheClient();
 
 		Thread t = new Thread(new Runnable()
 		{
@@ -36,6 +32,8 @@ public class SimpleCacheTest
 					System.out.println(b);
 					User s = client.get("qqq");
 					System.out.println(s.getName());
+					
+					Integer r = client.get("qqw");
 //					int b = client.listLeftPush("list_a", "aaaa");
 //					System.out.println(b);
 //					b = client.listLeftPush("list_a", "bbbb");

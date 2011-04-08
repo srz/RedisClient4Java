@@ -7,6 +7,7 @@ import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.impl.RedisClientBuilder;
 import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
+import com.handinfo.redis4j.test.Helper;
 
 public class BatchTest
 {
@@ -18,7 +19,7 @@ public class BatchTest
 	 */
 	public static void main(String[] args) throws Exception
 	{
-		final IRedisDatabaseClient client = RedisClientBuilder.buildDatabaseClient("192.2.9.223", 6379, 0, "");
+		final IRedisDatabaseClient client = Helper.getRedisDatabaseClient();
 
 		System.out.println(RedisResponseType.BulkReplies.getValue());
 		
@@ -33,7 +34,7 @@ public class BatchTest
 					
 					IDatabaseBatch batch = client.getNewBatch();
 					
-					for(int i=0; i<10; i++)
+					for(int i=0; i<100; i++)
 					{
 						batch.echo(String.valueOf(i));
 					}

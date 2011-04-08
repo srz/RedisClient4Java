@@ -6,14 +6,15 @@ package com.handinfo.redis4j.impl.cache;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
-import com.handinfo.redis4j.api.ICacheConnector;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.RedisResponseType;
 import com.handinfo.redis4j.api.Sharding;
+import com.handinfo.redis4j.api.cache.ICacheConnector;
 import com.handinfo.redis4j.api.cache.IRedisCacheClient;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
@@ -1165,7 +1166,17 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public int totalOfConnected()
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return connector.getNumberOfConnected();
+	}
+
+	@Override
+	public Set<Sharding> getShardGroupInfo()
+	{
+		Set<Sharding> shardGroup = new HashSet<Sharding>();
+		for(Sharding sharding : serverList)
+		{
+			shardGroup.add(sharding.clone());
+		}
+		return shardGroup;
 	}
 }

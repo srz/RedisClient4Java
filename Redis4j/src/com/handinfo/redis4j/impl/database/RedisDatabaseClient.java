@@ -4,7 +4,9 @@
 package com.handinfo.redis4j.impl.database;
 
 import java.util.HashMap;
+import java.util.Map;
 
+import com.handinfo.redis4j.api.ListPosition;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.Sharding;
@@ -53,7 +55,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public int append(String key, String value)
+	public Integer append(String key, String value)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.APPEND, key, value);
 	}
@@ -126,9 +128,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#config_get(java.lang.String)
 	 */
 	@Override
-	public String[] configGet(String parameter)
+	public Map<String, String> configGet(String parameter)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.CONFIG_GET, parameter);
+		return ParameterConvert.stringArrayToMap(super.sendRequest(String[].class, null, RedisCommand.CONFIG_GET, parameter));
 	}
 
 	/*
@@ -137,7 +139,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#config_resetstat()
 	 */
 	@Override
-	public boolean configResetStat()
+	public Boolean configResetStat()
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.CONFIG_RESETSTAT);
 	}
@@ -149,9 +151,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean configSet(String parameter, String value)
+	public Boolean configSet(String parameter, String value)
 	{
-		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.CONFIG_SET);
+		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.CONFIG_SET, parameter, value);
 	}
 
 	/*
@@ -160,7 +162,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#dbsize()
 	 */
 	@Override
-	public int dbSize()
+	public Integer dbSize()
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.DBSIZE);
 	}
@@ -171,9 +173,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#debug_object(java.lang.String)
 	 */
 	@Override
-	public String[] debugObject(String key)
+	public String debugObject(String key)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.DEBUG_OBJECT, key);
+		return super.sendRequest(String.class, null, RedisCommand.DEBUG_OBJECT, key);
 	}
 
 	/*
@@ -181,11 +183,11 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * 
 	 * @see com.handinfo.redis4j.api.IDatabase#debug_segfault()
 	 */
-	@Override
-	public String[] debugSegfault()
-	{
-		return super.sendRequest(String[].class, null, RedisCommand.DEBUG_SEGFAULT);
-	}
+//	@Override
+//	public String[] debugSegfault()
+//	{
+//		return super.sendRequest(String[].class, null, RedisCommand.DEBUG_SEGFAULT);
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -193,9 +195,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#decr(java.lang.String)
 	 */
 	@Override
-	public int decrement(String key)
+	public Long decrement(String key)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.DECR, key);
+		return super.sendRequest(Long.class, null, RedisCommand.DECR, key);
 	}
 
 	/*
@@ -204,9 +206,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#decrby(java.lang.String, int)
 	 */
 	@Override
-	public int decrementByValue(String key, int decrement)
+	public Long decrementByValue(String key, int decrement)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.DECRBY, key, decrement);
+		return super.sendRequest(Long.class, null, RedisCommand.DECRBY, key, decrement);
 	}
 
 	/*
@@ -215,7 +217,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#del(java.lang.String[])
 	 */
 	@Override
-	public int del(String... keys)
+	public Integer del(String... keys)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.DEL, (Object[]) keys);
 	}
@@ -237,7 +239,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#exists(java.lang.String)
 	 */
 	@Override
-	public boolean exists(String key)
+	public Boolean exists(String key)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.EXISTS, key);
 	}
@@ -248,7 +250,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#expire(java.lang.String, int)
 	 */
 	@Override
-	public boolean expire(String key, int seconds)
+	public Boolean expire(String key, int seconds)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.EXPIRE, key, seconds);
 	}
@@ -259,7 +261,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#expireat(java.lang.String, long)
 	 */
 	@Override
-	public boolean expireAsTimestamp(String key, long timestamp)
+	public Boolean expireAsTimestamp(String key, long timestamp)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.EXPIREAT, key, timestamp);
 	}
@@ -270,7 +272,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#flushall()
 	 */
 	@Override
-	public boolean flushAllDB()
+	public Boolean flushAllDB()
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.FLUSHALL);
 	}
@@ -281,7 +283,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#flushdb()
 	 */
 	@Override
-	public boolean flushCurrentDB()
+	public Boolean flushCurrentDB()
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.FLUSHDB);
 	}
@@ -303,9 +305,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#getbit(java.lang.String, int)
 	 */
 	@Override
-	public int getBit(String key, int offset)
+	public Boolean getBit(String key, int offset)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.GETBIT, key, offset);
+		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.GETBIT, key, offset);
 	}
 
 	/*
@@ -339,7 +341,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean hashesDel(String key, String field)
+	public Boolean hashesDel(String key, String field)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.HDEL, key, field);
 	}
@@ -351,7 +353,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean hashesExists(String key, String field)
+	public Boolean hashesExists(String key, String field)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.HEXISTS, key, field);
 	}
@@ -374,9 +376,10 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#hgetall(java.lang.String)
 	 */
 	@Override
-	public String[] hashesGetAllValue(String key)
+	public Map<String, String> hashesGetAllValue(String key)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.HGETALL, key);
+		String[] result = super.sendRequest(String[].class, null, RedisCommand.HGETALL, key);
+		return ParameterConvert.stringArrayToMap(result);
 	}
 
 	/*
@@ -386,7 +389,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String, int)
 	 */
 	@Override
-	public int hashesIncrementByValue(String key, String field, int increment)
+	public Integer hashesIncrementByValue(String key, String field, int increment)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.HINCRBY, key, field, increment);
 	}
@@ -408,7 +411,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#hlen(java.lang.String)
 	 */
 	@Override
-	public int hashesLength(String key)
+	public Integer hashesLength(String key)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.HLEN, key);
 	}
@@ -436,7 +439,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean hashesMultipleSet(String key, HashMap<String, String> fieldAndValue)
+	public Boolean hashesMultipleSet(String key, Map<String, String> fieldAndValue)
 	{
 		String[] allKey = ParameterConvert.mapToStringArray(fieldAndValue);
 		Object[] args = new Object[allKey.length+1];
@@ -453,7 +456,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean hashesSet(String key, String field, String value)
+	public Boolean hashesSet(String key, String field, String value)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.HSET, key, field, value);
 	}
@@ -465,7 +468,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean hashesSetNotExistField(String key, String field, String value)
+	public Boolean hashesSetNotExistField(String key, String field, String value)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.HSETNX, key, field, value);
 	}
@@ -476,15 +479,10 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#hashesGetAll(java.lang.String)
 	 */
 	@Override
-	public HashMap<String, String> hashesGetAll(String key)
+	public Map<String, String> hashesGetAll(String key)
 	{
 		String[] resultList = super.sendRequest(String[].class, null, RedisCommand.HGETALL, key);
-		HashMap<String, String> result = new HashMap<String, String>();
-		for(int i=0; i<resultList.length; i+=2)
-		{
-			result.put(resultList[i], resultList[i+1]);
-		}
-		return result;
+		return ParameterConvert.stringArrayToMap(resultList);
 	}
 
 	/*
@@ -493,9 +491,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#incr(java.lang.String)
 	 */
 	@Override
-	public int increment(String key)
+	public Long increment(String key)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.INCR, key);
+		return super.sendRequest(Long.class, null, RedisCommand.INCR, key);
 	}
 
 	/*
@@ -504,9 +502,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#incrby(java.lang.String, int)
 	 */
 	@Override
-	public int incrementByValue(String key, int increment)
+	public Long incrementByValue(String key, int increment)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.INCRBY, key, increment);
+		return super.sendRequest(Long.class, null, RedisCommand.INCRBY, key, increment);
 	}
 
 	/*
@@ -537,9 +535,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#lastsave()
 	 */
 	@Override
-	public int lastSave()
+	public Long lastSave()
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.LASTSAVE);
+		return super.sendRequest(Long.class, null, RedisCommand.LASTSAVE);
 	}
 
 	/*
@@ -560,9 +558,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public int listLeftInsert(String key, String BEFORE_AFTER, String pivot, String value)
+	public Integer listLeftInsert(String key, ListPosition beforeOrAfter, String pivot, String value)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.LINSERT, key, BEFORE_AFTER, pivot, value);
+		return super.sendRequest(Integer.class, null, RedisCommand.LINSERT, key, beforeOrAfter.toString(), pivot, value);
 	}
 
 	/*
@@ -571,7 +569,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#llen(java.lang.String)
 	 */
 	@Override
-	public int listLength(String key)
+	public Integer listLength(String key)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.LLEN, key);
 	}
@@ -594,7 +592,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public int listLeftPush(String key, String value)
+	public Integer listLeftPush(String key, String value)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.LPUSH, key, value);
 	}
@@ -606,7 +604,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public int listLeftPushOnExist(String key, String value)
+	public Integer listLeftPushOnExist(String key, String value)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.LPUSHX, key, value);
 	}
@@ -630,7 +628,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public int listRemove(String key, int count, String value)
+	public Integer listRemove(String key, int count, String value)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.LREM, key, count, value);
 	}
@@ -642,7 +640,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean listSet(String key, int index, String value)
+	public Boolean listSet(String key, int index, String value)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.LSET, key, index, value);
 	}
@@ -653,7 +651,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#ltrim(java.lang.String, int, int)
 	 */
 	@Override
-	public boolean listTrim(String key, int start, int stop)
+	public Boolean listTrim(String key, int start, int stop)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.LTRIM, key, start, stop);
 	}
@@ -675,7 +673,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#move(java.lang.String, int)
 	 */
 	@Override
-	public boolean move(String key, int indexDB)
+	public Boolean move(String key, int indexDB)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.MOVE, key, indexDB);
 	}
@@ -713,7 +711,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#persist(java.lang.String)
 	 */
 	@Override
-	public boolean persist(String key)
+	public Boolean persist(String key)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.PERSIST, key);
 	}
@@ -724,7 +722,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#ping()
 	 */
 	@Override
-	public boolean ping()
+	public Boolean ping()
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.PONG, RedisCommand.PING);
 	}
@@ -747,7 +745,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean rename(String key, String newKey)
+	public Boolean rename(String key, String newKey)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.RENAME, key, newKey);
 	}
@@ -759,7 +757,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean renameOnNotExistNewKey(String key, String newKey)
+	public Boolean renameOnNotExistNewKey(String key, String newKey)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.RENAMENX, key, newKey);
 	}
@@ -794,7 +792,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public int listRightPush(String key, String value)
+	public Integer listRightPush(String key, String value)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.RPUSH, key, value);
 	}
@@ -806,7 +804,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public int listRightPushOnExist(String key, String value)
+	public Integer listRightPushOnExist(String key, String value)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.RPUSHX, key, value);
 	}
@@ -829,7 +827,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#save()
 	 */
 	@Override
-	public boolean save()
+	public Boolean save()
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.SAVE);
 	}
@@ -840,7 +838,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#scard(java.lang.String)
 	 */
 	@Override
-	public int setsCard(String key)
+	public Integer setsCard(String key)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.SCARD, key);
 	}
@@ -863,7 +861,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String[])
 	 */
 	@Override
-	public int setsDiffStore(String destination, String... keys)
+	public Integer setsDiffStore(String destination, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		args[0] = destination;
@@ -879,7 +877,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean set(String key, String value)
+	public Boolean set(String key, String value)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.SET, key, value);
 	}
@@ -891,9 +889,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * int)
 	 */
 	@Override
-	public int setBit(String key, int offset, int value)
+	public Boolean setBit(String key, int offset, boolean value)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.SETBIT, key, offset, value);
+		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SETBIT, key, offset, value ? 1: 0);
 	}
 
 	/*
@@ -903,7 +901,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean setAndExpire(String key, int seconds, String value)
+	public Boolean setAndExpire(String key, int seconds, String value)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.SETEX, key, seconds, value);
 	}
@@ -927,7 +925,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public int setRange(String key, int offset, String value)
+	public Integer setRange(String key, int offset, String value)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.SETRANGE, key, offset, value);
 	}
@@ -938,7 +936,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#shutdown()
 	 */
 	@Override
-	public boolean shutdown()
+	public Boolean shutdown()
 	{
 		return super.sendRequest(Boolean.class, null, RedisCommand.SHUTDOWN);
 	}
@@ -961,13 +959,13 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String[])
 	 */
 	@Override
-	public int setsInterStore(String destination, String... keys)
+	public Integer setsInterStore(String destination, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		args[0] = destination;
 		System.arraycopy(keys, 0, args, 1, keys.length);
 		
-		return super.sendRequest(Integer.class, null, RedisCommand.SINTERSTORE, destination, args);
+		return super.sendRequest(Integer.class, null, RedisCommand.SINTERSTORE, args);
 	}
 
 	/*
@@ -988,7 +986,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#slaveof()
 	 */
 	@Override
-	public boolean slaveOf()
+	public Boolean slaveOf()
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.SLAVEOF);
 	}
@@ -1073,7 +1071,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#strlen(java.lang.String)
 	 */
 	@Override
-	public int strLength(String key)
+	public Integer strLength(String key)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.STRLEN, key);
 	}
@@ -1096,7 +1094,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String[])
 	 */
 	@Override
-	public int setsUnionStore(String destination, String... keys)
+	public Integer setsUnionStore(String destination, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		args[0] = destination;
@@ -1111,9 +1109,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#sync()
 	 */
 	@Override
-	public String[] sync()
+	public String sync()
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.SYNC);
+		return super.sendRequest(String.class, null, RedisCommand.SYNC);
 	}
 
 	/*
@@ -1122,7 +1120,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#ttl(java.lang.String)
 	 */
 	@Override
-	public int timeToLive(String key)
+	public Integer timeToLive(String key)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.TTL, key);
 	}
@@ -1156,7 +1154,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#zcard(java.lang.String)
 	 */
 	@Override
-	public int sortedSetsCard(String key)
+	public Integer sortedSetsCard(String key)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.ZCARD, key);
 	}
@@ -1168,7 +1166,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * int)
 	 */
 	@Override
-	public int sortedSetsCount(String key, int min, int max)
+	public Integer sortedSetsCount(String key, int min, int max)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.ZCOUNT, key, min, max);
 	}
@@ -1180,9 +1178,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public String sortedSetsIncrementByValue(String key, int increment, String member)
+	public Double sortedSetsIncrementByValue(String key, int increment, String member)
 	{
-		return super.sendRequest(String.class, null, RedisCommand.ZINCRBY, key, increment, member);
+		return super.sendRequest(Double.class, null, RedisCommand.ZINCRBY, key, increment, member);
 	}
 
 	/*
@@ -1191,9 +1189,13 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#zinterstore(java.lang.String[])
 	 */
 	@Override
-	public int sortedSetsInterStore(String... args)
+	public Integer sortedSetsInterStore(String destination, String... keys)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.ZINTERSTORE, (Object[]) args);
+		Object[] args = new Object[keys.length + 2];
+		args[0] = destination;
+		args[1] = keys.length;
+		System.arraycopy(keys, 0, args, 2, keys.length);
+		return super.sendRequest(Integer.class, null, RedisCommand.ZINTERSTORE, args);
 	}
 
 	/*
@@ -1214,9 +1216,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#zrangebyscore(java.lang.String[])
 	 */
 	@Override
-	public String[] sortedSetsRangeByScore(String... args)
+	public String[] sortedSetsRangeByScore(String key, int min, int max)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.ZRANGEBYSCORE, (Object[])args);
+		return super.sendRequest(String[].class, null, RedisCommand.ZRANGEBYSCORE, key, min, max);
 	}
 
 	/*
@@ -1226,7 +1228,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public int sortedSetsRank(String key, String member)
+	public Integer sortedSetsRank(String key, String member)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.ZRANK, key, member);
 	}
@@ -1238,7 +1240,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public Boolean sortedSetsRem(String key, String member)
+	public Boolean sortedSetsRemove(String key, String member)
 	{
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.ZREM, key, member);
 	}
@@ -1250,7 +1252,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * int, int)
 	 */
 	@Override
-	public int sortedSetsRemoveRangeByRank(String key, int start, int stop)
+	public Integer sortedSetsRemoveRangeByRank(String key, int start, int stop)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.ZREMRANGEBYRANK, key, start, stop);
 	}
@@ -1263,7 +1265,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * int, int)
 	 */
 	@Override
-	public int sortedSetsRemoveRangeByScore(String key, int min, int max)
+	public Integer sortedSetsRemoveRangeByScore(String key, int min, int max)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.ZREMRANGEBYSCORE, key, min, max);
 	}
@@ -1287,9 +1289,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * com.handinfo.redis4j.api.IDatabase#zrevrangebyscore(java.lang.String[])
 	 */
 	@Override
-	public String[] sortedSetsRevRangeByScore(String... args)
+	public String[] sortedSetsRevRangeByScore(String key, int max, int min)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.ZREVRANGEBYSCORE, (Object[])args);
+		return super.sendRequest(String[].class, null, RedisCommand.ZREVRANGEBYSCORE, key, max, min);
 	}
 
 	/*
@@ -1299,7 +1301,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public int sortedSetsRevRank(String key, String member)
+	public Integer sortedSetsRevRank(String key, String member)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.ZREVRANK, key, member);
 	}
@@ -1311,9 +1313,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public String sortedSetsScore(String key, String member)
+	public Integer sortedSetsScore(String key, String member)
 	{
-		return super.sendRequest(String.class, null, RedisCommand.ZSCORE, key, member);
+		return super.sendRequest(Integer.class, null, RedisCommand.ZSCORE, key, member);
 	}
 
 	/*
@@ -1322,9 +1324,13 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#zunionstore(java.lang.String[])
 	 */
 	@Override
-	public int sortedSetsUnionStore(String... args)
+	public Integer sortedSetsUnionStore(String destination, String... keys)
 	{
-		return super.sendRequest(Integer.class, null, RedisCommand.ZUNIONSTORE, (Object[]) args);
+		Object[] args = new Object[keys.length + 2];
+		args[0] = destination;
+		args[1] = keys.length;
+		System.arraycopy(keys, 0, args, 2, keys.length);
+		return super.sendRequest(Integer.class, null, RedisCommand.ZUNIONSTORE, args);
 	}
 
 	/*

@@ -1,30 +1,29 @@
-package com.handinfo.redis4j.impl;
+package com.handinfo.redis4j.impl.async;
 
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.handinfo.redis4j.api.IDataBaseConnector;
-import com.handinfo.redis4j.api.IRedis4jAsync;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.Sharding;
+import com.handinfo.redis4j.api.async.IAsyncConnector;
+import com.handinfo.redis4j.api.async.IRedisAsyncClient;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
-import com.handinfo.redis4j.impl.database.DatabaseConnector;
 
-public class Redis4jAsyncClient implements IRedis4jAsync
+public class RedisAsyncClient implements IRedisAsyncClient
 {
-	private static final Logger logger = Logger.getLogger(Redis4jAsyncClient.class.getName());
+	private static final Logger logger = Logger.getLogger(RedisAsyncClient.class.getName());
 	private AtomicBoolean isExecute;
-	private IDataBaseConnector connector;
+	private IAsyncConnector connector;
 	
-	public Redis4jAsyncClient(Sharding sharding) //throws Exception
+	public RedisAsyncClient(Sharding sharding)
 	{
 		this.isExecute = new AtomicBoolean(false);
 		sharding.setUseHeartbeat(false);
 		
-		connector = new DatabaseConnector(sharding);
+		connector = new AsyncConnector(sharding);
 		
 		connector.connect();
 		if (!connector.isConnected())
@@ -36,7 +35,7 @@ public class Redis4jAsyncClient implements IRedis4jAsync
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IRedis4jAsyncClient#executeCommand(com.handinfo.redis4j.api.IRedis4j.AsyncCommand, com.handinfo.redis4j.api.IRedis4j.Notify)
 	 */
-	public void executeCommand(RedisCommand command, Notify notify) throws CleanLockedThreadException, ErrorCommandException, IllegalStateException, InterruptedException, BrokenBarrierException
+	public void executeCommand(RedisCommand command, Result result) throws CleanLockedThreadException, ErrorCommandException, IllegalStateException, InterruptedException, BrokenBarrierException
 	{
 		if(command.getOperateType() != RedisCommand.OperateType.ASYNC)
 		{
@@ -44,7 +43,7 @@ public class Redis4jAsyncClient implements IRedis4jAsync
 		}
 		if(!this.isExecute.getAndSet(true))
 		{
-			connector.executeAsyncCommand(notify, command);
+			connector.executeAsyncCommand(result, command);
 		}
 		else
 		{

@@ -4,6 +4,7 @@
 package com.handinfo.redis4j.api;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 当把Redis作为数据库时,实现以下功能
@@ -25,7 +26,7 @@ public interface IDatabase
 	 * [PING]Ping the server
 	 * @return
 	 */
-	public boolean ping();
+	public Boolean ping();
 	
 	//hashes
 	/**
@@ -35,7 +36,7 @@ public interface IDatabase
 	 * @param field
 	 * @return
 	 */
-	public boolean hashesDel(String key, String field);
+	public Boolean hashesDel(String key, String field);
 
 
 	/**
@@ -44,7 +45,7 @@ public interface IDatabase
 	 * @param key
 	 * @return
 	 */
-	public String[] hashesGetAllValue(String key);
+	public Map<String, String> hashesGetAllValue(String key);
 
 	/**
 	 * 获取指定Hashe对象的长度
@@ -52,7 +53,7 @@ public interface IDatabase
 	 * @param key
 	 * @return
 	 */
-	public int hashesLength(String key);
+	public Integer hashesLength(String key);
 
 	/**
 	 * [HSET]Set the string value of a hash field
@@ -61,7 +62,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public boolean hashesSet(String key, String field, String value);
+	public Boolean hashesSet(String key, String field, String value);
 
 
 	/**
@@ -70,7 +71,7 @@ public interface IDatabase
 	 * @param field
 	 * @return
 	 */
-	public boolean hashesExists(String key, String field);
+	public Boolean hashesExists(String key, String field);
 
 
 	/**
@@ -80,7 +81,7 @@ public interface IDatabase
 	 * @param increment
 	 * @return
 	 */
-	public int hashesIncrementByValue(String key, String field, int increment);
+	public Integer hashesIncrementByValue(String key, String field, int increment);
 
 
 	/**
@@ -99,7 +100,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public boolean hashesSetNotExistField(String key, String field, String value);
+	public Boolean hashesSetNotExistField(String key, String field, String value);
 
 
 	/**
@@ -123,7 +124,7 @@ public interface IDatabase
 	 * @param fieldAndValue
 	 * @return
 	 */
-	public boolean hashesMultipleSet(String key, HashMap<String, String> fieldAndValue);
+	public Boolean hashesMultipleSet(String key, Map<String, String> fieldAndValue);
 
 
 	/**
@@ -131,7 +132,7 @@ public interface IDatabase
 	 * @param key
 	 * @return
 	 */
-	public HashMap<String, String> hashesGetAll(String key);
+	public Map<String, String> hashesGetAll(String key);
 	
 	//keys
 	/**
@@ -139,7 +140,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public int del(String... keys);
+	public Integer del(String... keys);
 
 	/**
 	 * [KEYS]Find all keys matching the given pattern
@@ -154,7 +155,7 @@ public interface IDatabase
 	 * @param newKey
 	 * @return
 	 */
-	public boolean rename(String key, String newKey);
+	public Boolean rename(String key, String newKey);
 
 	/**
 	 * [TYPE]Determine the type stored at key
@@ -168,7 +169,7 @@ public interface IDatabase
 	 * @param key
 	 * @return
 	 */
-	public boolean exists(String key);
+	public Boolean exists(String key);
 
 	/**
 	 * [MOVE]Move a key to another database
@@ -176,7 +177,7 @@ public interface IDatabase
 	 * @param indexDB
 	 * @return
 	 */
-	public boolean move(String key, int indexDB);
+	public Boolean move(String key, int indexDB);
 
 
 	/**
@@ -186,7 +187,7 @@ public interface IDatabase
 	 * @param newKey
 	 * @return
 	 */
-	public boolean renameOnNotExistNewKey(String key, String newKey);
+	public Boolean renameOnNotExistNewKey(String key, String newKey);
 
 	/**
 	 * [EXPIRE]Set a key's time to live in seconds
@@ -194,14 +195,14 @@ public interface IDatabase
 	 * @param seconds
 	 * @return
 	 */
-	public boolean expire(String key, int seconds);
+	public Boolean expire(String key, int seconds);
 
 	/**
 	 * [PERSIST]Remove the expiration from a key
 	 * @param key
 	 * @return
 	 */
-	public boolean persist(String key);
+	public Boolean persist(String key);
 
 	/**
 	 * [SORT]Sort the elements in a list, set or sorted set
@@ -218,7 +219,7 @@ public interface IDatabase
 	 * @param timestamp
 	 * @return
 	 */
-	public boolean expireAsTimestamp(String key, long timestamp);
+	public Boolean expireAsTimestamp(String key, long timestamp);
 
 	/**
 	 * [RANDOMKEY]Return a random key from the keyspace
@@ -231,7 +232,7 @@ public interface IDatabase
 	 * @param key
 	 * @return
 	 */
-	public int timeToLive(String key);
+	public Integer timeToLive(String key);
 	
 	//Lists
 	/**
@@ -247,7 +248,7 @@ public interface IDatabase
 	 * @param key
 	 * @return
 	 */
-	public int listLength(String key);
+	public Integer listLength(String key);
 
 	/**
 	 * [LREM]Remove elements from a list
@@ -256,7 +257,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public int listRemove(String key, int count, String value);
+	public Integer listRemove(String key, int count, String value);
 
 	/**
 	 * [RPUSH]Append a value to a list
@@ -264,7 +265,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public int listRightPush(String key, String value);
+	public Integer listRightPush(String key, String value);
 
 	/**
 	 * [BRPOP]Remove and get the last element in a list, or block until one is available
@@ -288,7 +289,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public boolean listSet(String key, int index, String value);
+	public Boolean listSet(String key, int index, String value);
 	
 	/**
 	 * [RPUSHX]Append a value to a list, only if the list exists
@@ -296,7 +297,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public int listRightPushOnExist(String key, String value);
+	public Integer listRightPushOnExist(String key, String value);
 
 	/**
 	 * [BRPOPLPUSH]Pop a value from a list, push it to another list and return it; or block until one is available
@@ -313,7 +314,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public int listLeftPush(String key, String value);
+	public Integer listLeftPush(String key, String value);
 
 	/**
 	 * [LTRIM]Trim a list to the specified range
@@ -322,7 +323,7 @@ public interface IDatabase
 	 * @param stop
 	 * @return
 	 */
-	public boolean listTrim(String key, int start, int stop);
+	public Boolean listTrim(String key, int start, int stop);
 
 	/**
 	 * [LINDEX]Get an element from a list by its index
@@ -338,7 +339,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public int listLeftPushOnExist(String key, String value);
+	public Integer listLeftPushOnExist(String key, String value);
 
 	/**
 	 * [RPOP]Remove and get the last element in a list
@@ -350,12 +351,12 @@ public interface IDatabase
 	/**
 	 * [LINSERT]Insert an element before or after another element in a list
 	 * @param key
-	 * @param BEFORE_AFTER
+	 * @param beforeOrAfter
 	 * @param pivot
 	 * @param value
 	 * @return
 	 */
-	public int listLeftInsert(String key, String BEFORE_AFTER, String pivot, String value);
+	public Integer listLeftInsert(String key, ListPosition beforeOrAfter, String pivot, String value);
 
 	/**
 	 * [LRANGE]Get a range of elements from a list
@@ -392,13 +393,13 @@ public interface IDatabase
 	 * @param parameter
 	 * @return
 	 */
-	public String[] configGet(String parameter);
+	public Map<String, String> configGet(String parameter);
 
 	/**
 	 * [CONFIG RESETSTAT]Reset the stats returned by INFO
 	 * @return
 	 */
-	public boolean configResetStat();
+	public Boolean configResetStat();
 
 	/**
 	 * [CONFIG SET]Set a configuration parameter to the given value
@@ -406,38 +407,38 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public boolean configSet(String parameter, String value);
+	public Boolean configSet(String parameter, String value);
 
 	/**
 	 * [DBSIZE]Return the number of keys in the selected database
 	 * @return
 	 */
-	public int dbSize();
+	public Integer dbSize();
 
 	/**
 	 * [DEBUG OBJECT]Get debugging information about a key
 	 * @param key
 	 * @return
 	 */
-	public String[] debugObject(String key);
+	public String debugObject(String key);
 
 	/**
 	 * [DEBUG SEGFAULT]Make the server crash
 	 * @return
 	 */
-	public String[] debugSegfault();
+	//public String[] debugSegfault();
 
 	/**
 	 * [FLUSHALL]Remove all keys from all databases
 	 * @return
 	 */
-	public boolean flushAllDB();
+	public Boolean flushAllDB();
 
 	/**
 	 * [FLUSHDB]Remove all keys from the current database
 	 * @return
 	 */
-	public boolean flushCurrentDB();
+	public Boolean flushCurrentDB();
 
 	/**
 	 * [INFO]Get information and statistics about the server
@@ -449,31 +450,31 @@ public interface IDatabase
 	 * [LASTSAVE]Get the UNIX time stamp of the last successful save to disk
 	 * @return
 	 */
-	public int lastSave();
+	public Long lastSave();
 
 	/**
 	 * [SAVE]Synchronously save the dataset to disk
 	 * @return
 	 */
-	public boolean save();
+	public Boolean save();
 
 	/**
 	 * [SHUTDOWN]Synchronously save the dataset to disk and then shut down the server
 	 * @return
 	 */
-	public boolean shutdown();
+	public Boolean shutdown();
 
 	/**
 	 * [SLAVEOF]Make the server a slave of another instance, or promote it as master
 	 * @return
 	 */
-	public boolean slaveOf();
+	public Boolean slaveOf();
 
 	/**
 	 * [SYNC]Internal command used for replication
 	 * @return
 	 */
-	public String[] sync();
+	public String sync();
 	
 	//Sets
 	/**
@@ -512,7 +513,7 @@ public interface IDatabase
 	 * @param key
 	 * @return
 	 */
-	public int setsCard(String key);
+	public Integer setsCard(String key);
 
 	/**
 	 * [SINTERSTORE]Intersect multiple sets and store the resulting set in a key
@@ -520,7 +521,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public int setsInterStore(String destination, String... keys);
+	public Integer setsInterStore(String destination, String... keys);
 
 	/**
 	 * [SPOP]Remove and return a random member from a set
@@ -535,7 +536,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public int setsUnionStore(String destination, String... keys);
+	public Integer setsUnionStore(String destination, String... keys);
 
 	/**
 	 * [SDIFF]Subtract multiple sets
@@ -565,7 +566,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public int setsDiffStore(String destination, String... keys);
+	public Integer setsDiffStore(String destination, String... keys);
 
 	/**
 	 * [SMEMBERS]Get all the members in a set
@@ -594,10 +595,11 @@ public interface IDatabase
 
 	/**
 	 * [ZINTERSTORE]Intersect multiple sorted sets and store the resulting sorted set in a new key
-	 * @param args
+	 * @param destination TODO
+	 * @param keys
 	 * @return
 	 */
-	public int sortedSetsInterStore(String... args);
+	public Integer sortedSetsInterStore(String destination, String... keys);
 
 	/**
 	 * [ZREM]Remove a member from a sorted set
@@ -605,21 +607,23 @@ public interface IDatabase
 	 * @param member
 	 * @return
 	 */
-	public Boolean sortedSetsRem(String key, String member);
+	public Boolean sortedSetsRemove(String key, String member);
 
 	/**
 	 * [ZREVRANGEBYSCORE]Return a range of members in a sorted set, by score, with scores ordered from high to low
-	 * @param args
+	 * @param key TODO
+	 * @param max TODO
+	 * @param min TODO
 	 * @return
 	 */
-	public String[] sortedSetsRevRangeByScore(String... args);
+	public String[] sortedSetsRevRangeByScore(String key, int max, int min);
 
 	/**
 	 * [ZCARD]Get the number of members in a sorted set
 	 * @param key
 	 * @return
 	 */
-	public int sortedSetsCard(String key);
+	public Integer sortedSetsCard(String key);
 
 	/**
 	 * [ZRANGE]Return a range of members in a sorted set, by index
@@ -637,7 +641,7 @@ public interface IDatabase
 	 * @param stop
 	 * @return
 	 */
-	public int sortedSetsRemoveRangeByRank(String key, int start, int stop);
+	public Integer sortedSetsRemoveRangeByRank(String key, int start, int stop);
 
 	/**
 	 * [ZREVRANK]Determine the index of a member in a sorted set, with scores ordered from high to low
@@ -645,7 +649,7 @@ public interface IDatabase
 	 * @param member
 	 * @return
 	 */
-	public int sortedSetsRevRank(String key, String member);
+	public Integer sortedSetsRevRank(String key, String member);
 
 	/**
 	 * [ZCOUNT]Count the members in a sorted set with scores within the given values
@@ -654,14 +658,16 @@ public interface IDatabase
 	 * @param max
 	 * @return
 	 */
-	public int sortedSetsCount(String key, int min, int max);
+	public Integer sortedSetsCount(String key, int min, int max);
 
 	/**
 	 * [ZRANGEBYSCORE]Return a range of members in a sorted set, by score
-	 * @param args
+	 * @param key TODO
+	 * @param min TODO
+	 * @param max TODO
 	 * @return
 	 */
-	public String[] sortedSetsRangeByScore(String... args);
+	public String[] sortedSetsRangeByScore(String key, int min, int max);
 
 	/**
 	 * [ZREMRANGEBYSCORE]Remove all members in a sorted set within the given scores
@@ -670,7 +676,7 @@ public interface IDatabase
 	 * @param max
 	 * @return
 	 */
-	public int sortedSetsRemoveRangeByScore(String key, int min, int max);
+	public Integer sortedSetsRemoveRangeByScore(String key, int min, int max);
 
 	/**
 	 * [ZSCORE]Get the score associated with the given member in a sorted set
@@ -678,7 +684,7 @@ public interface IDatabase
 	 * @param member
 	 * @return
 	 */
-	public String sortedSetsScore(String key, String member);
+	public Integer sortedSetsScore(String key, String member);
 
 	/**
 	 * [ZINCRBY]Increment the score of a member in a sorted set
@@ -687,7 +693,7 @@ public interface IDatabase
 	 * @param member
 	 * @return
 	 */
-	public String sortedSetsIncrementByValue(String key, int increment, String member);
+	public Double sortedSetsIncrementByValue(String key, int increment, String member);
 
 	/**
 	 * [ZRANK]Determine the index of a member in a sorted set
@@ -695,7 +701,7 @@ public interface IDatabase
 	 * @param member
 	 * @return
 	 */
-	public int sortedSetsRank(String key, String member);
+	public Integer sortedSetsRank(String key, String member);
 
 	/**
 	 * [ZREVRANGE]Return a range of members in a sorted set, by index, with scores ordered from high to low
@@ -708,10 +714,11 @@ public interface IDatabase
 
 	/**
 	 * [ZUNIONSTORE]Add multiple sorted sets and store the resulting sorted set in a new key
-	 * @param args
+	 * @param destination TODO
+	 * @param keys
 	 * @return
 	 */
-	public int sortedSetsUnionStore(String... args);
+	public Integer sortedSetsUnionStore(String destination, String... keys);
 	
 	//Strings
 	/**
@@ -720,7 +727,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public int append(String key, String value);
+	public Integer append(String key, String value);
 
 	/**
 	 * [GETRANGE]Get a substring of the string stored at a key
@@ -751,7 +758,7 @@ public interface IDatabase
 	 * @param key
 	 * @return
 	 */
-	public int decrement(String key);
+	public Long decrement(String key);
 
 	/**
 	 * [GETSET]Set the string value of a key and return its old value
@@ -775,7 +782,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public int setRange(String key, int offset, String value);
+	public Integer setRange(String key, int offset, String value);
 
 	/**
 	 * [DECRBY]Decrement the integer value of a key by the given number
@@ -783,14 +790,14 @@ public interface IDatabase
 	 * @param decrement
 	 * @return
 	 */
-	public int decrementByValue(String key, int decrement);
+	public Long decrementByValue(String key, int decrement);
 
 	/**
 	 * [INCR]Increment the integer value of a key by one
 	 * @param key
 	 * @return
 	 */
-	public int increment(String key);
+	public Long increment(String key);
 
 	/**
 	 * [SET]Set the string value of a key
@@ -798,14 +805,14 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public boolean set(String key, String value);
+	public Boolean set(String key, String value);
 
 	/**
 	 * [STRLEN]Get the length of the value stored in a key
 	 * @param key
 	 * @return
 	 */
-	public int strLength(String key);
+	public Integer strLength(String key);
 
 	/**
 	 * [GET]Get the value of a key
@@ -820,7 +827,7 @@ public interface IDatabase
 	 * @param increment
 	 * @return
 	 */
-	public int incrementByValue(String key, int increment);
+	public Long incrementByValue(String key, int increment);
 
 	/**
 	 * [SETBIT]Sets or clears the bit at offset in the string value stored at key
@@ -829,7 +836,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public int setBit(String key, int offset, int value);
+	public Boolean setBit(String key, int offset, boolean value);
 
 	/**
 	 * [GETBIT]Returns the bit value at offset in the string value stored at key
@@ -837,7 +844,7 @@ public interface IDatabase
 	 * @param offset
 	 * @return
 	 */
-	public int getBit(String key, int offset);
+	public Boolean getBit(String key, int offset);
 
 	/**
 	 * [MGET]Get the values of all the given keys
@@ -853,5 +860,5 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public boolean setAndExpire(String key, int seconds, String value);
+	public Boolean setAndExpire(String key, int seconds, String value);
 }

@@ -45,7 +45,7 @@ public class MessageHandler extends SimpleChannelHandler
 			session.getChannelSyncLock().unlock();
 		}
 
-		if (session.isAllowWrite().get() && e.getChannel().isConnected())
+		if (session.isAllowWrite().get() && e.getChannel().isConnected() && cmdWrapper.getType() == CommandWrapper.Type.SYNC)
 			cmdWrapper.pause();
 	}
 
@@ -66,15 +66,13 @@ public class MessageHandler extends SimpleChannelHandler
 		
 		if (cmdWrapper.getType() == CommandWrapper.Type.ASYNC)
 		{
-			cmdWrapper.addResult((RedisResponse) e.getMessage());
-			cmdWrapper.resume();
+			cmdWrapper.addAsyncResult((RedisResponse) e.getMessage());
 		}
 		else
 		{
-
-			cmdWrapper.addResult((RedisResponse) e.getMessage());
 			if(cmdWrapper.surplusLockedCommand() == 0)
 			{
+				cmdWrapper.addSyncResult((RedisResponse) e.getMessage());
 				this.commandQueue.remove(cmdWrapper);
 				cmdWrapper.resume();
 			}

@@ -1,4 +1,4 @@
-package com.handinfo.redis4j.test;
+package com.handinfo.redis4j.impl.cache;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;

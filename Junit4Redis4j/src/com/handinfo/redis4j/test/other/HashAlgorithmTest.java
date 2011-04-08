@@ -1,4 +1,4 @@
-package com.handinfo.redis4j.test;
+package com.handinfo.redis4j.test.other;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,9 +14,9 @@ public class HashAlgorithmTest
 	/** key's count */
 	private static final Integer EXE_TIMES = 1000000;
 
-	private static final Integer NODE_COUNT = 50;
+	private static final Integer NODE_COUNT = 2;
 
-	private static final Integer VIRTUAL_NODE_COUNT = 1600;
+	private static final Integer VIRTUAL_NODE_COUNT = 160;
 
 	public static void main(String[] args)
 	{

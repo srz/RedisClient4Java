@@ -10,6 +10,7 @@ public class Sharding
 
 	private int heartbeatTime;
 	private int reconnectDelay;
+	private String name;
 
 	public Sharding()
 	{
@@ -17,6 +18,22 @@ public class Sharding
 		this.heartbeatTime = IConnection.IDEL_TIMEOUT_PING;
 		this.reconnectDelay = IConnection.RECONNECT_DELAY;
 		this.isUseHeartbeat = true;;
+	}
+
+	/**
+	 * @return the name
+	 */
+	public String getName()
+	{
+		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 
 	private boolean isUseHeartbeat;

@@ -18,7 +18,7 @@ public interface IConnection
 	public boolean quit();
 	
 	/**
-	 * 检查网络连接状态
+	 * 返回客户端已经建立的连接数
 	 */
 	public int totalOfConnected();
 }

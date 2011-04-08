@@ -2,10 +2,12 @@ package com.handinfo.redis4j.impl.database;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
-import com.handinfo.redis4j.api.IDataBaseConnector;
 import com.handinfo.redis4j.api.IDatabase;
+import com.handinfo.redis4j.api.ListPosition;
 import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.database.IDataBaseConnector;
 import com.handinfo.redis4j.impl.util.ParameterConvert;
 
 public abstract class BatchCommandlist implements IDatabase
@@ -21,10 +23,19 @@ public abstract class BatchCommandlist implements IDatabase
 
 	protected void addCommand(RedisCommand command, Object... args)
 	{
+//		Object[] cmd = new Object[command.getValue().length + args.length];
+//		System.arraycopy(command.getValue(), 0, cmd, 0, command.getValue().length);
+//		System.arraycopy(args, 0, cmd, command.getValue().length, args.length);
+//		this.commandList.add(cmd);
+		addCommand(this.commandList.size(), command, args);
+	}
+	
+	protected void addCommand(int index, RedisCommand command, Object... args)
+	{
 		Object[] cmd = new Object[command.getValue().length + args.length];
 		System.arraycopy(command.getValue(), 0, cmd, 0, command.getValue().length);
 		System.arraycopy(args, 0, cmd, command.getValue().length, args.length);
-		this.commandList.add(cmd);
+		this.commandList.add(index, cmd);
 	}
 	
 	/*
@@ -34,10 +45,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public int append(String key, String value)
+	public Integer append(String key, String value)
 	{
 		this.addCommand(RedisCommand.APPEND, key, value);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -115,7 +126,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#config_get(java.lang.String)
 	 */
 	@Override
-	public String[] configGet(String parameter)
+	public Map<String, String> configGet(String parameter)
 	{
 		this.addCommand(RedisCommand.CONFIG_GET, parameter);
 		return null;
@@ -127,7 +138,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#config_resetstat()
 	 */
 	@Override
-	public boolean configResetStat()
+	public Boolean configResetStat()
 	{
 		this.addCommand(RedisCommand.CONFIG_RESETSTAT);
 		return false;
@@ -140,7 +151,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean configSet(String parameter, String value)
+	public Boolean configSet(String parameter, String value)
 	{
 		this.addCommand(RedisCommand.CONFIG_SET, parameter, value);
 		return false;
@@ -152,10 +163,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#dbsize()
 	 */
 	@Override
-	public int dbSize()
+	public Integer dbSize()
 	{
 		this.addCommand(RedisCommand.DBSIZE);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -164,7 +175,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#debug_object(java.lang.String)
 	 */
 	@Override
-	public String[] debugObject(String key)
+	public String debugObject(String key)
 	{
 		this.addCommand(RedisCommand.DEBUG_OBJECT, key);
 		return null;
@@ -175,12 +186,12 @@ public abstract class BatchCommandlist implements IDatabase
 	 * 
 	 * @see com.handinfo.redis4j.api.IDatabase#debug_segfault()
 	 */
-	@Override
-	public String[] debugSegfault()
-	{
-		this.addCommand(RedisCommand.DEBUG_SEGFAULT);
-		return null;
-	}
+//	@Override
+//	public String[] debugSegfault()
+//	{
+//		this.addCommand(RedisCommand.DEBUG_SEGFAULT);
+//		return null;
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -188,10 +199,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#decr(java.lang.String)
 	 */
 	@Override
-	public int decrement(String key)
+	public Long decrement(String key)
 	{
 		this.addCommand(RedisCommand.DECR, key);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -200,10 +211,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#decrby(java.lang.String, int)
 	 */
 	@Override
-	public int decrementByValue(String key, int decrement)
+	public Long decrementByValue(String key, int decrement)
 	{
 		this.addCommand(RedisCommand.DECRBY, key, decrement);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -212,10 +223,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#del(java.lang.String[])
 	 */
 	@Override
-	public int del(String... keys)
+	public Integer del(String... keys)
 	{
 		this.addCommand(RedisCommand.DEL, (Object[])keys);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -236,7 +247,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#exists(java.lang.String)
 	 */
 	@Override
-	public boolean exists(String key)
+	public Boolean exists(String key)
 	{
 		this.addCommand(RedisCommand.EXISTS, key);
 		return false;
@@ -248,7 +259,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#expire(java.lang.String, int)
 	 */
 	@Override
-	public boolean expire(String key, int seconds)
+	public Boolean expire(String key, int seconds)
 	{
 		this.addCommand(RedisCommand.EXPIRE, key, seconds);
 		return false;
@@ -260,7 +271,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#expireat(java.lang.String, long)
 	 */
 	@Override
-	public boolean expireAsTimestamp(String key, long timestamp)
+	public Boolean expireAsTimestamp(String key, long timestamp)
 	{
 		this.addCommand(RedisCommand.EXPIREAT, key, timestamp);
 		return false;
@@ -272,7 +283,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#flushall()
 	 */
 	@Override
-	public boolean flushAllDB()
+	public Boolean flushAllDB()
 	{
 		this.addCommand(RedisCommand.FLUSHALL);
 		return false;
@@ -284,7 +295,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#flushdb()
 	 */
 	@Override
-	public boolean flushCurrentDB()
+	public Boolean flushCurrentDB()
 	{
 		this.addCommand(RedisCommand.FLUSHDB);
 		return false;
@@ -308,10 +319,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#getbit(java.lang.String, int)
 	 */
 	@Override
-	public int getBit(String key, int offset)
+	public Boolean getBit(String key, int offset)
 	{
 		this.addCommand(RedisCommand.GETBIT, key, offset);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -347,7 +358,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean hashesDel(String key, String field)
+	public Boolean hashesDel(String key, String field)
 	{
 		this.addCommand(RedisCommand.HDEL, key, field);
 		return false;
@@ -360,7 +371,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean hashesExists(String key, String field)
+	public Boolean hashesExists(String key, String field)
 	{
 		this.addCommand(RedisCommand.HEXISTS, key, field);
 		return false;
@@ -385,7 +396,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#hgetall(java.lang.String)
 	 */
 	@Override
-	public String[] hashesGetAllValue(String key)
+	public Map<String, String> hashesGetAllValue(String key)
 	{
 		this.addCommand(RedisCommand.HVALS, key);
 		return null;
@@ -398,10 +409,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String, int)
 	 */
 	@Override
-	public int hashesIncrementByValue(String key, String field, int increment)
+	public Integer hashesIncrementByValue(String key, String field, int increment)
 	{
 		this.addCommand(RedisCommand.HINCRBY, key, field, increment);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -422,10 +433,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#hlen(java.lang.String)
 	 */
 	@Override
-	public int hashesLength(String key)
+	public Integer hashesLength(String key)
 	{
 		this.addCommand(RedisCommand.HLEN, key);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -451,7 +462,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean hashesMultipleSet(String key, HashMap<String, String> fieldAndValue)
+	public Boolean hashesMultipleSet(String key, Map<String, String> fieldAndValue)
 	{
 		String[] allKey = ParameterConvert.mapToStringArray(fieldAndValue);
 		Object[] args = new Object[allKey.length+1];
@@ -469,7 +480,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean hashesSet(String key, String field, String value)
+	public Boolean hashesSet(String key, String field, String value)
 	{
 		this.addCommand(RedisCommand.HSET, key, field, value);
 		return false;
@@ -482,7 +493,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean hashesSetNotExistField(String key, String field, String value)
+	public Boolean hashesSetNotExistField(String key, String field, String value)
 	{
 		this.addCommand(RedisCommand.HSETNX, key, field, value);
 		return false;
@@ -494,7 +505,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#hvals(java.lang.String)
 	 */
 	@Override
-	public HashMap<String, String> hashesGetAll(String key)
+	public Map<String, String> hashesGetAll(String key)
 	{
 		this.addCommand(RedisCommand.HGETALL, key);
 		return null;
@@ -506,10 +517,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#incr(java.lang.String)
 	 */
 	@Override
-	public int increment(String key)
+	public Long increment(String key)
 	{
 		this.addCommand(RedisCommand.INCR, key);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -518,10 +529,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#incrby(java.lang.String, int)
 	 */
 	@Override
-	public int incrementByValue(String key, int increment)
+	public Long incrementByValue(String key, int increment)
 	{
 		this.addCommand(RedisCommand.INCRBY, key, increment);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -554,10 +565,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#lastsave()
 	 */
 	@Override
-	public int lastSave()
+	public Long lastSave()
 	{
 		this.addCommand(RedisCommand.LASTSAVE);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -579,10 +590,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public int listLeftInsert(String key, String BEFORE_AFTER, String pivot, String value)
+	public Integer listLeftInsert(String key, ListPosition beforeOrAfter, String pivot, String value)
 	{
-		this.addCommand(RedisCommand.LINSERT, key, BEFORE_AFTER, pivot, value);
-		return 0;
+		this.addCommand(RedisCommand.LINSERT, key, beforeOrAfter.toString(), pivot, value);
+		return null;
 	}
 
 	/*
@@ -591,10 +602,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#llen(java.lang.String)
 	 */
 	@Override
-	public int listLength(String key)
+	public Integer listLength(String key)
 	{
 		this.addCommand(RedisCommand.LLEN, key);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -616,10 +627,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public int listLeftPush(String key, String value)
+	public Integer listLeftPush(String key, String value)
 	{
 		this.addCommand(RedisCommand.LPUSH, key, value);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -629,10 +640,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public int listLeftPushOnExist(String key, String value)
+	public Integer listLeftPushOnExist(String key, String value)
 	{
 		this.addCommand(RedisCommand.LPUSHX, key, value);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -655,10 +666,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public int listRemove(String key, int count, String value)
+	public Integer listRemove(String key, int count, String value)
 	{
 		this.addCommand(RedisCommand.LREM, count, value);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -668,7 +679,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean listSet(String key, int index, String value)
+	public Boolean listSet(String key, int index, String value)
 	{
 		this.addCommand(RedisCommand.LSET, key, index, value);
 		return false;
@@ -680,7 +691,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#ltrim(java.lang.String, int, int)
 	 */
 	@Override
-	public boolean listTrim(String key, int start, int stop)
+	public Boolean listTrim(String key, int start, int stop)
 	{
 		this.addCommand(RedisCommand.LTRIM, key, start, stop);
 		return false;
@@ -704,7 +715,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#move(java.lang.String, int)
 	 */
 	@Override
-	public boolean move(String key, int indexDB)
+	public Boolean move(String key, int indexDB)
 	{
 		this.addCommand(RedisCommand.MOVE, key, indexDB);
 		return false;
@@ -744,7 +755,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#persist(java.lang.String)
 	 */
 	@Override
-	public boolean persist(String key)
+	public Boolean persist(String key)
 	{
 		this.addCommand(RedisCommand.PERSIST, key);
 		return false;
@@ -756,7 +767,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#ping()
 	 */
 	@Override
-	public boolean ping()
+	public Boolean ping()
 	{
 		this.addCommand(RedisCommand.PING);
 		return false;
@@ -781,7 +792,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean rename(String key, String newKey)
+	public Boolean rename(String key, String newKey)
 	{
 		this.addCommand(RedisCommand.RENAME, key, newKey);
 		return false;
@@ -794,7 +805,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean renameOnNotExistNewKey(String key, String newKey)
+	public Boolean renameOnNotExistNewKey(String key, String newKey)
 	{
 		this.addCommand(RedisCommand.RENAMENX, key, newKey);
 		return false;
@@ -832,10 +843,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public int listRightPush(String key, String value)
+	public Integer listRightPush(String key, String value)
 	{
 		this.addCommand(RedisCommand.RPUSH, key, value);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -845,10 +856,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public int listRightPushOnExist(String key, String value)
+	public Integer listRightPushOnExist(String key, String value)
 	{
 		this.addCommand(RedisCommand.RPUSHX, key, value);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -870,7 +881,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#save()
 	 */
 	@Override
-	public boolean save()
+	public Boolean save()
 	{
 		this.addCommand(RedisCommand.SAVE);
 		return false;
@@ -882,10 +893,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#scard(java.lang.String)
 	 */
 	@Override
-	public int setsCard(String key)
+	public Integer setsCard(String key)
 	{
 		this.addCommand(RedisCommand.SCARD, key);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -907,14 +918,14 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String[])
 	 */
 	@Override
-	public int setsDiffStore(String destination, String... keys)
+	public Integer setsDiffStore(String destination, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		args[0] = destination;
 		System.arraycopy(keys, 0, args, 1, keys.length);
 		
 		this.addCommand(RedisCommand.SDIFFSTORE, args);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -924,7 +935,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean set(String key, String value)
+	public Boolean set(String key, String value)
 	{
 		this.addCommand(RedisCommand.SET, key, value);
 		return false;
@@ -937,10 +948,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * int)
 	 */
 	@Override
-	public int setBit(String key, int offset, int value)
+	public Boolean setBit(String key, int offset, boolean value)
 	{
-		this.addCommand(RedisCommand.SETBIT, key, offset, value);
-		return 0;
+		this.addCommand(RedisCommand.SETBIT, key, offset, value ? 1: 0);
+		return null;
 	}
 
 	/*
@@ -950,7 +961,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public boolean setAndExpire(String key, int seconds, String value)
+	public Boolean setAndExpire(String key, int seconds, String value)
 	{
 		this.addCommand(RedisCommand.SETEX, key, seconds, value);
 		return false;
@@ -976,10 +987,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public int setRange(String key, int offset, String value)
+	public Integer setRange(String key, int offset, String value)
 	{
 		this.addCommand(RedisCommand.SETRANGE, key, offset, value);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -988,7 +999,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#shutdown()
 	 */
 	@Override
-	public boolean shutdown()
+	public Boolean shutdown()
 	{
 		this.addCommand(RedisCommand.SHUTDOWN);
 		return false;
@@ -1013,14 +1024,14 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String[])
 	 */
 	@Override
-	public int setsInterStore(String destination, String... keys)
+	public Integer setsInterStore(String destination, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		args[0] = destination;
 		System.arraycopy(keys, 0, args, 1, keys.length);
 		
 		this.addCommand(RedisCommand.SINTERSTORE, args);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -1042,7 +1053,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#slaveof()
 	 */
 	@Override
-	public boolean slaveOf()
+	public Boolean slaveOf()
 	{
 		this.addCommand(RedisCommand.SLAVEOF);
 		return false;
@@ -1133,10 +1144,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#strlen(java.lang.String)
 	 */
 	@Override
-	public int strLength(String key)
+	public Integer strLength(String key)
 	{
 		this.addCommand(RedisCommand.STRLEN, key);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -1158,14 +1169,14 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String[])
 	 */
 	@Override
-	public int setsUnionStore(String destination, String... keys)
+	public Integer setsUnionStore(String destination, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		args[0] = destination;
 		System.arraycopy(keys, 0, args, 1, keys.length);
 		
 		this.addCommand(RedisCommand.SUNIONSTORE, args);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -1174,7 +1185,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#sync()
 	 */
 	@Override
-	public String[] sync()
+	public String sync()
 	{
 		this.addCommand(RedisCommand.SYNC);
 		return null;
@@ -1186,10 +1197,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#ttl(java.lang.String)
 	 */
 	@Override
-	public int timeToLive(String key)
+	public Integer timeToLive(String key)
 	{
 		this.addCommand(RedisCommand.TTL, key);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -1223,10 +1234,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#zcard(java.lang.String)
 	 */
 	@Override
-	public int sortedSetsCard(String key)
+	public Integer sortedSetsCard(String key)
 	{
 		this.addCommand(RedisCommand.ZCARD, key);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -1236,10 +1247,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * int)
 	 */
 	@Override
-	public int sortedSetsCount(String key, int min, int max)
+	public Integer sortedSetsCount(String key, int min, int max)
 	{
 		this.addCommand(RedisCommand.ZCOUNT, key, min, max);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -1249,7 +1260,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public String sortedSetsIncrementByValue(String key, int increment, String member)
+	public Double sortedSetsIncrementByValue(String key, int increment, String member)
 	{
 		this.addCommand(RedisCommand.ZINCRBY, key, increment, member);
 		return null;
@@ -1261,10 +1272,14 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#zinterstore(java.lang.String[])
 	 */
 	@Override
-	public int sortedSetsInterStore(String... args)
+	public Integer sortedSetsInterStore(String destination, String... keys)
 	{
-		this.addCommand(RedisCommand.ZINTERSTORE, (Object[])args);
-		return 0;
+		Object[] args = new Object[keys.length + 2];
+		args[0] = destination;
+		args[1] = keys.length;
+		System.arraycopy(keys, 0, args, 2, keys.length);
+		this.addCommand(RedisCommand.ZINTERSTORE, args);
+		return null;
 	}
 
 	/*
@@ -1286,9 +1301,9 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#zrangebyscore(java.lang.String[])
 	 */
 	@Override
-	public String[] sortedSetsRangeByScore(String... args)
+	public String[] sortedSetsRangeByScore(String key, int min, int max)
 	{
-		this.addCommand(RedisCommand.ZRANGEBYSCORE, (Object[])args);
+		this.addCommand(RedisCommand.ZRANGEBYSCORE, key, min, max);
 		return null;
 	}
 
@@ -1299,10 +1314,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public int sortedSetsRank(String key, String member)
+	public Integer sortedSetsRank(String key, String member)
 	{
 		this.addCommand(RedisCommand.ZRANK, key, member);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -1312,7 +1327,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public Boolean sortedSetsRem(String key, String member)
+	public Boolean sortedSetsRemove(String key, String member)
 	{
 		this.addCommand(RedisCommand.ZREM, key, member);
 		return null;
@@ -1325,10 +1340,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * int, int)
 	 */
 	@Override
-	public int sortedSetsRemoveRangeByRank(String key, int start, int stop)
+	public Integer sortedSetsRemoveRangeByRank(String key, int start, int stop)
 	{
 		this.addCommand(RedisCommand.ZREMRANGEBYRANK, key, start, stop);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -1339,10 +1354,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * int, int)
 	 */
 	@Override
-	public int sortedSetsRemoveRangeByScore(String key, int min, int max)
+	public Integer sortedSetsRemoveRangeByScore(String key, int min, int max)
 	{
 		this.addCommand(RedisCommand.ZREMRANGEBYSCORE, key, min, max);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -1365,9 +1380,9 @@ public abstract class BatchCommandlist implements IDatabase
 	 * com.handinfo.redis4j.api.IDatabase#zrevrangebyscore(java.lang.String[])
 	 */
 	@Override
-	public String[] sortedSetsRevRangeByScore(String... args)
+	public String[] sortedSetsRevRangeByScore(String key, int max, int min)
 	{
-		this.addCommand(RedisCommand.ZREVRANGEBYSCORE, (Object[])args);
+		this.addCommand(RedisCommand.ZREVRANGEBYSCORE, key, max, min);
 		return null;
 	}
 
@@ -1378,10 +1393,10 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public int sortedSetsRevRank(String key, String member)
+	public Integer sortedSetsRevRank(String key, String member)
 	{
 		this.addCommand(RedisCommand.ZREVRANK, key, member);
-		return 0;
+		return null;
 	}
 
 	/*
@@ -1391,7 +1406,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public String sortedSetsScore(String key, String member)
+	public Integer sortedSetsScore(String key, String member)
 	{
 		this.addCommand(RedisCommand.ZSCORE, key, member);
 		return null;
@@ -1403,9 +1418,13 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#zunionstore(java.lang.String[])
 	 */
 	@Override
-	public int sortedSetsUnionStore(String... args)
+	public Integer sortedSetsUnionStore(String destination, String... keys)
 	{
-		this.addCommand(RedisCommand.ZUNIONSTORE, (Object[])args);
-		return 0;
+		Object[] args = new Object[keys.length + 2];
+		args[0] = destination;
+		args[1] = keys.length;
+		System.arraycopy(keys, 0, args, 2, keys.length);
+		this.addCommand(RedisCommand.ZUNIONSTORE, args);
+		return null;
 	}
 }

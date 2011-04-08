@@ -5,8 +5,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.handinfo.redis4j.api.Sharding;
+import com.handinfo.redis4j.api.async.IRedisAsyncClient;
 import com.handinfo.redis4j.api.cache.IRedisCacheClient;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.async.RedisAsyncClient;
 import com.handinfo.redis4j.impl.cache.RedisCacheClient;
 import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
@@ -34,6 +36,29 @@ public class RedisClientBuilder
 		return new RedisDatabaseClient(sharding);
 	}
 	
+	public static IRedisAsyncClient buildAsyncClient(String host, int port, int defaultIndexDB, String password)
+	{
+		if (!checkIpAndPort(host, port))
+		{
+			throw new IllegalArgumentException("host or port is error!");
+		}
+		
+		Sharding sharding = new Sharding();
+		sharding.setServerAddress(new InetSocketAddress(host, port));
+		sharding.setDefaultIndexDB(defaultIndexDB);
+		sharding.setPassword(password);
+		sharding.setUseHeartbeat(false);
+		
+		return new RedisAsyncClient(sharding);
+	}
+	
+	public static IRedisAsyncClient buildAsyncClient(Sharding sharding)
+	{
+		sharding.setUseHeartbeat(false);
+		
+		return new RedisAsyncClient(sharding);
+	}
+	
 	public IRedisCacheClient buildCacheClient()
 	{
 		return new RedisCacheClient(shardingList);
@@ -56,6 +81,7 @@ public class RedisClientBuilder
 			sharding.setDefaultIndexDB(defaultIndexDB);
 			sharding.setPassword(password);
 			sharding.setUseHeartbeat(true);
+			sharding.setName(host + "_" + String.valueOf(port) + "_" + String.valueOf(defaultIndexDB));
 			this.shardingList.add(sharding);
 		}
 	}

@@ -89,7 +89,7 @@ public class FrameToObjectArray extends OneToOneDecoder
 				/**
 				 * With multi-bulk reply the first byte of the reply will be "*"
 				 */
-				
+
 				// 头中描述的元素个数
 				int lengthFiledOfHead = Integer.valueOf(header);
 
@@ -109,8 +109,19 @@ public class FrameToObjectArray extends OneToOneDecoder
 				default:
 					{
 						ArrayList<RedisResponse> responseList = new ArrayList<RedisResponse>();
-						buildMultiBulkResponse(binaryData, binaryData.readerIndex(), responseList);
-						response.setMultiBulkValue(responseList);
+						int objectTotal = buildMultiBulkResponse(binaryData, binaryData.readerIndex(), responseList);
+						switch (objectTotal)
+						{
+						case -1:
+							response.setMultiBulkValue(null);
+							break;
+						case 0:
+							response.setMultiBulkValue(responseList);
+							break;
+						default:
+							response.setMultiBulkValue(responseList);
+							break;
+						}
 						break;
 					}
 				}
@@ -131,6 +142,8 @@ public class FrameToObjectArray extends OneToOneDecoder
 		}
 
 		int objectTotal = Integer.valueOf(buffer.toString(currentIndex + 1, firstIndexLF - 2 - currentIndex, Charset.forName("UTF-8")));
+		if (objectTotal <= 0)
+			return objectTotal;
 
 		int currentObject = 0;
 		int byteIndex = firstIndexLF;
@@ -237,6 +250,9 @@ public class FrameToObjectArray extends OneToOneDecoder
 
 		if (contentLength == -1)
 		{
+			RedisResponse response = new RedisResponse(RedisResponseType.BulkReplies);
+			response.setBulkValue(null);
+			responseList.add(response);
 			// 返回的头内容为 -1，说明无后续数据
 			return firstIndexLF;
 		} else
@@ -247,10 +263,10 @@ public class FrameToObjectArray extends OneToOneDecoder
 			} else
 			{
 				RedisResponse response = new RedisResponse(RedisResponseType.BulkReplies);
-				
+
 				byte[] byteValue = new byte[contentLength];
 				buffer.getBytes(firstIndexLF + 1, byteValue, 0, contentLength);
-				
+
 				response.setBulkValue(byteValue);
 				responseList.add(response);
 				return firstIndexLF + contentLength + 2;

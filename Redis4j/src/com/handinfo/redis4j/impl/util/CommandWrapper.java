@@ -1,9 +1,11 @@
 package com.handinfo.redis4j.impl.util;
 
 import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -20,16 +22,15 @@ public class CommandWrapper
 	private Type type;
 	private ChannelBuffer value;
 	private CountDownLatch latch;
-	private CyclicBarrier barrier;
 	private RedisClientException exception;
-	private RedisResponse[] result;
-	private int resultIndex = 0;;
-	
+	private RedisResponse result;
+
 	private AtomicInteger totalOfCommand = new AtomicInteger();
 
 	private AtomicBoolean isPause = new AtomicBoolean(false);
 	private AtomicBoolean isResume = new AtomicBoolean(false);
 	private ArrayList<Object[]> cmdList;
+	private BlockingQueue<RedisResponse> asyncResult;
 
 	public ArrayList<Object[]> getCmdList()
 	{
@@ -46,14 +47,14 @@ public class CommandWrapper
 		this.type = type;
 		this.value = getBinaryCommand(command);
 		this.totalOfCommand.set(1);
-		result = new RedisResponse[this.totalOfCommand.get()];
+		this.result = null;
 
 		this.exception = null;
 
 		if (this.type == CommandWrapper.Type.SYNC)
 			this.latch = new CountDownLatch(1);
 		else
-			this.barrier = new CyclicBarrier(2);
+			asyncResult = new LinkedBlockingQueue<RedisResponse>();
 	}
 
 	public CommandWrapper(ArrayList<Object[]> commandList)
@@ -66,14 +67,14 @@ public class CommandWrapper
 			this.value.writeBytes(getBinaryCommand(cmd));
 		}
 		this.totalOfCommand.set(commandList.size());
-		result = new RedisResponse[this.totalOfCommand.get()];
+		this.result = null;
 
 		this.exception = null;
 
 		if (this.type == CommandWrapper.Type.SYNC)
 			this.latch = new CountDownLatch(1);
 		else
-			this.barrier = new CyclicBarrier(2);
+			asyncResult = new LinkedBlockingQueue<RedisResponse>();
 	}
 
 	private ChannelBuffer getBinaryCommand(Object[] commandList)
@@ -93,8 +94,7 @@ public class CommandWrapper
 			if (value instanceof ObjectWrapper<?>)
 			{
 				bytes = ((ObjectWrapper<?>) value).getByteArray();
-			}
-			else
+			} else
 			{
 				bytes = String.valueOf(value).getBytes();
 			}
@@ -129,10 +129,6 @@ public class CommandWrapper
 			{
 				latch.await();
 			}
-		} else
-		{
-			barrier.reset();
-			barrier.await();
 		}
 	}
 
@@ -144,10 +140,6 @@ public class CommandWrapper
 			{
 				latch.await(timeout, unit);
 			}
-		} else
-		{
-			barrier.reset();
-			barrier.await(timeout, unit);
 		}
 	}
 
@@ -155,7 +147,7 @@ public class CommandWrapper
 	{
 		return this.totalOfCommand.decrementAndGet();
 	}
-	
+
 	public void resume() throws InterruptedException, BrokenBarrierException
 	{
 		if (type == CommandWrapper.Type.SYNC)
@@ -164,9 +156,6 @@ public class CommandWrapper
 			{
 				latch.countDown();
 			}
-		} else
-		{
-			barrier.await();
 		}
 	}
 
@@ -180,14 +169,24 @@ public class CommandWrapper
 		this.exception = exception;
 	}
 
-	public RedisResponse[] getResult()
+	public RedisResponse getSyncResult()
 	{
 		return result;
 	}
 
-	public void addResult(RedisResponse response)
+	public void addSyncResult(RedisResponse response)
 	{
-		result[resultIndex] = response;
-		resultIndex++;
+		this.result = response;
+	}
+
+	public RedisResponse getAsyncResult() throws InterruptedException
+	{
+		return asyncResult.take();
+	}
+	
+	public void addAsyncResult(RedisResponse response) throws InterruptedException
+	{
+		if (this.type == CommandWrapper.Type.ASYNC)
+			asyncResult.put(response);
 	}
 }

@@ -8,14 +8,19 @@ import com.dyuproject.protostuff.runtime.RuntimeSchema;
 public class ObjectWrapper<T>
 {
 	private T original;
-	
+
 	@SuppressWarnings("unchecked")
 	public ObjectWrapper(byte[] objectByteArray)
 	{
+		if (objectByteArray == null)
+		{
+			original = null;
+			return;
+		}
 		Schema<ObjectWrapper> schema = RuntimeSchema.getSchema(ObjectWrapper.class);
 		ProtostuffIOUtil.mergeFrom(objectByteArray, this, schema);
 	}
-	
+
 	/**
 	 * @param original
 	 */
@@ -31,7 +36,7 @@ public class ObjectWrapper<T>
 	{
 		return original;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public byte[] getByteArray()
 	{

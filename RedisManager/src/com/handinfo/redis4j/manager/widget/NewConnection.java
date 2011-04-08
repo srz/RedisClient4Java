@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.RedisClientBuilder;
 import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
 
 public class NewConnection extends JDialog implements ActionListener, PropertyChangeListener
@@ -129,8 +130,8 @@ public class NewConnection extends JDialog implements ActionListener, PropertyCh
 					JOptionPane.showMessageDialog(NewConnection.this, "输入的IP或端口号无效", "Try again", JOptionPane.ERROR_MESSAGE);
 				} else
 				{
-					client = new RedisDatabaseClient(this.ipAddress.getText().trim(), Integer.valueOf(this.port.getText().trim()), 10, 10, 10);
-					if (client.totalOfConnected())
+					client = RedisClientBuilder.buildDatabaseClient(this.ipAddress.getText().trim(), Integer.valueOf(this.port.getText().trim()), 0, "");
+					if (client.totalOfConnected() == 1)
 					{
 						tabName = ipAddress.getText().trim() + ":" + port.getText().trim();
 						clearAndHide();

@@ -9,6 +9,7 @@ import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.impl.RedisClientBuilder;
 import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
+import com.handinfo.redis4j.test.Helper;
 
 public class BenchmarkOfRedis4j
 {
@@ -30,7 +31,7 @@ public class BenchmarkOfRedis4j
 		}
 		final String tmp = s;
 
-		final IRedisDatabaseClient client = RedisClientBuilder.buildDatabaseClient("192.2.9.223", 6379, 0, "");
+		final IRedisDatabaseClient client = Helper.getRedisDatabaseClient();
 
 		int numOfBatch = 1000;
 		IDatabaseBatch batch = client.getNewBatch();

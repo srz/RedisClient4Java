@@ -4,12 +4,12 @@ import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.handinfo.redis4j.api.IDataBaseConnector;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.RedisResponseType;
 import com.handinfo.redis4j.api.Sharding;
+import com.handinfo.redis4j.api.database.IDataBaseConnector;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 
@@ -18,7 +18,7 @@ public abstract class DatabaseClient
 	private static final Logger logger = Logger.getLogger(DatabaseClient.class.getName());
 	protected IDataBaseConnector connector;
 	private Sharding sharding;
-	
+
 	public DatabaseClient(Sharding sharding)
 	{
 		this.sharding = sharding;
@@ -38,7 +38,7 @@ public abstract class DatabaseClient
 	/**
 	 * @return the host 连接信息
 	 */
-	public Sharding getSharding()
+	public Sharding getShardInfo()
 	{
 		return this.sharding.clone();
 	}
@@ -50,9 +50,12 @@ public abstract class DatabaseClient
 		if (classType == String.class)
 		{
 			return classType.cast(arg);
-		}
-		else if (classType == Integer.class)
+		} else if (classType == Integer.class)
 			return classType.cast(Integer.valueOf((String) arg));
+		else if (classType == Long.class)
+			return classType.cast(Long.valueOf((String) arg));
+		else if (classType == Double.class)
+			return classType.cast(Double.valueOf((String) arg));
 		else if (classType == Boolean.class)
 		{
 			if (compareValue != null)
@@ -94,36 +97,43 @@ public abstract class DatabaseClient
 				switch (response.getType())
 				{
 				case SingleLineReply:
-				{
-					return castResult(classType, response.getTextValue(), compareValue);
-				}
+					{
+						return castResult(classType, response.getTextValue(), compareValue);
+					}
 				case IntegerReply:
-				{
-					return castResult(classType, response.getTextValue(), compareValue);
-				}
+					{
+						return castResult(classType, response.getTextValue(), compareValue);
+					}
 				case BulkReplies:
-				{
-					if (response.getBulkValue() == null)
-						return null;
-					else
 					{
-						return castResult(classType, new String(response.getBulkValue(), Charset.forName("UTF-8")), compareValue);
+						if (response.getBulkValue() == null)
+							return null;
+						else
+						{
+							return castResult(classType, new String(response.getBulkValue(), Charset.forName("UTF-8")), compareValue);
+						}
 					}
-				}
 				case MultiBulkReplies:
-				{
-					if (response.getMultiBulkValue().size() == 0)
-						return null;
-
-					String[] result = new String[response.getMultiBulkValue().size()];
-					int i = 0;
-					for (RedisResponse res : response.getMultiBulkValue())
 					{
-						result[i] = new String(res.getBulkValue(), Charset.forName("UTF-8"));
-						i++;
+						if (response.getMultiBulkValue()==null || response.getMultiBulkValue().size() == 0)
+							return null;
+
+						String[] result = new String[response.getMultiBulkValue().size()];
+						int i = 0;
+						for (RedisResponse res : response.getMultiBulkValue())
+						{
+							if(res.getBulkValue() != null)
+							{
+								result[i] = new String(res.getBulkValue(), Charset.forName("UTF-8"));
+							}
+							else
+							{
+								result[i] = null;
+							}
+							i++;
+						}
+						return castResult(classType, result, null);
 					}
-					return castResult(classType, result, null);
-				}
 				default:
 					return null;
 				}
@@ -131,7 +141,12 @@ public abstract class DatabaseClient
 			{
 				// 返回的值有问题
 				if (response.getType() == RedisResponseType.ErrorReply)
-					throw new ErrorCommandException(response.getTextValue());
+				{
+					if (classType == Boolean.class)
+						return castResult(classType, response.getTextValue(), compareValue);
+					else
+						throw new ErrorCommandException(response.getTextValue());
+				}
 			}
 		}
 

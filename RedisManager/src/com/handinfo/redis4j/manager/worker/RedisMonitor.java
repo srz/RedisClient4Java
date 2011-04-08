@@ -5,22 +5,22 @@ import java.util.concurrent.BrokenBarrierException;
 
 import javax.swing.SwingWorker;
 
-import com.handinfo.redis4j.api.IRedis4jAsync;
 import com.handinfo.redis4j.api.RedisCommand;
-import com.handinfo.redis4j.api.IRedis4jAsync.Notify;
+import com.handinfo.redis4j.api.async.IRedisAsyncClient;
+import com.handinfo.redis4j.api.async.IRedisAsyncClient.Result;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
+import com.handinfo.redis4j.impl.RedisClientBuilder;
 
 public class RedisMonitor extends SwingWorker<String, String>
 {
 	private IResult result;
-	private IRedis4jAsync client;
+	private IRedisAsyncClient client;
 
 	public RedisMonitor(IRedisDatabaseClient client, IResult result)
 	{
-		//TODO 还没处理
-		//this.client = client.getAsyncClient();
+		this.client = RedisClientBuilder.buildAsyncClient(client.getShardInfo());
 		this.result = result;
 	}
 
@@ -29,11 +29,11 @@ public class RedisMonitor extends SwingWorker<String, String>
 	{
 		try
 		{
-			client.executeCommand(RedisCommand.MONITOR, new Notify()
+			client.executeCommand(RedisCommand.MONITOR, new Result()
 			{
 
 				@Override
-				public void onNotify(String result)
+				public void doInCurrentThread(String result)
 				{
 					if (!isCancelled())
 					{
@@ -44,7 +44,7 @@ public class RedisMonitor extends SwingWorker<String, String>
 		}
 		catch (InterruptedException e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		catch (CleanLockedThreadException e)
 		{

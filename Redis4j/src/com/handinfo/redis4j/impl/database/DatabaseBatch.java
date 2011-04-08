@@ -3,7 +3,7 @@
  */
 package com.handinfo.redis4j.impl.database;
 
-import com.handinfo.redis4j.api.IDataBaseConnector;
+import com.handinfo.redis4j.api.database.IDataBaseConnector;
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.exception.NullBatchException;
 

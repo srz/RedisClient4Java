@@ -1,13 +1,15 @@
 package com.handinfo.redis4j.impl.cache;
 
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.handinfo.redis4j.api.ICacheConnector;
 import com.handinfo.redis4j.api.ISession;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.Sharding;
+import com.handinfo.redis4j.api.cache.ICacheConnector;
+import com.handinfo.redis4j.api.cache.IRedisCacheClient;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.transfers.Session;
@@ -19,7 +21,7 @@ public class CacheConnector implements ICacheConnector
 	private SessionManager sessionManager;
 	private Set<Sharding> serverList;
 	private ISession[] sessions;
-
+	private KetamaNodeLocator locator;
 
 	public CacheConnector(Set<Sharding> serverList)
 	{
@@ -35,7 +37,7 @@ public class CacheConnector implements ICacheConnector
 	@Override
 	public void disConnect()
 	{
-		for(ISession session : sessions)
+		for (ISession session : sessions)
 		{
 			session.close();
 		}
@@ -52,16 +54,15 @@ public class CacheConnector implements ICacheConnector
 		return getSessionByKey(key).executeCommand(command, newArgs);
 	}
 
-
-
 	@Override
 	public ISession getSessionByKey(String key)
 	{
-		// TODO Auto-generated method stub
-		return sessions[0];
+		if (sessions.length == 1)
+			return sessions[0];
+		ISession session = locator.getPrimary(key);
+		logger.log(Level.INFO, "session=" + session.getName() + " key=" + key);
+		return session;
 	}
-
-
 
 	@Override
 	public void initSession()
@@ -72,6 +73,8 @@ public class CacheConnector implements ICacheConnector
 			sessions[i] = sessionManager.createSession(server);
 			i++;
 		}
+
+		locator = new KetamaNodeLocator(sessions, HashAlgorithm.KETAMA_HASH, IRedisCacheClient.VIRTUAL_NODE_COUNT);
 	}
 
 	@Override
@@ -79,5 +82,17 @@ public class CacheConnector implements ICacheConnector
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public int getNumberOfConnected()
+	{
+		int i = 0;
+		for(ISession session : sessions)
+		{
+			if(session.isConnected())
+				i++;
+		}
+		return i;
 	}
 }

@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 
 public class ParameterConvert
 {
-	public static String[] mapToStringArray(HashMap<String, String> map)
+	public static String[] mapToStringArray(Map<String, String> map)
 	{
 		Iterator<Entry<String, String>> iterator = map.entrySet().iterator();
 		String[] result = new String[map.size()*2];
@@ -20,5 +20,16 @@ public class ParameterConvert
 			i+=2;
 		}
 		return result;
+	}
+	
+	public static Map<String, String> stringArrayToMap(String[] result)
+	{
+		Map<String, String> map = new HashMap<String, String>();
+		
+		for(int i=0; i<result.length; i+=2)
+		{
+			map.put(result[i], result[i+1]);
+		}
+		return map;
 	}
 }

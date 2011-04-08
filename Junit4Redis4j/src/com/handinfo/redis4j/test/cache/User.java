@@ -1,4 +1,4 @@
-package com.handinfo.redis4j.test;
+package com.handinfo.redis4j.test.cache;
 
 import java.io.Serializable;
 

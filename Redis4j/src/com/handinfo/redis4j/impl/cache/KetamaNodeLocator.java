@@ -1,52 +1,55 @@
-package com.handinfo.redis4j.test;
+package com.handinfo.redis4j.impl.cache;
 
-import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import com.handinfo.redis4j.api.ISession;
 
 public final class KetamaNodeLocator
 {
 
-	private TreeMap<Long, Node> ketamaNodes;
+	private TreeMap<Long, ISession> ketamaNodes;
 	private HashAlgorithm hashAlg;
 	private int numReps = 160;
 
-	public KetamaNodeLocator(List<Node> nodes, HashAlgorithm alg, int nodeCopies)
+	public KetamaNodeLocator(ISession[] sessions, HashAlgorithm alg, int nodeCopies)
 	{
 		hashAlg = alg;
-		ketamaNodes = new TreeMap<Long, Node>();
+		ketamaNodes = new TreeMap<Long, ISession>();
 
-		numReps = nodeCopies;
+		if (nodeCopies > 0)
+			numReps = nodeCopies;
 
-		for (Node node : nodes)
+		for (ISession session : sessions)
 		{
 			for (int i = 0; i < numReps / 4; i++)
 			{
-				byte[] digest = hashAlg.computeMd5(node.getName() + i);
+				byte[] digest = hashAlg.computeMd5(session.getName() + i);
 				for (int h = 0; h < 4; h++)
 				{
 					long m = hashAlg.hash(digest, h);
 
-					ketamaNodes.put(m, node);
+					ketamaNodes.put(m, session);
 				}
 			}
 		}
+		int a = 0;
 	}
 
-	public Node getPrimary(final String k)
+	public ISession getPrimary(final String k)
 	{
 		byte[] digest = hashAlg.computeMd5(k);
-		Node rv = getNodeForKey(hashAlg.hash(digest, 0));
+		ISession rv = getNodeForKey(hashAlg.hash(digest, 0));
 		return rv;
 	}
 
-	Node getNodeForKey(long hash)
+	ISession getNodeForKey(long hash)
 	{
-		final Node rv;
+		final ISession rv;
 		Long key = hash;
 		if (!ketamaNodes.containsKey(key))
 		{
-			SortedMap<Long, Node> tailMap = ketamaNodes.tailMap(key);
+			SortedMap<Long, ISession> tailMap = ketamaNodes.tailMap(key);
 			if (tailMap.isEmpty())
 			{
 				key = ketamaNodes.firstKey();

@@ -56,7 +56,10 @@ public enum RedisCommand
 	LPOP("LPOP", RedisResponseType.BulkReplies, OperateType.SYNC, Classification.LISTS,  ""),
 	LSET("LSET", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.LISTS,  ""),
 	RPUSHX("RPUSHX", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.LISTS,  ""),
-	//TODO BRPOPLPUSH Return value Bulk reply: the element being popped from source and pushed to destination. If timeout is reached, a Null multi-bulk reply is returned.
+	/***
+	 *BRPOPLPUSH Return value Bulk reply: the element being popped from source and pushed to destination. 
+	 *If timeout is reached, a Null multi-bulk reply is returned.
+	 */
 	BRPOPLPUSH("BRPOPLPUSH", RedisResponseType.BulkReplies, OperateType.SYNC, Classification.LISTS,  ""),
 	LPUSH("LPUSH", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.LISTS,  ""),
 	LTRIM("LTRIM", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.LISTS,  ""),
@@ -89,30 +92,23 @@ public enum RedisCommand
 	ZCARD("ZCARD", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.SORTEDSETS,  ""),
 	ZRANGE("ZRANGE", RedisResponseType.MultiBulkReplies, OperateType.SYNC, Classification.SORTEDSETS,  ""),
 	ZREMRANGEBYRANK("ZREMRANGEBYRANK", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.SORTEDSETS,  ""),
-	//TODO ZREVRANK Return value
-	//If member exists in the sorted set, Integer reply: the rank of member.
-	//If member does not exist in the sorted set or key does not exist, Bulk reply: nil.
 	ZREVRANK("ZREVRANK", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.SORTEDSETS,  ""),
 	ZCOUNT("ZCOUNT", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.SORTEDSETS,  ""),
 	ZRANGEBYSCORE("ZRANGEBYSCORE", RedisResponseType.MultiBulkReplies, OperateType.SYNC, Classification.SORTEDSETS,  ""),
 	ZREMRANGEBYSCORE("ZREMRANGEBYSCORE", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.SORTEDSETS,  ""),
 	ZSCORE("ZSCORE", RedisResponseType.BulkReplies, OperateType.SYNC, Classification.SORTEDSETS,  ""),
 	ZINCRBY("ZINCRBY", RedisResponseType.BulkReplies, OperateType.SYNC, Classification.SORTEDSETS,  ""),
-	//TODO ZRANK Return value
-	//If member exists in the sorted set, Integer reply: the rank of member.
-	//If member does not exist in the sorted set or key does not exist, Bulk reply: nil.
 	ZRANK("ZRANK", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.SORTEDSETS,  ""),
 	ZREVRANGE("ZREVRANGE", RedisResponseType.MultiBulkReplies, OperateType.SYNC, Classification.SORTEDSETS,  ""),
 	ZUNIONSTORE("ZUNIONSTORE", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.SORTEDSETS,  ""),
 	
 	//TODO pub/sub待定
 	PSUBSCRIBE("PSUBSCRIBE", RedisResponseType.IntegerReply, OperateType.ASYNC, Classification.PUBSUB,  ""),
-	PUNSUBSCRIBE("PUNSUBSCRIBE", RedisResponseType.IntegerReply, OperateType.ASYNC, Classification.PUBSUB,  ""),
-	UNSUBSCRIBE("UNSUBSCRIBE", RedisResponseType.IntegerReply, OperateType.ASYNC, Classification.PUBSUB,  ""),
-	PUBLISH("PUBLISH", RedisResponseType.IntegerReply, OperateType.ASYNC, Classification.PUBSUB,  ""),
+	PUNSUBSCRIBE("PUNSUBSCRIBE", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.PUBSUB,  ""),
+	UNSUBSCRIBE("UNSUBSCRIBE", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.PUBSUB,  ""),
+	PUBLISH("PUBLISH", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.PUBSUB,  ""),
 	SUBSCRIBE("SUBSCRIBE", RedisResponseType.IntegerReply, OperateType.ASYNC, Classification.PUBSUB,  ""),
 	
-	//TODO 到这里了
 	DISCARD("DISCARD", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.TRANSACTIONS,  ""),
 	MULTI("MULTI", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.TRANSACTIONS,  ""),
 	WATCH("WATCH", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.TRANSACTIONS,  ""),
@@ -127,28 +123,21 @@ public enum RedisCommand
 
 	BGREWRITEAOF("BGREWRITEAOF", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.SERVER,  ""),
 	BGSAVE("BGSAVE", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.SERVER,  ""),
-	//TODO 返回类型需要测试,网站没有相关信息
-	CONFIG_GET("CONFIG GET", RedisResponseType.BulkReplies, OperateType.SYNC, Classification.SERVER,  ""),
+	CONFIG_GET("CONFIG GET", RedisResponseType.MultiBulkReplies, OperateType.SYNC, Classification.SERVER,  ""),
 	CONFIG_RESETSTAT("CONFIG RESETSTAT", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.SERVER,  ""),
-	//TODO 返回类型需要测试,网站没有相关信息
 	CONFIG_SET("CONFIG SET", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.SERVER,  ""),
 	DBSIZE("DBSIZE", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.SERVER,  ""),
-	//TODO 返回类型需要测试,网站没有相关信息
-	DEBUG_OBJECT("DEBUG OBJECT", RedisResponseType.BulkReplies, OperateType.SYNC, Classification.SERVER,  ""),
-	//TODO 返回类型需要测试,网站没有相关信息
-	DEBUG_SEGFAULT("DEBUG SEGFAULT", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.SERVER,  ""),
+	DEBUG_OBJECT("DEBUG OBJECT", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.SERVER,  ""),
+	DEBUG_SEGFAULT("DEBUG SEGFAULT", RedisResponseType.NONE, OperateType.SYNC, Classification.SERVER,  ""),
 	FLUSHALL("FLUSHALL", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.SERVER,  ""),
 	FLUSHDB("FLUSHDB", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.SERVER,  ""),
 	INFO("INFO", RedisResponseType.BulkReplies, OperateType.SYNC, Classification.SERVER,  ""),
 	LASTSAVE("LASTSAVE", RedisResponseType.IntegerReply, OperateType.SYNC, Classification.SERVER,  ""),
-	//TODO 返回类型需要测试,网站没有相关信息
 	MONITOR("MONITOR", RedisResponseType.BulkReplies, OperateType.ASYNC, Classification.SERVER,  ""),
-	//TODO 返回类型需要测试,网站没有相关信息
 	SAVE("SAVE", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.SERVER,  ""),
 	SHUTDOWN("SHUTDOWN", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.SERVER,  ""),
 	SLAVEOF("SLAVEOF", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.SERVER,  ""),
-	//TODO 返回类型需要测试,网站没有相关信息
-	SYNC("SYNC", RedisResponseType.SingleLineReply, OperateType.SYNC, Classification.SERVER,  "");
+	SYNC("SYNC", RedisResponseType.BulkReplies, OperateType.SYNC, Classification.SERVER,  "");
 	
 	private String value;
 	private RedisResponseType responseType;
