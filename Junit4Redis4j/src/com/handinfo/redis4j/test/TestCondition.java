@@ -1,5 +1,8 @@
 package com.handinfo.redis4j.test;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -14,56 +17,80 @@ public class TestCondition
 	public void abc(int ii) throws InterruptedException
 	{
 		lock.lock();
-		while (true)
+		if (ii == 1)
 		{
-			if (thread != null)
+			while (true)
 			{
-				if (!thread.equals(Thread.currentThread()))
+				if (thread != null)
 				{
-					condition.await();
+					if (!thread.equals(Thread.currentThread()))
+					{
+						condition.await();
+					} else
+					{
+						break;
+					}
 				} else
 				{
+					thread = Thread.currentThread();
 					break;
 				}
-			} else
-			{
-				thread = Thread.currentThread();
-				break;
 			}
 		}
-		
-		//System.out.println(ii);
-		if(ii == 989)
-		{
-			System.out.println("Thread.sleep");
-			Thread.sleep(1000*60*60);
-		}
-		
-		total++;
-		if (total == 5)
+
+		// System.out.println(ii);
+		// if(ii == 989)
+		// {
+		// System.out.println("Thread.sleep");
+		// Thread.sleep(1000*60*60);
+		// }
+
+		// total++;
+		if (ii == 2)
 		{
 			total = 0;
 			thread = null;
-			
+
+			// if (ii == 2)
 			condition.signal();
 		}
-		//System.out.println("finish lock==" + Thread.currentThread().getName() + " total=" + total);
+		System.out.println("finish lock==" + Thread.currentThread().getName() + " total=" + total);
 		lock.unlock();
+		
+		final CountDownLatch cdl_1 = new CountDownLatch(1);
+		new Thread(new Runnable(){
+
+			@Override
+			public void run()
+			{
+				try
+				{
+					Thread.sleep(1);
+				} catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+				cdl_1.countDown();
+			}}).start();
+		cdl_1.await();
 	}
 
 	/**
 	 * @param args
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
 	public static void main(String[] args) throws InterruptedException
 	{
 		final AtomicInteger tt = new AtomicInteger(0);
-		
+
 		final TestCondition tc = new TestCondition();
 
-		for (int i = 0; i < 200; i++)
+		int corePoolSize = 2;
+		final CountDownLatch cdl = new CountDownLatch(corePoolSize);
+		final ExecutorService pool = Executors.newFixedThreadPool(corePoolSize);
+		for (int i = 0; i < corePoolSize; i++)
 		{
-			new Thread(new Runnable()
+			pool.execute(new Runnable()
 			{
 
 				@Override
@@ -71,19 +98,29 @@ public class TestCondition
 				{
 					try
 					{
-						for (int j = 0; j < 5; j++)
-						{
-							tc.abc(tt.getAndIncrement());
-						}
+						// for (int j = 0; j < 5; j++)
+						// {
+						// tc.abc(tt.getAndIncrement());
+						// }
+						tc.abc(1);
+						tc.abc(3);
+						tc.abc(4);
+						tc.abc(2);
+						
 					} catch (InterruptedException e)
 					{
 						e.printStackTrace();
 					}
+
+					cdl.countDown();
 				}
-			}, "Thread#" + i).start();
+			});
 		}
-		
-		Thread.sleep(3000);
-		tc.condition.signal();
+
+		pool.shutdown();
+		cdl.await();
+
+		// Thread.sleep(3000);
+		// tc.condition.signal();
 	}
 }

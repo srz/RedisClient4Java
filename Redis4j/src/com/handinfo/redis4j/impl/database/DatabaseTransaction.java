@@ -43,6 +43,7 @@ public class DatabaseTransaction extends BatchCommandlist implements IDatabaseTr
 	@Override
 	public void watch(String... keys)
 	{
+		super.commandList.clear();
 		super.connector.executeCommand(RedisCommand.WATCH, (Object[])keys);
 		//super.addCommand(0, RedisCommand.WATCH, (Object[])keys);
 	}

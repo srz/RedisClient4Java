@@ -36,8 +36,8 @@ public class Transactions extends RedisCommandTestBase
 	@Test
 	public void testSingleClientCAS() throws InterruptedException
 	{
-		int corePoolSize = 2;
-		final int repeats = 1;
+		int corePoolSize = 1000;
+		final int repeats = 10000;
 		final ExecutorService pool = Executors.newFixedThreadPool(corePoolSize);
 		final CountDownLatch cdl = new CountDownLatch(corePoolSize);
 		final AtomicInteger numberOfAllExecute = new AtomicInteger(0);
@@ -54,6 +54,8 @@ public class Transactions extends RedisCommandTestBase
 					IDatabaseTransaction trans = client.getNewTransaction();
 					for (int i = 0; i < repeats; i++)
 					{
+						try
+						{
 						trans.watch("foo");
 
 						int newValue = Integer.valueOf(client.get("foo")) + 1;
@@ -62,6 +64,11 @@ public class Transactions extends RedisCommandTestBase
 						if (trans.commit())
 						{
 							numberOfAllExecute.incrementAndGet();
+						}
+						}
+						catch(Exception ex)
+						{
+							//ex.printStackTrace();
 						}
 					}
 					cdl.countDown();

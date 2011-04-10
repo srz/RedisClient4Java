@@ -368,6 +368,7 @@ public class Session implements ISession
 					}
 					finally
 					{
+						Session.this.getCondition().signalAll();
 						Session.this.isAllowWrite().set(true);
 						Session.this.getChannelSyncLock().unlock();
 					}
