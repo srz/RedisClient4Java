@@ -70,4 +70,10 @@ public class DatabaseConnector implements IDataBaseConnector
 	{
 		session = sessionManager.createSession(sharding);
 	}
+
+	@Override
+	public void executeTransaction(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	{
+		session.executeTransaction(commandList);
+	}
 }

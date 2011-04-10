@@ -65,11 +65,11 @@ public class Keys extends RedisCommandTestBase
 		String key = "WillBeDeletedKey1";
 		long time = System.currentTimeMillis();
 
-		assertTrue(!client.expireAsTimestamp(key, time));
+		assertEquals(false, client.expireAsTimestamp(key, time));
 
 		client.set(key, "I am WillBeDeletedKey 1");
 
-		assertTrue(client.expireAsTimestamp(key, time));
+		assertEquals(true, client.expireAsTimestamp(key, time));
 	}
 
 	@Test

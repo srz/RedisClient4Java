@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -14,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
+import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.exception.RedisClientException;
 
@@ -31,6 +31,8 @@ public class CommandWrapper
 	private AtomicBoolean isResume = new AtomicBoolean(false);
 	private ArrayList<Object[]> cmdList;
 	private BlockingQueue<RedisResponse> asyncResult;
+	
+	private RedisCommand command;
 
 	public ArrayList<Object[]> getCmdList()
 	{
@@ -42,10 +44,11 @@ public class CommandWrapper
 		SYNC, ASYNC;
 	}
 
-	public CommandWrapper(Type type, Object[] command)
+	public CommandWrapper(RedisCommand cmd, Type type, Object[] commandContent)
 	{
+		this.command = cmd;
 		this.type = type;
-		this.value = getBinaryCommand(command);
+		this.value = getBinaryCommand(commandContent);
 		this.totalOfCommand.set(1);
 		this.result = null;
 
@@ -75,6 +78,11 @@ public class CommandWrapper
 			this.latch = new CountDownLatch(1);
 		else
 			asyncResult = new LinkedBlockingQueue<RedisResponse>();
+	}
+
+	public RedisCommand getCommand()
+	{
+		return command;
 	}
 
 	private ChannelBuffer getBinaryCommand(Object[] commandList)

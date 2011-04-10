@@ -7,6 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +34,13 @@ public class Session implements ISession
 	private final BlockingQueue<CommandWrapper> commandQueue = new LinkedBlockingQueue<CommandWrapper>();
 	private AtomicBoolean isAllowWrite = new AtomicBoolean(true);
 	private final ReentrantLock lock = new ReentrantLock();
+	
+
+	private final Condition condition = lock.newCondition();
+	public Condition getCondition()
+	{
+		return condition;
+	}
 
 	private Sharding sharding;
 	private ChannelPipeline pipeline;
@@ -143,7 +151,7 @@ public class Session implements ISession
 			System.arraycopy(command.getValue(), 0, redisCommand, 0, command.getValue().length);
 			System.arraycopy(args, 0, redisCommand, command.getValue().length, args.length);
 
-			final CommandWrapper cmdWrapper = new CommandWrapper(CommandWrapper.Type.SYNC, redisCommand);
+			final CommandWrapper cmdWrapper = new CommandWrapper(command, CommandWrapper.Type.SYNC, redisCommand);
 
 			channel.write(cmdWrapper);
 
@@ -186,7 +194,7 @@ public class Session implements ISession
 			System.arraycopy(command.getValue(), 0, redisCommand, 0, command.getValue().length);
 			System.arraycopy(args, 0, redisCommand, command.getValue().length, args.length);
 
-			final CommandWrapper cmdWrapper = new CommandWrapper(CommandWrapper.Type.SYNC, redisCommand);
+			final CommandWrapper cmdWrapper = new CommandWrapper(command, CommandWrapper.Type.SYNC, redisCommand);
 
 			channel.write(cmdWrapper);
 
@@ -263,7 +271,7 @@ public class Session implements ISession
 			System.arraycopy(command.getValue(), 0, redisCommand, 0, command.getValue().length);
 			System.arraycopy(args, 0, redisCommand, command.getValue().length, args.length);
 
-			final CommandWrapper cmd = new CommandWrapper(CommandWrapper.Type.ASYNC, redisCommand);
+			final CommandWrapper cmd = new CommandWrapper(command, CommandWrapper.Type.ASYNC, redisCommand);
 
 			boolean isFirstWrite = true;
 			while (true)
@@ -385,5 +393,28 @@ public class Session implements ISession
 	public String getName()
 	{
 		return this.name;
+	}
+
+	@Override
+	public void executeTransaction(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	{
+		if (channel != null && channel.isConnected())
+		{
+			final CommandWrapper cmdWrapper = new CommandWrapper(commandList);
+
+			channel.write(cmdWrapper);
+
+			if (cmdWrapper.getException() != null)
+			{
+				if (cmdWrapper.getException() instanceof CleanLockedThreadException)
+				{
+					throw (CleanLockedThreadException) cmdWrapper.getException();
+				} else
+				{
+					throw cmdWrapper.getException();
+				}
+			}
+		} else
+			throw new IllegalStateException("connection has been disconnected.");		
 	}
 }

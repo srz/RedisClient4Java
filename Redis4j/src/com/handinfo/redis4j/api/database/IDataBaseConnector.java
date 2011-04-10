@@ -20,5 +20,7 @@ public interface IDataBaseConnector
 	
 	public List<RedisResponse> executeBatch(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
 	
+	public void executeTransaction(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
+	
 	public void disConnect();
 }

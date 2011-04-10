@@ -7,8 +7,8 @@ import com.handinfo.redis4j.impl.RedisClientBuilder;
 
 public class Helper
 {
-	private static String ip = "192.2.9.223";
-	private static int port = 6380;
+	private static String ip = "192.168.1.103";//"192.2.9.223";
+	private static int port = 6379;//6380;
 	private static int defaultIndexDB = 0;
 	private static String password = "";
 	

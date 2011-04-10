@@ -6,39 +6,44 @@ import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.database.IDataBaseConnector;
 import com.handinfo.redis4j.api.database.IDatabaseTransaction;
+import com.handinfo.redis4j.api.exception.NullBatchException;
 
 public class DatabaseTransaction extends BatchCommandlist implements IDatabaseTransaction
 {
 	public DatabaseTransaction(IDataBaseConnector connector)
 	{
 		super(connector);
-		super.addCommand(RedisCommand.MULTI);
 	}
 
 	@Override
 	public Boolean commit()
 	{
-		super.addCommand(RedisCommand.EXEC);
-		List<RedisResponse> responseList = super.connector.executeBatch(super.commandList);
-		return responseList==null ? false: true;
+		super.addCommand(0, RedisCommand.MULTI);
+		super.connector.executeTransaction(super.commandList);
+		super.commandList.clear();
+		RedisResponse response = super.connector.executeCommand(RedisCommand.EXEC);
+
+		return response.getMultiBulkValue()==null ? false: true;
 	}
 
 	@Override
 	public void discard()
 	{
-		super.addCommand(RedisCommand.DISCARD);
+		//super.addCommand(RedisCommand.DISCARD);
+		super.connector.executeCommand(RedisCommand.DISCARD);
 	}
 
 	@Override
 	public void unwatch()
 	{
-		super.addCommand(RedisCommand.UNWATCH);
+		//super.addCommand(RedisCommand.UNWATCH);
+		super.connector.executeCommand(RedisCommand.UNWATCH);
 	}
 
 	@Override
 	public void watch(String... keys)
 	{
-		//super.connector.executeCommand(RedisCommand.WATCH, (Object[])keys);
-		super.addCommand(0, RedisCommand.WATCH, (Object[])keys);
+		super.connector.executeCommand(RedisCommand.WATCH, (Object[])keys);
+		//super.addCommand(0, RedisCommand.WATCH, (Object[])keys);
 	}
 }

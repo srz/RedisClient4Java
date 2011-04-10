@@ -20,7 +20,7 @@ public class DataCheck
 
 	public static void main(String[] args) throws Exception
 	{
-		final IRedisDatabaseClient client = RedisClientBuilder.buildDatabaseClient("192.2.9.223", 6379, 0, "");
+		final IRedisDatabaseClient client = Helper.getRedisDatabaseClient();
 		
 		for(int i=0; i<keys.length; i++)
 		{

@@ -7,6 +7,7 @@ import java.util.Map;
 import com.handinfo.redis4j.api.IDatabase;
 import com.handinfo.redis4j.api.ListPosition;
 import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.database.IDataBaseConnector;
 import com.handinfo.redis4j.impl.util.ParameterConvert;
 
@@ -937,6 +938,8 @@ public abstract class BatchCommandlist implements IDatabase
 	@Override
 	public Boolean set(String key, String value)
 	{
+		//RedisResponse res = this.connector.executeCommand(RedisCommand.SET, key, value);
+		//System.err.println("--------------" + res.getTextValue());
 		this.addCommand(RedisCommand.SET, key, value);
 		return false;
 	}

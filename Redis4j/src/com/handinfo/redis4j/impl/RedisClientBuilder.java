@@ -31,6 +31,7 @@ public class RedisClientBuilder
 		sharding.setServerAddress(new InetSocketAddress(host, port));
 		sharding.setDefaultIndexDB(defaultIndexDB);
 		sharding.setPassword(password);
+		sharding.setReconnectDelay(3);
 		sharding.setUseHeartbeat(true);
 		
 		return new RedisDatabaseClient(sharding);
