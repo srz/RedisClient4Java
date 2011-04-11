@@ -7,6 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -34,9 +35,28 @@ public class Session implements ISession
 	private final BlockingQueue<CommandWrapper> commandQueue = new LinkedBlockingQueue<CommandWrapper>();
 	private AtomicBoolean isAllowWrite = new AtomicBoolean(true);
 	private final ReentrantLock lock = new ReentrantLock();
-	
+
+	private final Condition cleanCondition = lock.newCondition();
+	private final AtomicInteger totalOfWaitCondition = new AtomicInteger(0);
+
+	/**
+	 * @return the totalOfWaitCondition
+	 */
+	public AtomicInteger getTotalOfWaitCondition()
+	{
+		return totalOfWaitCondition;
+	}
+
+	/**
+	 * @return the cleanCondition
+	 */
+	public Condition getCleanCondition()
+	{
+		return cleanCondition;
+	}
 
 	private final Condition condition = lock.newCondition();
+
 	public Condition getCondition()
 	{
 		return condition;
@@ -345,8 +365,29 @@ public class Session implements ISession
 				public void run()
 				{
 					Session.this.getChannelSyncLock().lock();
+					printMsg(Level.INFO, Session.this.sharding.getServerAddress() + " signalAll....");
+					Session.this.getCondition().signalAll();
+					Session.this.getChannelSyncLock().unlock();
+
+					// try
+					// {
+					// Thread.sleep(3000);
+					// }
+					// catch (InterruptedException ex)
+					// {
+					// ex.printStackTrace();
+					// }
+
+					Session.this.getChannelSyncLock().lock();
+
 					try
 					{
+						if (Session.this.getTotalOfWaitCondition().get() != 0)
+						{
+							Session.this.cleanCondition.await();
+						}
+						printMsg(Level.INFO, Session.this.sharding.getServerAddress() + " signalAll....  finished");
+
 						printMsg(Level.INFO, Session.this.sharding.getServerAddress() + " Start clean " + commandQueue.size() + " command...");
 
 						for (CommandWrapper cmd : commandQueue)
@@ -368,7 +409,7 @@ public class Session implements ISession
 					}
 					finally
 					{
-						Session.this.getCondition().signalAll();
+						// Session.this.getCondition().signalAll();
 						Session.this.isAllowWrite().set(true);
 						Session.this.getChannelSyncLock().unlock();
 					}
@@ -416,6 +457,6 @@ public class Session implements ISession
 				}
 			}
 		} else
-			throw new IllegalStateException("connection has been disconnected.");		
+			throw new IllegalStateException("connection has been disconnected.");
 	}
 }

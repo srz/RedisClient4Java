@@ -57,22 +57,22 @@ public class TestCondition
 		System.out.println("finish lock==" + Thread.currentThread().getName() + " total=" + total);
 		lock.unlock();
 		
-		final CountDownLatch cdl_1 = new CountDownLatch(1);
-		new Thread(new Runnable(){
-
-			@Override
-			public void run()
-			{
-				try
-				{
-					Thread.sleep(1);
-				} catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-				cdl_1.countDown();
-			}}).start();
-		cdl_1.await();
+//		final CountDownLatch cdl_1 = new CountDownLatch(1);
+//		new Thread(new Runnable(){
+//
+//			@Override
+//			public void run()
+//			{
+//				try
+//				{
+//					Thread.sleep(1);
+//				} catch (InterruptedException e)
+//				{
+//					e.printStackTrace();
+//				}
+//				cdl_1.countDown();
+//			}}).start();
+//		cdl_1.await();
 	}
 
 	/**

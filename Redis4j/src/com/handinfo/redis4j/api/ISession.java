@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -25,6 +26,10 @@ import com.handinfo.redis4j.impl.util.CommandWrapper;
  */
 public interface ISession
 {
+	public AtomicInteger getTotalOfWaitCondition();
+	
+	public Condition getCleanCondition();
+	
 	public Condition getCondition();
 	
 	public String getName();

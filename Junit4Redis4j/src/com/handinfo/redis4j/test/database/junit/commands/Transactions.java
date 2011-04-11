@@ -60,7 +60,9 @@ public class Transactions extends RedisCommandTestBase
 
 						int newValue = Integer.valueOf(client.get("foo")) + 1;
 
+						System.out.println("trans.set 1111");
 						trans.set("foo", String.valueOf(newValue));
+						System.out.println("trans.set 2222");
 						if (trans.commit())
 						{
 							numberOfAllExecute.incrementAndGet();
@@ -68,7 +70,7 @@ public class Transactions extends RedisCommandTestBase
 						}
 						catch(Exception ex)
 						{
-							//ex.printStackTrace();
+							ex.printStackTrace();
 						}
 					}
 					cdl.countDown();

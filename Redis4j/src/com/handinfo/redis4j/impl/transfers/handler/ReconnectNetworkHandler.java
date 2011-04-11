@@ -56,7 +56,7 @@ public class ReconnectNetworkHandler extends SimpleChannelUpstreamHandler
 					}
 					catch (Exception ex)
 					{
-						ex.printStackTrace();
+						//ex.printStackTrace();
 					}
 				}
 			}, session.getReconnectDelay(), TimeUnit.SECONDS);
