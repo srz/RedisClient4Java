@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jboss.netty.channel.Channel;
@@ -24,12 +23,12 @@ import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.async.IRedisAsyncClient;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
-import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
 import com.handinfo.redis4j.impl.util.CommandWrapper;
+import com.handinfo.redis4j.impl.util.Log;
 
 public class Session implements ISession
 {
-	private static final Logger logger = Logger.getLogger(ReconnectNetworkHandler.class.getName());
+	private final Logger logger = (new Log(Session.class.getName())).getLogger();
 	private Channel channel;
 	private AtomicBoolean isStartQuit = new AtomicBoolean(false);
 	private final BlockingQueue<CommandWrapper> commandQueue = new LinkedBlockingQueue<CommandWrapper>();
@@ -186,7 +185,7 @@ public class Session implements ISession
 				}
 			} else
 			{
-				RedisResponse response = cmdWrapper.getSyncResult();
+				RedisResponse response = cmdWrapper.getSyncResult().get(0);
 				if (response != null)
 				{
 					return response;
@@ -229,7 +228,7 @@ public class Session implements ISession
 				}
 			} else
 			{
-				RedisResponse response = cmdWrapper.getSyncResult();
+				RedisResponse response = cmdWrapper.getSyncResult().get(0);
 				if (response != null)
 				{
 					if (response.getType() != RedisResponseType.ErrorReply)
@@ -268,11 +267,11 @@ public class Session implements ISession
 				}
 			} else
 			{
-				RedisResponse result = cmdWrapper.getSyncResult();
+				List<RedisResponse> result = cmdWrapper.getSyncResult();
 
 				if (result != null)
 				{
-					return result.getMultiBulkValue();
+					return result;
 				} else
 				{
 					throw new ErrorCommandException("Error back value");
@@ -339,7 +338,6 @@ public class Session implements ISession
 									result = response.getTextValue();
 								}
 								notify.doInCurrentThread(result);
-								// cmd.pause();
 							} else
 								throw new ErrorCommandException(response.getTextValue());
 						} else
@@ -365,30 +363,20 @@ public class Session implements ISession
 				public void run()
 				{
 					Session.this.getChannelSyncLock().lock();
-					printMsg(Level.INFO, Session.this.sharding.getServerAddress() + " signalAll....");
+					logger.info(Session.this.sharding.getServerAddress() + " signalAll....");
 					Session.this.getCondition().signalAll();
 					Session.this.getChannelSyncLock().unlock();
 
-					// try
-					// {
-					// Thread.sleep(3000);
-					// }
-					// catch (InterruptedException ex)
-					// {
-					// ex.printStackTrace();
-					// }
-
 					Session.this.getChannelSyncLock().lock();
-
 					try
 					{
 						if (Session.this.getTotalOfWaitCondition().get() != 0)
 						{
 							Session.this.cleanCondition.await();
 						}
-						printMsg(Level.INFO, Session.this.sharding.getServerAddress() + " signalAll....  finished");
+						logger.info(Session.this.sharding.getServerAddress() + " signalAll....  finished");
 
-						printMsg(Level.INFO, Session.this.sharding.getServerAddress() + " Start clean " + commandQueue.size() + " command...");
+						logger.info(Session.this.sharding.getServerAddress() + " Start clean " + commandQueue.size() + " command...");
 
 						for (CommandWrapper cmd : commandQueue)
 						{
@@ -397,19 +385,14 @@ public class Session implements ISession
 						}
 						commandQueue.clear();
 
-						printMsg(Level.INFO, Session.this.sharding.getServerAddress() + " Clean finished==" + commandQueue.size());
+						logger.info(Session.this.sharding.getServerAddress() + " Clean finished==" + commandQueue.size());
 					}
 					catch (InterruptedException e)
 					{
 						e.printStackTrace();
 					}
-					catch (BrokenBarrierException e)
-					{
-						e.printStackTrace();
-					}
 					finally
 					{
-						// Session.this.getCondition().signalAll();
 						Session.this.isAllowWrite().set(true);
 						Session.this.getChannelSyncLock().unlock();
 					}
@@ -418,11 +401,6 @@ public class Session implements ISession
 			clean.setName("CleanCommandQueue-" + this.sharding.getServerAddress());
 			clean.start();
 		}
-	}
-
-	private void printMsg(Level level, String msg)
-	{
-		logger.log(level, "Thread name:" + Thread.currentThread().getName() + " - ID:" + Thread.currentThread().getId() + " - " + msg);
 	}
 
 	@Override
@@ -435,28 +413,5 @@ public class Session implements ISession
 	public String getName()
 	{
 		return this.name;
-	}
-
-	@Override
-	public void executeTransaction(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
-	{
-		if (channel != null && channel.isConnected())
-		{
-			final CommandWrapper cmdWrapper = new CommandWrapper(commandList);
-
-			channel.write(cmdWrapper);
-
-			if (cmdWrapper.getException() != null)
-			{
-				if (cmdWrapper.getException() instanceof CleanLockedThreadException)
-				{
-					throw (CleanLockedThreadException) cmdWrapper.getException();
-				} else
-				{
-					throw cmdWrapper.getException();
-				}
-			}
-		} else
-			throw new IllegalStateException("connection has been disconnected.");
 	}
 }

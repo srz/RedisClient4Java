@@ -8,6 +8,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 
 import com.handinfo.redis4j.api.ISession;
+import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.NetworkException;
@@ -116,9 +117,14 @@ public class MessageHandler extends SimpleChannelHandler
 
 		try
 		{
-			if (cmdWrapper.getCommand() != null)
+			RedisCommand lastCommand = cmdWrapper.getCommand();
+			if (lastCommand == null)
 			{
-				switch (cmdWrapper.getCommand())
+				lastCommand = (RedisCommand) cmdWrapper.getCmdList().get(cmdWrapper.getCmdList().size()-1)[0];
+			}
+			if (lastCommand != null)
+			{
+				switch (lastCommand)
 				{
 				case WATCH:
 					while (true)
@@ -137,7 +143,7 @@ public class MessageHandler extends SimpleChannelHandler
 
 						if (thread != null)
 						{
-							if (thread.equals(Thread.currentThread()))
+							if (Thread.currentThread().equals(thread))
 							{
 								break;
 							}
@@ -153,21 +159,21 @@ public class MessageHandler extends SimpleChannelHandler
 					}
 					break;
 				case EXEC:
-					if (thread.equals(Thread.currentThread()))
+					if (Thread.currentThread().equals(thread))
 					{
 						thread = null;
 						this.session.getCondition().signal();
 					}
 					break;
 				case UNWATCH:
-					if (thread.equals(Thread.currentThread()))
+					if (Thread.currentThread().equals(thread))
 					{
 						thread = null;
 						this.session.getCondition().signal();
 					}
 					break;
 				case DISCARD:
-					if (thread.equals(Thread.currentThread()))
+					if (Thread.currentThread().equals(thread))
 					{
 						thread = null;
 						this.session.getCondition().signal();
@@ -189,6 +195,10 @@ public class MessageHandler extends SimpleChannelHandler
 				isSendSucess = false;
 				cmdWrapper.setException(new UnknownException(ex.getCause()));
 			}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
 		}
 		finally
 		{

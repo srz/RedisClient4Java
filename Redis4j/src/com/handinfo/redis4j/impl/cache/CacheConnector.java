@@ -14,10 +14,12 @@ import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.transfers.Session;
 import com.handinfo.redis4j.impl.transfers.SessionManager;
+import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
+import com.handinfo.redis4j.impl.util.Log;
 
 public class CacheConnector implements ICacheConnector
 {
-	private static final Logger logger = Logger.getLogger(CacheConnector.class.getName());
+	private final Logger logger = (new Log(CacheConnector.class.getName())).getLogger();
 	private SessionManager sessionManager;
 	private Set<Sharding> serverList;
 	private ISession[] sessions;
@@ -60,7 +62,7 @@ public class CacheConnector implements ICacheConnector
 		if (sessions.length == 1)
 			return sessions[0];
 		ISession session = locator.getPrimary(key);
-		logger.log(Level.INFO, "session=" + session.getName() + " key=" + key);
+		logger.info("session=" + session.getName() + " key=" + key);
 		return session;
 	}
 

@@ -14,10 +14,12 @@ import com.handinfo.redis4j.api.database.IDataBaseConnector;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.transfers.SessionManager;
+import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
+import com.handinfo.redis4j.impl.util.Log;
 
 public class DatabaseConnector implements IDataBaseConnector
 {
-	private static final Logger logger = Logger.getLogger(DatabaseConnector.class.getName());
+	//private final Logger logger = (new Log(DatabaseConnector.class.getName())).getLogger();
 	private SessionManager sessionManager;
 	private Sharding sharding;
 	private ISession session;
@@ -29,6 +31,7 @@ public class DatabaseConnector implements IDataBaseConnector
 		this.sharding = sharding;
 	}
 
+	@Override
 	public boolean isConnected()
 	{
 		return session.isConnected();
@@ -40,25 +43,23 @@ public class DatabaseConnector implements IDataBaseConnector
 	 * com.handinfo.redis4j.impl.transfers.IConnector#executeCommand(java.lang
 	 * .String, java.lang.Object)
 	 */
+	@Override
 	public RedisResponse executeCommand(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		return session.executeCommand(command, args);
 	}
 
+	@Override
 	public List<RedisResponse> executeBatch(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
 	{
 		return session.executeBatch(commandList);
-	}
-
-	public void executeAsyncCommand(IRedisAsyncClient.Result notify, RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException
-	{
-		session.executeAsyncCommand(notify, command, args);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.transfers.IConnector#disConnect()
 	 */
+	@Override
 	public void disConnect()
 	{
 		session.close();
@@ -69,11 +70,5 @@ public class DatabaseConnector implements IDataBaseConnector
 	public void connect()
 	{
 		session = sessionManager.createSession(sharding);
-	}
-
-	@Override
-	public void executeTransaction(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
-	{
-		session.executeTransaction(commandList);
 	}
 }

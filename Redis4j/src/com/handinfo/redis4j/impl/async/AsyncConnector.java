@@ -11,10 +11,12 @@ import com.handinfo.redis4j.api.async.IRedisAsyncClient;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.transfers.SessionManager;
+import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
+import com.handinfo.redis4j.impl.util.Log;
 
 public class AsyncConnector implements IAsyncConnector
 {
-	private static final Logger logger = Logger.getLogger(AsyncConnector.class.getName());
+	//private final Logger logger = (new Log(AsyncConnector.class.getName())).getLogger();
 	private SessionManager sessionManager;
 	private Sharding sharding;
 	private ISession session;

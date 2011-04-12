@@ -4,13 +4,15 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
-import com.handinfo.redis4j.impl.RedisClientBuilder;
-import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
+import com.handinfo.redis4j.impl.util.Log;
 
 public class DataCheck
 {
+	private final static Logger logger = (new Log(DataCheck.class.getName())).getLogger();
+	
 	static int repeats = 200;//每个线程循环执行的次数
 	static int corePoolSize = 1500;//测试程序启动的工作线程数
 	
@@ -54,7 +56,7 @@ public class DataCheck
 						}
 						if (result != null && !result.equalsIgnoreCase(key))
 						{
-							System.out.println("error: key=|" + key + "|return=" + result + "|error: threadID=|" + Thread.currentThread().getId() + "|times=" + i);
+							logger.info("error: key=|" + key + "|return=" + result + "|error: threadID=|" + Thread.currentThread().getId() + "|times=" + i);
 							break;
 						}
 						else
@@ -80,9 +82,9 @@ public class DataCheck
 		cdl.await();
 		
 		long allTime = (System.nanoTime() - AllTimeStart)/1000000;
-		System.out.println("Program execute AllTime=" + allTime + "ms");
-		System.out.println("AllTimes=" + numberOfAllExecute.get());
-		System.out.println("TPS=" + (int)(((double)numberOfAllExecute.get()/(double)allTime)*1000) + " /s");
+		logger.info("Program execute AllTime=" + allTime + "ms");
+		logger.info("AllTimes=" + numberOfAllExecute.get());
+		logger.info("TPS=" + (int)(((double)numberOfAllExecute.get()/(double)allTime)*1000) + " /s");
 
 		client.quit();
 	}

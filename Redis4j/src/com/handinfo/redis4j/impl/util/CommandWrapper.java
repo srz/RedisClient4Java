@@ -1,6 +1,7 @@
 package com.handinfo.redis4j.impl.util;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CountDownLatch;
@@ -23,7 +24,7 @@ public class CommandWrapper
 	private ChannelBuffer value;
 	private CountDownLatch latch;
 	private RedisClientException exception;
-	private RedisResponse result;
+	private List<RedisResponse> result;
 
 	private AtomicInteger totalOfCommand = new AtomicInteger();
 
@@ -50,7 +51,7 @@ public class CommandWrapper
 		this.type = type;
 		this.value = getBinaryCommand(commandContent);
 		this.totalOfCommand.set(1);
-		this.result = null;
+		this.result = new ArrayList<RedisResponse>(1);
 
 		this.exception = null;
 
@@ -65,12 +66,16 @@ public class CommandWrapper
 		cmdList = commandList;
 		this.type = CommandWrapper.Type.SYNC;
 		this.value = ChannelBuffers.dynamicBuffer();
-		for (Object[] cmd : commandList)
+		for (Object[] singleCmd : commandList)
 		{
-			this.value.writeBytes(getBinaryCommand(cmd));
+			RedisCommand command = (RedisCommand)singleCmd[0];
+			Object[] fullCmd = new Object[command.getValue().length + singleCmd.length - 1];
+			System.arraycopy(command.getValue(), 0, fullCmd, 0, command.getValue().length);
+			System.arraycopy(singleCmd, 1, fullCmd, command.getValue().length, singleCmd.length - 1);
+			this.value.writeBytes(getBinaryCommand(fullCmd));
 		}
 		this.totalOfCommand.set(commandList.size());
-		this.result = null;
+		this.result = new ArrayList<RedisResponse>(commandList.size());
 
 		this.exception = null;
 
@@ -129,7 +134,7 @@ public class CommandWrapper
 		return value;
 	}
 
-	public void pause() throws InterruptedException, BrokenBarrierException
+	public void pause() throws InterruptedException
 	{
 		if (type == CommandWrapper.Type.SYNC)
 		{
@@ -140,7 +145,7 @@ public class CommandWrapper
 		}
 	}
 
-	public void pause(long timeout, TimeUnit unit) throws InterruptedException, BrokenBarrierException, TimeoutException
+	public void pause(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException
 	{
 		if (type == CommandWrapper.Type.SYNC)
 		{
@@ -156,7 +161,7 @@ public class CommandWrapper
 		return this.totalOfCommand.decrementAndGet();
 	}
 
-	public void resume() throws InterruptedException, BrokenBarrierException
+	public void resume() throws InterruptedException
 	{
 		if (type == CommandWrapper.Type.SYNC)
 		{
@@ -177,14 +182,14 @@ public class CommandWrapper
 		this.exception = exception;
 	}
 
-	public RedisResponse getSyncResult()
+	public List<RedisResponse> getSyncResult()
 	{
 		return result;
 	}
 
 	public void addSyncResult(RedisResponse response)
 	{
-		this.result = response;
+		this.result.add(response);
 	}
 
 	public RedisResponse getAsyncResult() throws InterruptedException

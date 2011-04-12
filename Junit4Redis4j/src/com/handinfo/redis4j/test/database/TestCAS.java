@@ -24,8 +24,8 @@ public class TestCAS
 	{
 		final IRedisDatabaseClient client = Helper.getRedisDatabaseClient();
 
-		int corePoolSize = 1000;
-		final int repeats = 1000;
+		int corePoolSize = 1500;
+		final int repeats = 1;
 		final ExecutorService pool = Executors.newFixedThreadPool(corePoolSize);
 		final CountDownLatch cdl = new CountDownLatch(corePoolSize);
 		final AtomicInteger numberOfAllExecute = new AtomicInteger(0);
@@ -38,7 +38,7 @@ public class TestCAS
 		}
 		catch (Exception ex)
 		{
-			//ex.printStackTrace();
+			// ex.printStackTrace();
 		}
 
 		for (int i = 0; i < corePoolSize; i++)
@@ -63,51 +63,16 @@ public class TestCAS
 								{
 									numberOfAllExecute.incrementAndGet();
 								}
-							}
-							else
+							} else
 							{
 								client.set("foo", "0");
 							}
 						}
 						catch (Exception ex)
 						{
-							//ex.printStackTrace();
+							// ex.printStackTrace();
+							// System.out.println(i);
 						}
-
-
-						// try
-						// {
-						// trans.watch("foo");
-						// }
-						// catch (Exception ex)
-						// {
-						// //System.out.println("trans.set 0000");
-						// }
-						//						
-						// int newValue = 0;
-						// try
-						// {
-						// newValue = Integer.valueOf(client.get("foo")) + 1;
-						// }
-						// catch (Exception ex)
-						// {
-						// //System.out.println("trans.set 1111");
-						// }
-						//						
-						// try
-						// {
-						// trans.set("foo", String.valueOf(newValue));
-						// if (trans.commit())
-						// {
-						// numberOfAllExecute.incrementAndGet();
-						// }
-						// }
-						// catch (Exception ex)
-						// {
-						// //ex.printStackTrace();
-						// //trans.discard();
-						// //System.out.println("trans.set 2222");
-						// }
 					}
 					cdl.countDown();
 				}

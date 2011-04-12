@@ -33,9 +33,11 @@ public abstract class BatchCommandlist implements IDatabase
 	
 	protected void addCommand(int index, RedisCommand command, Object... args)
 	{
-		Object[] cmd = new Object[command.getValue().length + args.length];
-		System.arraycopy(command.getValue(), 0, cmd, 0, command.getValue().length);
-		System.arraycopy(args, 0, cmd, command.getValue().length, args.length);
+		Object[] cmd = new Object[1 + args.length];
+		cmd[0] = command;
+		System.arraycopy(args, 0, cmd, 1, args.length);
+		//System.arraycopy(command.getValue(), 0, cmd, 0, command.getValue().length);
+		//System.arraycopy(args, 0, cmd, command.getValue().length, args.length);
 		this.commandList.add(index, cmd);
 	}
 	

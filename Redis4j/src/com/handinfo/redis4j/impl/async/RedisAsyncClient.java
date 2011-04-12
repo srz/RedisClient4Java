@@ -11,10 +11,12 @@ import com.handinfo.redis4j.api.async.IAsyncConnector;
 import com.handinfo.redis4j.api.async.IRedisAsyncClient;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
+import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
+import com.handinfo.redis4j.impl.util.Log;
 
 public class RedisAsyncClient implements IRedisAsyncClient
 {
-	private static final Logger logger = Logger.getLogger(RedisAsyncClient.class.getName());
+	private final Logger logger = (new Log(RedisAsyncClient.class.getName())).getLogger();
 	private AtomicBoolean isExecute;
 	private IAsyncConnector connector;
 	
@@ -28,7 +30,7 @@ public class RedisAsyncClient implements IRedisAsyncClient
 		connector.connect();
 		if (!connector.isConnected())
 		{
-			logger.log(Level.WARNING, "can not connect to server,client will reconnect after " + sharding.getReconnectDelay() + " s");
+			logger.severe("can not connect to server,client will reconnect after " + sharding.getReconnectDelay() + " s");
 		}
 	}
 	

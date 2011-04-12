@@ -14,7 +14,7 @@ import com.handinfo.redis4j.test.database.junit.RedisCommandTestBase;
 
 public class Transactions extends RedisCommandTestBase
 {
-	//@Test
+	@Test
 	public void multi()
 	{
 		IDatabaseTransaction trans = client.getNewTransaction();
@@ -36,13 +36,13 @@ public class Transactions extends RedisCommandTestBase
 	@Test
 	public void testSingleClientCAS() throws InterruptedException
 	{
-		int corePoolSize = 1000;
-		final int repeats = 10000;
+		int corePoolSize = 100;
+		final int repeats = 100;
 		final ExecutorService pool = Executors.newFixedThreadPool(corePoolSize);
 		final CountDownLatch cdl = new CountDownLatch(corePoolSize);
 		final AtomicInteger numberOfAllExecute = new AtomicInteger(0);
 
-		client.set("foo", "0");
+		client.set("foo", numberOfAllExecute.toString());
 
 		for (int i = 0; i < corePoolSize; i++)
 		{
@@ -56,19 +56,22 @@ public class Transactions extends RedisCommandTestBase
 					{
 						try
 						{
-						trans.watch("foo");
-
-						int newValue = Integer.valueOf(client.get("foo")) + 1;
-
-						System.out.println("trans.set 1111");
-						trans.set("foo", String.valueOf(newValue));
-						System.out.println("trans.set 2222");
-						if (trans.commit())
-						{
-							numberOfAllExecute.incrementAndGet();
+							trans.watch("foo");
+							String foo = client.get("foo");
+							if (foo != null)
+							{
+								int newValue = Integer.valueOf(foo) + 1;
+								trans.set("foo", String.valueOf(newValue));
+								if (trans.commit())
+								{
+									numberOfAllExecute.incrementAndGet();
+								}
+							} else
+							{
+								client.set("foo", "0");
+							}
 						}
-						}
-						catch(Exception ex)
+						catch (Exception ex)
 						{
 							ex.printStackTrace();
 						}
@@ -81,10 +84,11 @@ public class Transactions extends RedisCommandTestBase
 		pool.shutdown();
 		cdl.await();
 
+		logger.info("numberOfAllExecute=" + numberOfAllExecute.toString());
 		assertEquals(numberOfAllExecute.toString(), client.get("foo"));
 	}
 
-	//@Test
+	@Test
 	public void testMultiClientCAS() throws InterruptedException
 	{
 		int corePoolSize = 100;
@@ -93,7 +97,7 @@ public class Transactions extends RedisCommandTestBase
 		final CountDownLatch cdl = new CountDownLatch(corePoolSize);
 		final AtomicInteger numberOfAllExecute = new AtomicInteger(0);
 
-		client.set("foo", "0");
+		client.set("foo", numberOfAllExecute.toString());
 
 		for (int i = 0; i < corePoolSize; i++)
 		{
@@ -106,14 +110,30 @@ public class Transactions extends RedisCommandTestBase
 					IDatabaseTransaction trans = cli.getNewTransaction();
 					for (int i = 0; i < repeats; i++)
 					{
-						trans.watch("foo");
-
-						int newValue = Integer.valueOf(cli.get("foo")) + 1;
-
-						trans.set("foo", String.valueOf(newValue));
-						if (trans.commit())
+						try
 						{
-							numberOfAllExecute.incrementAndGet();
+							trans.watch("foo");
+							String foo = cli.get("foo");
+							if (foo != null)
+							{
+								int newValue = Integer.valueOf(foo) + 1;
+								trans.set("foo", String.valueOf(newValue));
+								if (trans.commit())
+								{
+									numberOfAllExecute.incrementAndGet();
+								}
+								else
+								{
+									logger.info("commit false!");
+								}
+							} else
+							{
+								client.set("foo", "0");
+							}
+						}
+						catch (Exception ex)
+						{
+							ex.printStackTrace();
 						}
 					}
 					cli.quit();
@@ -125,12 +145,14 @@ public class Transactions extends RedisCommandTestBase
 		pool.shutdown();
 		cdl.await();
 
+		logger.info("numberOfAllExecute=" + numberOfAllExecute.toString());
 		assertEquals(numberOfAllExecute.toString(), client.get("foo"));
 	}
 
-	//@Test
+	@Test
 	public void unwatch() throws InterruptedException
 	{
+		final CountDownLatch cdl = new CountDownLatch(1);
 		IDatabaseTransaction trans = client.getNewTransaction();
 		trans.watch("mykey");
 		new Thread(new Runnable()
@@ -142,12 +164,16 @@ public class Transactions extends RedisCommandTestBase
 				transNew.watch("mykey");
 				transNew.set("mykey", "newThread");
 				transNew.commit();
+
+				cdl.countDown();
 			}
 		}).start();
-		
+
 		Thread.sleep(3000);
 		client.set("mykey", "trans");
 		trans.unwatch();
+
+		cdl.await();
 		
 		assertEquals("newThread", client.get("mykey"));
 	}

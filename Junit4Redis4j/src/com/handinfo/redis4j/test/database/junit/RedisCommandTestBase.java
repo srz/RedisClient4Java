@@ -1,5 +1,7 @@
 package com.handinfo.redis4j.test.database.junit;
 
+import java.util.logging.Logger;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -7,10 +9,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
+import com.handinfo.redis4j.impl.util.Log;
 import com.handinfo.redis4j.test.Helper;
 
 public abstract class RedisCommandTestBase extends Assert
 {
+	protected static final Logger logger = (new Log(RedisCommandTestBase.class.getName())).getLogger();
 	protected static IRedisDatabaseClient client;
 
 	public RedisCommandTestBase()
@@ -27,14 +32,14 @@ public abstract class RedisCommandTestBase extends Assert
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception
 	{
-		System.out.println("tearDown flushCurrentDB  = " + client.flushAllDB());
+		logger.info("tearDown flushCurrentDB  = " + client.flushAllDB());
 		client.quit();
 	}
 
 	@Before
 	public void setUp() throws Exception
 	{
-		System.out.println("setUp flushCurrentDB = " + client.flushAllDB());
+		logger.info("setUp flushCurrentDB = " + client.flushAllDB());
 	}
 
 	@After

@@ -1,6 +1,5 @@
 package com.handinfo.redis4j.impl.transfers.handler;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -11,10 +10,11 @@ import org.jboss.netty.handler.timeout.IdleStateEvent;
 
 import com.handinfo.redis4j.api.ISession;
 import com.handinfo.redis4j.api.RedisCommand;
+import com.handinfo.redis4j.impl.util.Log;
 
 public class HeartbeatHandler extends IdleStateAwareChannelHandler
 {
-	private static final Logger logger = Logger.getLogger(HeartbeatHandler.class.getName());
+	private final Logger logger = (new Log(HeartbeatHandler.class.getName())).getLogger();
 	private ISession session;
 
 	public HeartbeatHandler(ISession session)
@@ -29,7 +29,7 @@ public class HeartbeatHandler extends IdleStateAwareChannelHandler
 		if (e.getState() == IdleState.WRITER_IDLE)
 		{
 			double idelTime = (double) (System.currentTimeMillis() - e.getLastActivityTimeMillis()) / 1000;
-			printMsg(Level.INFO, "Idel " + idelTime + "s,send PING...");
+			logger.info("Idel " + idelTime + "s,send PING...");
 			try
 			{
 				this.session.executeCommand(RedisCommand.PING);
@@ -44,10 +44,5 @@ public class HeartbeatHandler extends IdleStateAwareChannelHandler
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception
 	{
 		super.exceptionCaught(ctx, e);
-	}
-
-	private void printMsg(Level level, String msg)
-	{
-		logger.log(level, "Thread name:" + Thread.currentThread().getName() + " - ID:" + Thread.currentThread().getId() + " - " + msg);
 	}
 }

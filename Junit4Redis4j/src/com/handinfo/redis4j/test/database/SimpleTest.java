@@ -1,14 +1,18 @@
 package com.handinfo.redis4j.test.database;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.impl.RedisClientBuilder;
 import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
+import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
+import com.handinfo.redis4j.impl.util.Log;
 import com.handinfo.redis4j.test.Helper;
 
 public class SimpleTest
 {
+	private final static Logger logger = (new Log(SimpleTest.class.getName())).getLogger();
 	private static CountDownLatch latch = new CountDownLatch(1);
 
 	/**
@@ -27,8 +31,8 @@ public class SimpleTest
 				try
 				{
 					boolean b = client.set("qqq", "cxc1");
-					System.out.println(b);
-					System.out.println(client.get("qqq"));
+					logger.info(String.valueOf(b));
+					logger.info(client.get("qqq"));
 //					int b = client.listLeftPush("list_a", "aaaa");
 //					System.out.println(b);
 //					b = client.listLeftPush("list_a", "bbbb");
@@ -51,12 +55,12 @@ public class SimpleTest
 			}
 		});
 		t.setName("NewThread");
-		System.out.println("run.......");
+		logger.info("run.......");
 		t.start();
 
 		latch.await();
-		Thread.sleep(1000000);
-		System.out.println("thread " + t.getName() + " is finished");
+		//Thread.sleep(1000000);
+		logger.info("thread " + t.getName() + " is finished");
 
 		client.quit();
 	}

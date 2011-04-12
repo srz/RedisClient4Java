@@ -4,15 +4,16 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
-import com.handinfo.redis4j.impl.RedisClientBuilder;
-import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
+import com.handinfo.redis4j.impl.util.Log;
 import com.handinfo.redis4j.test.Helper;
 
 public class BenchmarkOfRedis4j
 {
+	private final static Logger logger = (new Log(BenchmarkOfRedis4j.class.getName())).getLogger();
 	static int repeats = 40000;// 每个线程循环执行的次数
 	static int corePoolSize = 10;// 测试程序启动的工作线程数
 	static int dataLength = 1024;// 数据长度,单位byte
@@ -87,7 +88,7 @@ public class BenchmarkOfRedis4j
 								e2.printStackTrace();
 							}
 							if (!result)
-								System.out.println(key);
+								logger.info(key);
 							else
 							{
 								numberOfAllExecute.incrementAndGet();
@@ -126,9 +127,9 @@ public class BenchmarkOfRedis4j
 		latch.await();
 
 		long allTime = (System.nanoTime() - AllTimeStart) / 1000000;
-		System.out.println("Program execute AllTime=" + allTime + "ms");
-		System.out.println("AllTimes=" + numberOfAllExecute.get());
-		System.out.println("TPS=" + (int) (((double) numberOfAllExecute.get() / (double) allTime) * 1000) + " /s");
+		logger.info("Program execute AllTime=" + allTime + "ms");
+		logger.info("AllTimes=" + numberOfAllExecute.get());
+		logger.info("TPS=" + (int) (((double) numberOfAllExecute.get() / (double) allTime) * 1000) + " /s");
 
 		client.flushAllDB();
 		client.quit();

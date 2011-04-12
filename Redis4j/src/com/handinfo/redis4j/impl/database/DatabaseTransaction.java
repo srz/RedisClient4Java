@@ -18,12 +18,19 @@ public class DatabaseTransaction extends BatchCommandlist implements IDatabaseTr
 	@Override
 	public Boolean commit()
 	{
-		super.addCommand(0, RedisCommand.MULTI);
-		super.connector.executeTransaction(super.commandList);
-		super.commandList.clear();
-		RedisResponse response = super.connector.executeCommand(RedisCommand.EXEC);
+		if (super.commandList.size() != 0)
+		{
+			super.addCommand(0, RedisCommand.MULTI);
+			super.addCommand(RedisCommand.EXEC);
+			List<RedisResponse> responseList = super.connector.executeBatch(super.commandList);
+			super.commandList.clear();
+			//RedisResponse response = super.connector.executeCommand(RedisCommand.EXEC);
+			RedisResponse transactionResponse = responseList.get(responseList.size()-1);
 
-		return response.getMultiBulkValue()==null ? false: true;
+			return transactionResponse.getMultiBulkValue()==null ? false: true;
+		}
+		else
+			throw new NullBatchException("please add some command to transaction!");
 	}
 
 	@Override
@@ -31,6 +38,7 @@ public class DatabaseTransaction extends BatchCommandlist implements IDatabaseTr
 	{
 		//super.addCommand(RedisCommand.DISCARD);
 		super.connector.executeCommand(RedisCommand.DISCARD);
+		super.commandList.clear();
 	}
 
 	@Override
@@ -38,6 +46,7 @@ public class DatabaseTransaction extends BatchCommandlist implements IDatabaseTr
 	{
 		//super.addCommand(RedisCommand.UNWATCH);
 		super.connector.executeCommand(RedisCommand.UNWATCH);
+		super.commandList.clear();
 	}
 
 	@Override

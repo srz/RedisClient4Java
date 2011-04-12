@@ -6,9 +6,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
+
+import com.handinfo.redis4j.impl.util.Log;
 
 public class TestCondition
 {
+	private final Logger logger = (new Log(TestCondition.class.getName())).getLogger();
+	
 	private final ReentrantLock lock = new ReentrantLock();
 	private final Condition condition = lock.newCondition();
 	private int total = 0;
@@ -54,7 +59,7 @@ public class TestCondition
 			// if (ii == 2)
 			condition.signal();
 		}
-		System.out.println("finish lock==" + Thread.currentThread().getName() + " total=" + total);
+		logger.info("finish lock==" + Thread.currentThread().getName() + " total=" + total);
 		lock.unlock();
 		
 //		final CountDownLatch cdl_1 = new CountDownLatch(1);

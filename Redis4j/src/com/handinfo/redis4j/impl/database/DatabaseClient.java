@@ -12,10 +12,11 @@ import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.database.IDataBaseConnector;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
+import com.handinfo.redis4j.impl.util.Log;
 
 public abstract class DatabaseClient
 {
-	private static final Logger logger = Logger.getLogger(DatabaseClient.class.getName());
+	private final Logger logger = (new Log(DatabaseClient.class.getName())).getLogger();
 	protected IDataBaseConnector connector;
 	private Sharding sharding;
 
@@ -26,7 +27,7 @@ public abstract class DatabaseClient
 		connector.connect();
 		if (!connector.isConnected())
 		{
-			logger.log(Level.WARNING, "can not connect to server,client will reconnect after " + this.sharding.getReconnectDelay() + " s");
+			logger.severe("can not connect to server,client will reconnect after " + this.sharding.getReconnectDelay() + " s");
 		}
 	}
 

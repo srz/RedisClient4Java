@@ -1,16 +1,16 @@
 package com.handinfo.redis4j.test.database;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
-import com.handinfo.redis4j.api.RedisResponseType;
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
-import com.handinfo.redis4j.impl.RedisClientBuilder;
-import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
+import com.handinfo.redis4j.impl.util.Log;
 import com.handinfo.redis4j.test.Helper;
 
 public class BatchTest
 {
+	private final static Logger logger = (new Log(BatchTest.class.getName())).getLogger();
 	private static CountDownLatch latch = new CountDownLatch(1);
 
 	/**
@@ -20,8 +20,6 @@ public class BatchTest
 	public static void main(String[] args) throws Exception
 	{
 		final IRedisDatabaseClient client = Helper.getRedisDatabaseClient();
-
-		System.out.println(RedisResponseType.BulkReplies.getValue());
 		
 		Thread t = new Thread(new Runnable()
 		{
@@ -42,7 +40,7 @@ public class BatchTest
 					batch.execute();
 
 					
-					System.out.println(System.currentTimeMillis()-start);
+					logger.info(String.valueOf(System.currentTimeMillis()-start));
 				}
 				catch (Exception e)
 				{
@@ -53,11 +51,11 @@ public class BatchTest
 			}
 		});
 		t.setName("NewThread");
-		System.out.println("run.......");
+		logger.info("run.......");
 		t.start();
 
 		latch.await();
-		System.out.println("thread " + t.getName() + " is finished");
+		logger.info("thread " + t.getName() + " is finished");
 
 
 		client.quit();

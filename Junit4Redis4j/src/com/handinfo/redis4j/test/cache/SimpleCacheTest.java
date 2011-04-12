@@ -1,13 +1,15 @@
 package com.handinfo.redis4j.test.cache;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.cache.IRedisCacheClient;
-import com.handinfo.redis4j.impl.RedisClientBuilder;
+import com.handinfo.redis4j.impl.util.Log;
 import com.handinfo.redis4j.test.Helper;
 
 public class SimpleCacheTest
 {
+	private final static Logger logger = (new Log(SimpleCacheTest.class.getName())).getLogger();
 	private static CountDownLatch latch = new CountDownLatch(1);
 
 	/**
@@ -29,9 +31,9 @@ public class SimpleCacheTest
 					user.setId(11);
 					user.setName("srz");
 					boolean b = client.set("qqq", user);
-					System.out.println(b);
+					logger.info(String.valueOf(b));
 					User s = client.get("qqq");
-					System.out.println(s.getName());
+					logger.info(s.getName());
 					
 					Integer r = client.get("qqw");
 //					int b = client.listLeftPush("list_a", "aaaa");
@@ -56,12 +58,12 @@ public class SimpleCacheTest
 			}
 		});
 		t.setName("NewThread");
-		System.out.println("run.......");
+		logger.info("run.......");
 		t.start();
 
 		latch.await();
 		//Thread.sleep(50000000);
-		System.out.println("thread " + t.getName() + " is finished");
+		logger.info("thread " + t.getName() + " is finished");
 
 		client.quit();
 	}
