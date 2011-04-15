@@ -8,6 +8,7 @@ import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.async.IRedisAsyncClient;
 import com.handinfo.redis4j.api.cache.IRedisCacheClient;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.async.RedisAsyncClient;
 import com.handinfo.redis4j.impl.cache.RedisCacheClient;
 import com.handinfo.redis4j.impl.database.RedisDatabaseClient;

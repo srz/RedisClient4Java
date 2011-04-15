@@ -1,7 +1,6 @@
 package com.handinfo.redis4j.impl.transfers;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
@@ -18,17 +17,19 @@ import org.jboss.netty.channel.ChannelPipeline;
 import com.handinfo.redis4j.api.ISession;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
+import com.handinfo.redis4j.api.RedisResponseMessage;
 import com.handinfo.redis4j.api.RedisResponseType;
 import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.async.IRedisAsyncClient;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
+import com.handinfo.redis4j.api.exception.RedisClientException;
 import com.handinfo.redis4j.impl.util.CommandWrapper;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 
 public class Session implements ISession
 {
-	private final Logger logger = (new Log(Session.class.getName())).getLogger();
+	private final Logger logger = LogUtil.getLogger(Session.class.getName());
 	private Channel channel;
 	private AtomicBoolean isStartQuit = new AtomicBoolean(false);
 	private final BlockingQueue<CommandWrapper> commandQueue = new LinkedBlockingQueue<CommandWrapper>();
@@ -37,6 +38,11 @@ public class Session implements ISession
 
 	private final Condition cleanCondition = lock.newCondition();
 	private final AtomicInteger totalOfWaitCondition = new AtomicInteger(0);
+	
+	private Sharding sharding;
+	private ChannelPipeline pipeline;
+	private SessionManager manager;
+	private String name;
 
 	/**
 	 * @return the totalOfWaitCondition
@@ -61,10 +67,7 @@ public class Session implements ISession
 		return condition;
 	}
 
-	private Sharding sharding;
-	private ChannelPipeline pipeline;
-	private SessionManager manager;
-	private String name;
+	
 
 	public Session(SessionManager manager, Sharding sharding)
 	{
@@ -146,6 +149,15 @@ public class Session implements ISession
 	public void setChannel(Channel channel)
 	{
 		this.channel = channel;
+		RedisResponse response = executeCommand(RedisCommand.AUTH, this.sharding.getPassword());
+		if (!RedisResponseMessage.OK.getValue().equalsIgnoreCase(response.getTextValue()))
+		{
+			logger.severe("Auth failed! server back[" + response.getTextValue() + "] Client has been auto quit!");
+			this.manager.disconnectAllSession();
+			
+			//帐号验证失败
+			throw new RedisClientException("Auth failed! server back[" + response.getTextValue() + "] Client has been auto quit!");
+		}
 		executeCommand(RedisCommand.SELECT, this.sharding.getDefaultIndexDB());
 	}
 
@@ -162,7 +174,7 @@ public class Session implements ISession
 	}
 
 	@Override
-	public RedisResponse executeCommand(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public RedisResponse executeCommand(RedisCommand command, Object... args)
 	{
 		if (channel != null && channel.isConnected())
 		{
@@ -205,7 +217,7 @@ public class Session implements ISession
 	 * .String, java.lang.Object)
 	 */
 	@Override
-	public RedisResponse executeCommand(RedisCommand command, String key, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public RedisResponse executeCommand(String key, RedisCommand command, Object... args)
 	{
 		if (channel != null && channel.isConnected())
 		{
@@ -248,7 +260,7 @@ public class Session implements ISession
 	}
 
 	@Override
-	public List<RedisResponse> executeBatch(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public List<RedisResponse> executeBatch(List<Object[]> commandList)
 	{
 		if (channel != null && channel.isConnected())
 		{
@@ -282,7 +294,7 @@ public class Session implements ISession
 	}
 
 	@Override
-	public void executeAsyncCommand(IRedisAsyncClient.Result notify, RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException
+	public void executeAsyncCommand(IRedisAsyncClient.Result notify, RedisCommand command, Object... args) throws InterruptedException
 	{
 		if (channel != null && channel.isConnected())
 		{

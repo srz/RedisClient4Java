@@ -1,25 +1,28 @@
 package com.handinfo.redis4j.impl.cache;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.ISession;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
+import com.handinfo.redis4j.api.RedisResponseType;
 import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.cache.ICacheConnector;
 import com.handinfo.redis4j.api.cache.IRedisCacheClient;
-import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
-import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.transfers.Session;
 import com.handinfo.redis4j.impl.transfers.SessionManager;
-import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 
 public class CacheConnector implements ICacheConnector
 {
-	private final Logger logger = (new Log(CacheConnector.class.getName())).getLogger();
+	private final Logger logger = LogUtil.getLogger(CacheConnector.class.getName());
 	private SessionManager sessionManager;
 	private Set<Sharding> serverList;
 	private ISession[] sessions;
@@ -47,7 +50,7 @@ public class CacheConnector implements ICacheConnector
 	}
 
 	@Override
-	public RedisResponse executeCommand(RedisCommand command, String key, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public RedisResponse executeCommand(RedisCommand command, String key, Object... args)
 	{
 		Object[] newArgs = new Object[args.length + 1];
 		newArgs[0] = key;
@@ -79,20 +82,110 @@ public class CacheConnector implements ICacheConnector
 		locator = new KetamaNodeLocator(sessions, HashAlgorithm.KETAMA_HASH, IRedisCacheClient.VIRTUAL_NODE_COUNT);
 	}
 
-	@Override
-	public RedisResponse executeCommand(RedisCommand command, String... keys) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	private Map<ISession, List<String>> getSessionAndKeysMap(RedisCommand command, String... keys)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		Map<ISession, List<String>> sessionList = new LinkedHashMap<ISession, List<String>>(sessions.length);
+		for (String key : keys)
+		{
+			ISession session = getSessionByKey(key);
+			if (sessionList.containsKey(session))
+			{
+				sessionList.get(session).add(key);
+			} else
+			{
+				List<String> keyList = new ArrayList<String>(keys.length);
+				keyList.add(key);
+				sessionList.put(session, keyList);
+			}
+		}
+		return sessionList;
+	}
+	
+	private Map<ISession, Map<String, Integer>> getSessionAndKeysMapWithIndex(RedisCommand command, String... keys)
+	{
+		Map<ISession, Map<String, Integer>> sessionList = new LinkedHashMap<ISession, Map<String, Integer>>(sessions.length);
+		for (int i=0; i<keys.length; i++)
+		{
+			ISession session = getSessionByKey(keys[i]);
+			if (sessionList.containsKey(session))
+			{
+				sessionList.get(session).put(keys[i], i);
+			} else
+			{
+				Map<String, Integer> keyList = new LinkedHashMap<String, Integer>(keys.length);
+				keyList.put(keys[i], i);
+				sessionList.put(session, keyList);
+			}
+		}
+		return sessionList;
+	}
+	
+	@Override
+	public RedisResponse executeMultiKeysNoArgsAndMultiReplay(RedisCommand command, String... keys)
+	{
+		Map<ISession, Map<String, Integer>> sessionList = getSessionAndKeysMapWithIndex(command, keys);
+
+		List<RedisResponse> responseList = new ArrayList<RedisResponse>(keys.length);
+		for (int i=0; i<keys.length; i++)
+		{
+			responseList.add(i, null);
+		}
+
+		Iterator<Entry<ISession, Map<String, Integer>>> iterator = sessionList.entrySet().iterator();
+		while (iterator.hasNext())
+		{
+			Entry<ISession, Map<String, Integer>> entry = iterator.next();
+			ISession session = entry.getKey();
+			Map<String, Integer> keyList = entry.getValue();
+
+			List<RedisResponse> responseMultiValue = session.executeCommand(command, keyList.keySet().toArray()).getMultiBulkValue();
+
+			Iterator<Entry<String, Integer>> keyItem = keyList.entrySet().iterator();
+			int i=0;
+			while (keyItem.hasNext())
+			{
+				Entry<String, Integer> keyEntry = keyItem.next();
+				responseList.set(keyEntry.getValue(), responseMultiValue.get(i++));
+			}
+		}
+		RedisResponse response = new RedisResponse(RedisResponseType.MultiBulkReplies);
+		response.setMultiBulkValue(responseList);
+
+		return response;
+	}
+
+	@Override
+	public List<RedisResponse> executeMultiKeysNoArgsAndSingleReplay(RedisCommand command, String... keys)
+	{
+		Map<ISession, List<String>> sessionList = getSessionAndKeysMap(command, keys);
+		
+		List<RedisResponse> responseList = new ArrayList<RedisResponse>(keys.length);
+
+		Iterator<Entry<ISession, List<String>>> iterator = sessionList.entrySet().iterator();
+		while (iterator.hasNext())
+		{
+			Entry<ISession, List<String>> entry = iterator.next();
+			ISession session = entry.getKey();
+			List<String> keyList = entry.getValue();
+
+			RedisResponse response = session.executeCommand(command, keyList.toArray());
+
+			if (response != null)
+			{
+				responseList.add(response);
+			}
+		}
+
+		return responseList;
 	}
 
 	@Override
 	public int getNumberOfConnected()
 	{
 		int i = 0;
-		for(ISession session : sessions)
+		for (ISession session : sessions)
 		{
-			if(session.isConnected())
+			if (session.isConnected())
 				i++;
 		}
 		return i;

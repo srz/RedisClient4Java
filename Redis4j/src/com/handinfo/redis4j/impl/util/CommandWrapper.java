@@ -30,12 +30,12 @@ public class CommandWrapper
 
 	private AtomicBoolean isPause = new AtomicBoolean(false);
 	private AtomicBoolean isResume = new AtomicBoolean(false);
-	private ArrayList<Object[]> cmdList;
+	private List<Object[]> cmdList;
 	private BlockingQueue<RedisResponse> asyncResult;
 	
 	private RedisCommand command;
 
-	public ArrayList<Object[]> getCmdList()
+	public List<Object[]> getCmdList()
 	{
 		return cmdList;
 	}
@@ -61,7 +61,7 @@ public class CommandWrapper
 			asyncResult = new LinkedBlockingQueue<RedisResponse>();
 	}
 
-	public CommandWrapper(ArrayList<Object[]> commandList)
+	public CommandWrapper(List<Object[]> commandList)
 	{
 		cmdList = commandList;
 		this.type = CommandWrapper.Type.SYNC;

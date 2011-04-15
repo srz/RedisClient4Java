@@ -2,6 +2,7 @@ package com.handinfo.redis4j.api;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * 当把Redis作为缓存时,实现以下基础功能
@@ -9,6 +10,18 @@ import java.util.HashMap;
  */
 public interface ICache
 {
+	/**
+	 * [FLUSHALL]Remove all keys from all databases
+	 * @return
+	 */
+	public Boolean flushAllDB();
+
+	/**
+	 * [FLUSHDB]Remove all keys from the current database
+	 * @return
+	 */
+	public Boolean flushCurrentDB();
+	
 	//hashes
 	/**
 	 * 删除Hashe对象中的指定字段
@@ -709,7 +722,7 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public <T> T[] multipleGet(String... keys);
+	public <T> List<T> multipleGet(String... keys);
 
 	/**
 	 * [SETEX]Set the value and expiration of a key

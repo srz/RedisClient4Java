@@ -14,7 +14,7 @@ public class ParameterConvert
 		int i=0;
 		while (iterator.hasNext())
 		{
-			Map.Entry<String, String> entry = (Map.Entry<String, String>) iterator.next();
+			Map.Entry<String, String> entry = iterator.next();
 			result[i] = entry.getKey();
 			result[i+1] = entry.getValue();
 			i+=2;

@@ -1,13 +1,13 @@
 package com.handinfo.redis4j.api;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class RedisResponse
 {
 	private RedisResponseType type;
 	private String textValue;
 	private byte[] bulkValue;
-	private ArrayList<RedisResponse> multiBulkValue;
+	private List<RedisResponse> multiBulkValue;
 	
 	/**
 	 * @param type
@@ -65,7 +65,7 @@ public class RedisResponse
 	/**
 	 * @return the multiBulkValue
 	 */
-	public ArrayList<RedisResponse> getMultiBulkValue()
+	public List<RedisResponse> getMultiBulkValue()
 	{
 		return multiBulkValue;
 	}
@@ -73,7 +73,7 @@ public class RedisResponse
 	/**
 	 * @param multiBulkValue the multiBulkValue to set
 	 */
-	public void setMultiBulkValue(ArrayList<RedisResponse> multiBulkValue)
+	public void setMultiBulkValue(List<RedisResponse> multiBulkValue)
 	{
 		this.multiBulkValue = multiBulkValue;
 	}

@@ -58,10 +58,6 @@ public class RedisMonitor extends SwingWorker<String, String>
 		{
 			e.printStackTrace();
 		}
-		catch (BrokenBarrierException e)
-		{
-			e.printStackTrace();
-		}
 		finally
 		{
 			client.quit();

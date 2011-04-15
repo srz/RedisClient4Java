@@ -12,11 +12,11 @@ import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.database.IDataBaseConnector;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 
 public abstract class DatabaseClient
 {
-	private final Logger logger = (new Log(DatabaseClient.class.getName())).getLogger();
+	private final Logger logger = LogUtil.getLogger(DatabaseClient.class.getName());
 	protected IDataBaseConnector connector;
 	private Sharding sharding;
 
@@ -85,7 +85,7 @@ public abstract class DatabaseClient
 	 * @throws CleanLockedThreadException
 	 * @throws ErrorCommandException
 	 */
-	public <T> T sendRequest(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public <T> T sendRequest(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, Object... args)
 	{
 		RedisResponse response = connector.executeCommand(command, args);
 

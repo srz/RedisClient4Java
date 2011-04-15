@@ -14,9 +14,9 @@ public interface IDataBaseConnector
 	
 	public void connect();
 
-	public RedisResponse executeCommand(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
+	public RedisResponse executeCommand(RedisCommand command, Object... args);
 
-	public List<RedisResponse> executeBatch(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
+	public List<RedisResponse> executeBatch(ArrayList<Object[]> commandList);
 
 	public void disConnect();
 }

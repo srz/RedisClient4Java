@@ -33,7 +33,6 @@ public final class KetamaNodeLocator
 				}
 			}
 		}
-		int a = 0;
 	}
 
 	public ISession getPrimary(final String k)

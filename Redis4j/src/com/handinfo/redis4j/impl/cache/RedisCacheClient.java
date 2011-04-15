@@ -5,8 +5,10 @@ package com.handinfo.redis4j.impl.cache;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.handinfo.redis4j.api.RedisCommand;
@@ -75,7 +77,13 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public int del(String... keys)
 	{
-		return this.sendMultipleRequest(Integer.class, null, RedisCommand.DEL, keys);
+		List<Integer> resultList = this.sendMultipleKeysNoArgsAndSingleReplay(Integer.class, null, RedisCommand.DEL, keys);
+		int result=0;
+		for(Integer i : resultList)
+		{
+			result += i;
+		}
+		return result;
 	}
 
 	/*
@@ -523,10 +531,19 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#multipleGet(java.lang.String[])
 	 */
 	@Override
-	public <T> T[] multipleGet(String... keys)
+	public <T> List<T> multipleGet(String... keys)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.MGET, keys);
+
+		List<T> result = new ArrayList<T>(objectbytes.length);;
+		for(byte[] object : objectbytes)
+		{
+			ObjectWrapper<T> obj = new ObjectWrapper<T>(object);
+			result.add(obj.getOriginal());
+		}
+		
+
+		return result;
 	}
 
 	/*
@@ -613,8 +630,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> boolean setAndExpire(String key, int seconds, T value)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		ObjectWrapper<T> obj = new ObjectWrapper<T>(value);
+		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.SETEX, key, seconds, obj);
 	}
 
 	/*
@@ -1002,50 +1019,8 @@ public class RedisCacheClient implements IRedisCacheClient
 		return null;
 	}
 
-	private <T, V> T castResult(Class<T> classType, V arg, RedisResponseMessage compareValue)
+	private <T> T handleResponse(RedisResponse response, Class<T> classType, RedisResponseMessage compareValue, RedisCommand command)
 	{
-		if (arg == null)
-			return null;
-		if (classType == byte[].class)
-		{
-			return classType.cast(arg);
-		} else if (classType == String.class)
-		{
-			return classType.cast(arg);
-		} else if (classType == Integer.class)
-			return classType.cast(Integer.valueOf((String) arg));
-		else if (classType == Boolean.class)
-		{
-			if (compareValue != null)
-				return classType.cast(Boolean.valueOf(((String) arg).equalsIgnoreCase(compareValue.getValue())));
-			else
-				return classType.cast(Boolean.FALSE);
-		} else if (classType == String[].class)
-			return classType.cast(arg);
-		else
-			return null;
-	}
-
-	/**
-	 * 发送请求
-	 * 
-	 * @param <T>
-	 *            classType 返回数据类型
-	 * @param compareValue
-	 *            与返回结果做对比用的数据,以生成boolean型返回值
-	 * @param command
-	 *            发送的命令
-	 * @param args
-	 *            命令参数
-	 * @return
-	 * @throws IllegalStateException
-	 * @throws CleanLockedThreadException
-	 * @throws ErrorCommandException
-	 */
-	public <T> T sendRequest(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, String key, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
-	{
-		RedisResponse response = connector.executeCommand(command, key, args);
-
 		if (response != null)
 		{
 			// 判断返回类型是否为预期的结果类型
@@ -1076,11 +1051,11 @@ public class RedisCacheClient implements IRedisCacheClient
 						if (response.getMultiBulkValue().size() == 0)
 							return null;
 
-						String[] result = new String[response.getMultiBulkValue().size()];
+						byte[][] result = new byte[response.getMultiBulkValue().size()][];
 						int i = 0;
 						for (RedisResponse res : response.getMultiBulkValue())
 						{
-							result[i] = new String(res.getBulkValue(), Charset.forName("UTF-8"));
+							result[i] = res.getBulkValue();
 							i++;
 						}
 						return castResult(classType, result, null);
@@ -1098,62 +1073,70 @@ public class RedisCacheClient implements IRedisCacheClient
 
 		return null;
 	}
-
-	public <T> T sendMultipleRequest(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, String... keys) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	private <T, V> T castResult(Class<T> classType, V arg, RedisResponseMessage compareValue)
 	{
-		RedisResponse response = connector.executeCommand(command, keys);
-
-		if (response != null)
+		if (arg == null)
+			return null;
+		if (classType == byte[].class)
 		{
-			// 判断返回类型是否为预期的结果类型
-			if (command.getResponseType() == response.getType())
-			{
-				// 返回正确结果
-				switch (response.getType())
-				{
-				case SingleLineReply:
-					{
-						return castResult(classType, response.getTextValue(), compareValue);
-					}
-				case IntegerReply:
-					{
-						return castResult(classType, response.getTextValue(), compareValue);
-					}
-				case BulkReplies:
-					{
-						if (response.getBulkValue() == null)
-							return null;
-						else
-						{
-							return castResult(classType, new String(response.getBulkValue(), Charset.forName("UTF-8")), compareValue);
-						}
-					}
-				case MultiBulkReplies:
-					{
-						if (response.getMultiBulkValue().size() == 0)
-							return null;
+			return classType.cast(arg);
+		} else if (classType == String.class)
+		{
+			return classType.cast(arg);
+		} else if (classType == Integer.class)
+			return classType.cast(Integer.valueOf((String) arg));
+		else if (classType == Boolean.class)
+		{
+			if (compareValue != null)
+				return classType.cast(Boolean.valueOf(((String) arg).equalsIgnoreCase(compareValue.getValue())));
+			else
+				return classType.cast(Boolean.FALSE);
+		} else if (classType == byte[][].class)
+			return classType.cast(arg);
+		else
+			return null;
+	}
 
-						String[] result = new String[response.getMultiBulkValue().size()];
-						int i = 0;
-						for (RedisResponse res : response.getMultiBulkValue())
-						{
-							result[i] = new String(res.getBulkValue(), Charset.forName("UTF-8"));
-							i++;
-						}
-						return castResult(classType, result, null);
-					}
-				default:
-					return null;
-				}
-			} else
-			{
-				// 返回的值有问题
-				if (response.getType() == RedisResponseType.ErrorReply)
-					throw new ErrorCommandException(response.getTextValue());
-			}
+	/**
+	 * 发送请求
+	 * 
+	 * @param <T>
+	 *            classType 返回数据类型
+	 * @param compareValue
+	 *            与返回结果做对比用的数据,以生成boolean型返回值
+	 * @param command
+	 *            发送的命令
+	 * @param args
+	 *            命令参数
+	 * @return
+	 * @throws IllegalStateException
+	 * @throws CleanLockedThreadException
+	 * @throws ErrorCommandException
+	 */
+	public <T> T sendRequest(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, String key, Object... args)
+	{
+		RedisResponse response = connector.executeCommand(command, key, args);
+
+		return handleResponse(response, classType, compareValue, command);
+	}
+
+	public <T> T sendMultipleKeysNoArgsAndMultiReplay(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, String... keys)
+	{
+		RedisResponse response = connector.executeMultiKeysNoArgsAndMultiReplay(command, keys);
+
+		return handleResponse(response, classType, compareValue, command);
+	}
+	
+	public <T> List<T> sendMultipleKeysNoArgsAndSingleReplay(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, String... keys)
+	{
+		List<RedisResponse> responseList = connector.executeMultiKeysNoArgsAndSingleReplay(command, keys);
+		List<T> result = new ArrayList<T>(responseList.size());
+		for(RedisResponse response : responseList)
+		{
+			result.add(handleResponse(response, classType, compareValue, command));
 		}
 
-		return null;
+		return result;
 	}
 
 	@Override
@@ -1178,5 +1161,19 @@ public class RedisCacheClient implements IRedisCacheClient
 			shardGroup.add(sharding.clone());
 		}
 		return shardGroup;
+	}
+
+	@Override
+	public Boolean flushAllDB()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean flushCurrentDB()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -13,6 +13,7 @@ import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IDatabaseTransaction;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.util.ParameterConvert;
 
 /**
@@ -936,7 +937,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#shutdown()
 	 */
 	@Override
-	public Boolean shutdown()
+	public Boolean shutdownServer()
 	{
 		return super.sendRequest(Boolean.class, null, RedisCommand.SHUTDOWN);
 	}

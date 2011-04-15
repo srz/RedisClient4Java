@@ -17,7 +17,9 @@ public class Sharding
 		this.defaultIndexDB = 0;
 		this.heartbeatTime = IConnection.IDEL_TIMEOUT_PING;
 		this.reconnectDelay = IConnection.RECONNECT_DELAY;
-		this.isUseHeartbeat = true;;
+		this.isUseHeartbeat = true;
+		this.password = "";
+		this.name = "";
 	}
 
 	/**

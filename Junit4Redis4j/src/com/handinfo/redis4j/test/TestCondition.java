@@ -8,11 +8,11 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 
 public class TestCondition
 {
-	private final Logger logger = (new Log(TestCondition.class.getName())).getLogger();
+	private final Logger logger = LogUtil.getLogger(TestCondition.class.getName());
 	
 	private final ReentrantLock lock = new ReentrantLock();
 	private final Condition condition = lock.newCondition();

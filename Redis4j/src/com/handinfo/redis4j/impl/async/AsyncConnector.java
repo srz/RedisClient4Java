@@ -12,7 +12,7 @@ import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.transfers.SessionManager;
 import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 
 public class AsyncConnector implements IAsyncConnector
 {
@@ -21,7 +21,7 @@ public class AsyncConnector implements IAsyncConnector
 	private Sharding sharding;
 	private ISession session;
 
-	public AsyncConnector(Sharding sharding) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public AsyncConnector(Sharding sharding)
 	{
 		this.sessionManager = new SessionManager();
 		this.sharding = sharding;
@@ -34,7 +34,7 @@ public class AsyncConnector implements IAsyncConnector
 	}
 
 	@Override
-	public void executeAsyncCommand(IRedisAsyncClient.Result notify, RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException
+	public void executeAsyncCommand(IRedisAsyncClient.Result notify, RedisCommand command, Object... args) throws InterruptedException
 	{
 		session.executeAsyncCommand(notify, command, args);
 	}

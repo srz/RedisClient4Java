@@ -13,11 +13,11 @@ import org.jboss.netty.util.Timer;
 import org.jboss.netty.util.TimerTask;
 
 import com.handinfo.redis4j.api.ISession;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 
 public class ReconnectNetworkHandler extends SimpleChannelUpstreamHandler
 {
-	private final Logger logger = (new Log(ReconnectNetworkHandler.class.getName())).getLogger();
+	private final Logger logger = LogUtil.getLogger(ReconnectNetworkHandler.class.getName());
 	private final Timer timer;
 	private long startTime = -1;
 	private ISession session;

@@ -2,20 +2,16 @@ package com.handinfo.redis4j.impl.database;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.ISession;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.Sharding;
-import com.handinfo.redis4j.api.async.IRedisAsyncClient;
 import com.handinfo.redis4j.api.database.IDataBaseConnector;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
+import com.handinfo.redis4j.api.exception.RedisClientException;
 import com.handinfo.redis4j.impl.transfers.SessionManager;
-import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
-import com.handinfo.redis4j.impl.util.Log;
 
 public class DatabaseConnector implements IDataBaseConnector
 {
@@ -25,7 +21,7 @@ public class DatabaseConnector implements IDataBaseConnector
 	private ISession session;
 
 
-	public DatabaseConnector(Sharding sharding) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public DatabaseConnector(Sharding sharding)
 	{
 		this.sessionManager = new SessionManager();
 		this.sharding = sharding;
@@ -34,7 +30,7 @@ public class DatabaseConnector implements IDataBaseConnector
 	@Override
 	public boolean isConnected()
 	{
-		return session.isConnected();
+		return session==null ? false : session.isConnected();
 	}
 
 	/*
@@ -44,14 +40,18 @@ public class DatabaseConnector implements IDataBaseConnector
 	 * .String, java.lang.Object)
 	 */
 	@Override
-	public RedisResponse executeCommand(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public RedisResponse executeCommand(RedisCommand command, Object... args)
 	{
+		if(session == null)
+			throw new RedisClientException("Connection create failed or client has been quit!");
 		return session.executeCommand(command, args);
 	}
 
 	@Override
-	public List<RedisResponse> executeBatch(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException
+	public List<RedisResponse> executeBatch(ArrayList<Object[]> commandList)
 	{
+		if(session == null)
+			throw new RedisClientException("Connection create failed or client has been quit!");
 		return session.executeBatch(commandList);
 	}
 
@@ -62,6 +62,8 @@ public class DatabaseConnector implements IDataBaseConnector
 	@Override
 	public void disConnect()
 	{
+		if(session == null)
+			throw new RedisClientException("Connection create failed or client has been quit!");
 		session.close();
 		sessionManager.disconnectAllSession();
 	}

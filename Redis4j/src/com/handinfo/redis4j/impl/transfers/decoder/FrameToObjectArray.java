@@ -2,6 +2,7 @@ package com.handinfo.redis4j.impl.transfers.decoder;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
@@ -108,7 +109,7 @@ public class FrameToObjectArray extends OneToOneDecoder
 					}
 				default:
 					{
-						ArrayList<RedisResponse> responseList = new ArrayList<RedisResponse>();
+						List<RedisResponse> responseList = new ArrayList<RedisResponse>();
 						int objectTotal = buildMultiBulkResponse(binaryData, binaryData.readerIndex(), responseList);
 						switch (objectTotal)
 						{
@@ -133,7 +134,7 @@ public class FrameToObjectArray extends OneToOneDecoder
 		}
 	}
 
-	private int buildMultiBulkResponse(ChannelBuffer buffer, int currentIndex, ArrayList<RedisResponse> responseList)
+	private int buildMultiBulkResponse(ChannelBuffer buffer, int currentIndex, List<RedisResponse> responseList)
 	{
 		int firstIndexLF = findFirstCRLFIndex(buffer, currentIndex);
 		if (firstIndexLF == -1)
@@ -238,7 +239,7 @@ public class FrameToObjectArray extends OneToOneDecoder
 		return byteIndex;
 	}
 
-	private int addBulkResponse(ChannelBuffer buffer, int currentIndex, ArrayList<RedisResponse> responseList)
+	private int addBulkResponse(ChannelBuffer buffer, int currentIndex, List<RedisResponse> responseList)
 	{
 		int firstIndexLF = findFirstCRLFIndex(buffer, currentIndex);
 		if (firstIndexLF == -1)

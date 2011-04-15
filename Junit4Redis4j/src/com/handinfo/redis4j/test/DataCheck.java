@@ -7,11 +7,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 
 public class DataCheck
 {
-	private final static Logger logger = (new Log(DataCheck.class.getName())).getLogger();
+	private final static Logger logger = LogUtil.getLogger(DataCheck.class.getName());
 	
 	static int repeats = 200;//每个线程循环执行的次数
 	static int corePoolSize = 1500;//测试程序启动的工作线程数

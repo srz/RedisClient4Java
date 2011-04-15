@@ -10,11 +10,11 @@ import org.jboss.netty.handler.timeout.IdleStateEvent;
 
 import com.handinfo.redis4j.api.ISession;
 import com.handinfo.redis4j.api.RedisCommand;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 
 public class HeartbeatHandler extends IdleStateAwareChannelHandler
 {
-	private final Logger logger = (new Log(HeartbeatHandler.class.getName())).getLogger();
+	private final Logger logger = LogUtil.getLogger(HeartbeatHandler.class.getName());
 	private ISession session;
 
 	public HeartbeatHandler(ISession session)

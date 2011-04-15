@@ -37,7 +37,7 @@ public interface IRedisAsyncClient
 	 * @throws InterruptedException
 	 * @throws BrokenBarrierException
 	 */
-	public void executeCommand(RedisCommand command, Result result) throws CleanLockedThreadException, ErrorCommandException, IllegalStateException, InterruptedException, BrokenBarrierException;
+	public void executeCommand(RedisCommand command, Result result) throws InterruptedException;
 
 	/**
 	 * 退出客户端

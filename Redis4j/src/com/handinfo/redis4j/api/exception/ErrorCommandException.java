@@ -27,6 +27,7 @@ public class ErrorCommandException extends RedisClientException
 	public ErrorCommandException(String message)
 	{
 		super(message);
+		super.fillInStackTrace();
 		// TODO Auto-generated constructor stub
 	}
 

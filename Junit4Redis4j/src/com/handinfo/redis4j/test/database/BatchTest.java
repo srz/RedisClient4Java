@@ -5,12 +5,12 @@ import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 import com.handinfo.redis4j.test.Helper;
 
 public class BatchTest
 {
-	private final static Logger logger = (new Log(BatchTest.class.getName())).getLogger();
+	private final static Logger logger = LogUtil.getLogger(BatchTest.class.getName());
 	private static CountDownLatch latch = new CountDownLatch(1);
 
 	/**

@@ -141,10 +141,6 @@ public class Server extends RedisCommandTestBase
 		{
 			e.printStackTrace();
 		}
-		catch (BrokenBarrierException e)
-		{
-			e.printStackTrace();
-		}
 	}
 
 	@Test

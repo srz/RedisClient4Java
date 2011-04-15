@@ -8,12 +8,12 @@ import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 import com.handinfo.redis4j.test.Helper;
 
 public class BenchmarkOfRedis4j
 {
-	private final static Logger logger = (new Log(BenchmarkOfRedis4j.class.getName())).getLogger();
+	private final static Logger logger = LogUtil.getLogger(BenchmarkOfRedis4j.class.getName());
 	static int repeats = 40000;// 每个线程循环执行的次数
 	static int corePoolSize = 10;// 测试程序启动的工作线程数
 	static int dataLength = 1024;// 数据长度,单位byte

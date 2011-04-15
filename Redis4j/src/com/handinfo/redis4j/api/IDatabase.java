@@ -462,7 +462,7 @@ public interface IDatabase
 	 * [SHUTDOWN]Synchronously save the dataset to disk and then shut down the server
 	 * @return
 	 */
-	public Boolean shutdown();
+	public Boolean shutdownServer();
 
 	/**
 	 * [SLAVEOF]Make the server a slave of another instance, or promote it as master

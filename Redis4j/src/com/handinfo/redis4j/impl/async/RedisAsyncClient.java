@@ -1,22 +1,17 @@
 package com.handinfo.redis4j.impl.async;
 
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.async.IAsyncConnector;
 import com.handinfo.redis4j.api.async.IRedisAsyncClient;
-import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
-import com.handinfo.redis4j.api.exception.ErrorCommandException;
-import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 
 public class RedisAsyncClient implements IRedisAsyncClient
 {
-	private final Logger logger = (new Log(RedisAsyncClient.class.getName())).getLogger();
+	private final Logger logger = LogUtil.getLogger(RedisAsyncClient.class.getName());
 	private AtomicBoolean isExecute;
 	private IAsyncConnector connector;
 	
@@ -37,7 +32,7 @@ public class RedisAsyncClient implements IRedisAsyncClient
 	/* (non-Javadoc)
 	 * @see com.handinfo.redis4j.impl.IRedis4jAsyncClient#executeCommand(com.handinfo.redis4j.api.IRedis4j.AsyncCommand, com.handinfo.redis4j.api.IRedis4j.Notify)
 	 */
-	public void executeCommand(RedisCommand command, Result result) throws CleanLockedThreadException, ErrorCommandException, IllegalStateException, InterruptedException, BrokenBarrierException
+	public void executeCommand(RedisCommand command, Result result) throws InterruptedException
 	{
 		if(command.getOperateType() != RedisCommand.OperateType.ASYNC)
 		{

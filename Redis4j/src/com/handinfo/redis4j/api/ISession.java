@@ -4,7 +4,6 @@
 package com.handinfo.redis4j.api;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.BrokenBarrierException;
@@ -60,14 +59,14 @@ public interface ISession
 
 	public boolean isStartClose();
 
-	public RedisResponse executeCommand(RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
+	public RedisResponse executeCommand(RedisCommand command, Object... args);
 	
 	//TODO 可能用不上,最后再删
-	public RedisResponse executeCommand(RedisCommand command, String key, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
+	public RedisResponse executeCommand(String key, RedisCommand command, Object... args);
 	
-	public List<RedisResponse> executeBatch(ArrayList<Object[]> commandList) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException;
+	public List<RedisResponse> executeBatch(List<Object[]> commandList);
 
-	public void executeAsyncCommand(IRedisAsyncClient.Result notify, RedisCommand command, Object... args) throws IllegalStateException, CleanLockedThreadException, ErrorCommandException, InterruptedException, BrokenBarrierException;
+	public void executeAsyncCommand(IRedisAsyncClient.Result notify, RedisCommand command, Object... args) throws InterruptedException;
 	
 	public void cleanCommandQueue();
 	

@@ -8,10 +8,8 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-public class Log
+public class LogUtil
 {
-	private Logger logger;
-
 	private class LogFormatter extends Formatter
 	{
 		@Override
@@ -54,38 +52,29 @@ public class Log
 			return sb.toString();
 		}
 	}
-
-	private class StdoutConsoleHandler extends ConsoleHandler
+	
+	//private final static StreamHandler streamHandler = new StreamHandler(System.out, new LogUtil().new LogFormatter());
+	
+	public static Logger getLogger(String loggerName)
 	{
-		public StdoutConsoleHandler()
-		{
-			super();
-			super.setOutputStream(System.out);
-		}
-
-	}
-
-	public Log(String loggerName)
-	{
-		super();
-		logger = Logger.getLogger(loggerName);
-		StdoutConsoleHandler consoleHandler = new StdoutConsoleHandler();
-		consoleHandler.setLevel(Level.INFO);
-		// consoleHandler.setLevel(Level.OFF);
-		LogFormatter MyLogHander = new LogFormatter();
-		consoleHandler.setFormatter(MyLogHander);
+		Logger logger = Logger.getLogger(loggerName);
+		//streamHandler.setLevel(Level.INFO);
 		logger.setUseParentHandlers(false);
-		logger.addHandler(consoleHandler);
-	}
-
-	public Logger getLogger()
-	{
+		//logger.addHandler(streamHandler);
+		ConsoleHandler ch = new ConsoleHandler();
+		ch.setLevel(Level.ALL);
+		ch.setFormatter(new LogUtil().new LogFormatter());
+		logger.addHandler(ch);
 		return logger;
 	}
 
 	public static void main(String[] args)
 	{
-		Logger logger = (new Log("test")).getLogger();
+		Logger logger = LogUtil.getLogger("test");
 		logger.log(Level.INFO, "xxxxxxxxxxx");
+		
+		Logger logger1 =  LogUtil.getLogger("test1");
+		logger1.log(Level.INFO, "xxxxxxxxxxx111");
+		//int a = 1/0;
 	}
 }

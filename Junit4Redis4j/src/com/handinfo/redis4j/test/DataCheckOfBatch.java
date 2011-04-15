@@ -1,6 +1,5 @@
 package com.handinfo.redis4j.test;
 
-import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -10,13 +9,11 @@ import java.util.logging.Logger;
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.impl.RedisClientBuilder;
-import com.handinfo.redis4j.impl.database.RedisDatabaseClient;
-import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 
 public class DataCheckOfBatch
 {
-	private final static Logger logger = (new Log(DataCheckOfBatch.class.getName())).getLogger();
+	private final static Logger logger = LogUtil.getLogger(DataCheckOfBatch.class.getName());
 	
 	static int repeats = 10;//每个线程循环执行的次数
 	static int corePoolSize = 1500;//测试程序启动的工作线程数

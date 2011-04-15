@@ -16,6 +16,7 @@ import org.jboss.netty.util.Timer;
 
 import com.handinfo.redis4j.api.ISession;
 import com.handinfo.redis4j.api.Sharding;
+import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.transfers.decoder.FrameToObjectArray;
 import com.handinfo.redis4j.impl.transfers.decoder.InputStreamToFrame;
 import com.handinfo.redis4j.impl.transfers.encoder.CommandWrapperToBinaryData;

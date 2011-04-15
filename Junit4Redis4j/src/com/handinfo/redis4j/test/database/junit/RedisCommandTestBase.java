@@ -10,12 +10,12 @@ import org.junit.BeforeClass;
 
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
 import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
-import com.handinfo.redis4j.impl.util.Log;
+import com.handinfo.redis4j.impl.util.LogUtil;
 import com.handinfo.redis4j.test.Helper;
 
 public abstract class RedisCommandTestBase extends Assert
 {
-	protected static final Logger logger = (new Log(RedisCommandTestBase.class.getName())).getLogger();
+	protected static final Logger logger = LogUtil.getLogger(RedisCommandTestBase.class.getName());
 	protected static IRedisDatabaseClient client;
 
 	public RedisCommandTestBase()

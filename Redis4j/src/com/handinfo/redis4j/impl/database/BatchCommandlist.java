@@ -1004,7 +1004,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#shutdown()
 	 */
 	@Override
-	public Boolean shutdown()
+	public Boolean shutdownServer()
 	{
 		this.addCommand(RedisCommand.SHUTDOWN);
 		return false;
