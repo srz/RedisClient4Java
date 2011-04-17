@@ -3,7 +3,7 @@
  */
 package com.handinfo.redis4j.impl.database;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.handinfo.redis4j.api.ListPosition;
@@ -13,7 +13,6 @@ import com.handinfo.redis4j.api.Sharding;
 import com.handinfo.redis4j.api.database.IDatabaseBatch;
 import com.handinfo.redis4j.api.database.IDatabaseTransaction;
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
-import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.util.ParameterConvert;
 
 /**
@@ -89,12 +88,14 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#blpop(java.lang.String, int)
 	 */
 	@Override
-	public String[] listBlockLeftPop(int timeout, String... keys)
+	public List<String> listBlockLeftPop(int timeout, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		System.arraycopy(keys, 0, args, 0, keys.length);
 		args[keys.length] = timeout;
-		return super.sendRequest(String[].class, null, RedisCommand.BLPOP, args);
+
+		return super.sendRequestWithMultiReplay(RedisCommand.BLPOP, args);
+		//return super.sendRequest(String[].class, null, RedisCommand.BLPOP, args);
 	}
 
 	/*
@@ -103,12 +104,12 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#brpop(java.lang.String, int)
 	 */
 	@Override
-	public String[] listBlockRightPop(int timeout, String... keys)
+	public List<String> listBlockRightPop(int timeout, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		System.arraycopy(keys, 0, args, 0, keys.length);
 		args[keys.length] = timeout;
-		return super.sendRequest(String[].class, null, RedisCommand.BRPOP, args);
+		return super.sendRequestWithMultiReplay(RedisCommand.BRPOP, args);
 	}
 
 	/*
@@ -131,7 +132,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	@Override
 	public Map<String, String> configGet(String parameter)
 	{
-		return ParameterConvert.stringArrayToMap(super.sendRequest(String[].class, null, RedisCommand.CONFIG_GET, parameter));
+		return ParameterConvert.stringArrayToMap(super.sendRequestWithMultiReplay(RedisCommand.CONFIG_GET, parameter));
 	}
 
 	/*
@@ -379,7 +380,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	@Override
 	public Map<String, String> hashesGetAllValue(String key)
 	{
-		String[] result = super.sendRequest(String[].class, null, RedisCommand.HGETALL, key);
+		List<String> result = super.sendRequestWithMultiReplay(RedisCommand.HGETALL, key);
 		return ParameterConvert.stringArrayToMap(result);
 	}
 
@@ -401,9 +402,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#hkeys(java.lang.String)
 	 */
 	@Override
-	public String[] hashesGetAllField(String key)
+	public List<String> hashesGetAllField(String key)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.HKEYS, key);
+		return super.sendRequestWithMultiReplay(RedisCommand.HKEYS, key);
 	}
 
 	/*
@@ -424,13 +425,13 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public String[] hashesMultipleFieldGet(String key, String... fields)
+	public List<String> hashesMultipleFieldGet(String key, String... fields)
 	{
 		Object[] args = new Object[fields.length+1];
 		args[0] = key;
 		System.arraycopy(fields, 0, args, 1, fields.length);
 		
-		return super.sendRequest(String[].class, null, RedisCommand.HMGET, args);
+		return super.sendRequestWithMultiReplay(RedisCommand.HMGET, args);
 	}
 
 	/*
@@ -482,7 +483,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	@Override
 	public Map<String, String> hashesGetAll(String key)
 	{
-		String[] resultList = super.sendRequest(String[].class, null, RedisCommand.HGETALL, key);
+		List<String> resultList = super.sendRequestWithMultiReplay(RedisCommand.HGETALL, key);
 		return ParameterConvert.stringArrayToMap(resultList);
 	}
 
@@ -525,9 +526,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#keys(java.lang.String)
 	 */
 	@Override
-	public String[] keys(String pattern)
+	public List<String> keys(String pattern)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.KEYS, pattern);
+		return super.sendRequestWithMultiReplay(RedisCommand.KEYS, pattern);
 	}
 
 	/*
@@ -617,9 +618,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * int)
 	 */
 	@Override
-	public String[] listRange(String key, int start, int stop)
+	public List<String> listRange(String key, int start, int stop)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.LRANGE, key, start, stop);
+		return super.sendRequestWithMultiReplay(RedisCommand.LRANGE, key, start, stop);
 	}
 
 	/*
@@ -663,9 +664,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#mget(java.lang.String[])
 	 */
 	@Override
-	public String[] multipleGet(String... keys)
+	public List<String> multipleGet(String... keys)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.MGET, (Object[])keys);
+		return super.sendRequestWithMultiReplay(RedisCommand.MGET, (Object[])keys);
 	}
 
 	/*
@@ -686,7 +687,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public Boolean multipleSet(HashMap<String, String> keyAndValue)
+	public Boolean multipleSet(Map<String, String> keyAndValue)
 	{
 		Object[] allKey = ParameterConvert.mapToStringArray(keyAndValue);
 		
@@ -700,7 +701,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String)
 	 */
 	@Override
-	public Boolean multipleSetOnNotExist(HashMap<String, String> keyAndValue)
+	public Boolean multipleSetOnNotExist(Map<String, String> keyAndValue)
 	{
 		Object[] allKey = ParameterConvert.mapToStringArray(keyAndValue);
 		return super.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.MSETNX, allKey);
@@ -850,9 +851,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#sdiff(java.lang.String[])
 	 */
 	@Override
-	public String[] setsDiff(String... keys)
+	public List<String> setsDiff(String... keys)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.SDIFF, (Object[])keys);
+		return super.sendRequestWithMultiReplay(RedisCommand.SDIFF, (Object[])keys);
 	}
 
 	/*
@@ -948,9 +949,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#sinter(java.lang.String[])
 	 */
 	@Override
-	public String[] setsInter(String... keys)
+	public List<String> setsInter(String... keys)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.SINTER, (Object[])keys);
+		return super.sendRequestWithMultiReplay(RedisCommand.SINTER, (Object[])keys);
 	}
 
 	/*
@@ -998,9 +999,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#smembers(java.lang.String)
 	 */
 	@Override
-	public String[] setsMembers(String key)
+	public List<String> setsMembers(String key)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.SMEMBERS, key);
+		return super.sendRequestWithMultiReplay(RedisCommand.SMEMBERS, key);
 	}
 
 	/*
@@ -1022,14 +1023,14 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String[])
 	 */
 	@Override
-	public Object[] sort(String key, String... params)
+	public List<String> sort(String key, String... params)
 	{
 		Object[] args = new Object[params.length+1];
 		args[0] = key;
 		System.arraycopy(params, 0, args, 1, params.length);
 
 		
-		return super.sendRequest(String[].class, null, RedisCommand.SORT, args);
+		return super.sendRequestWithMultiReplay(RedisCommand.SORT, args);
 	}
 
 	/*
@@ -1083,9 +1084,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#sunion(java.lang.String[])
 	 */
 	@Override
-	public String[] setsUnion(String... keys)
+	public List<String> setsUnion(String... keys)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.SUNION, (Object[])keys);
+		return super.sendRequestWithMultiReplay(RedisCommand.SUNION, (Object[])keys);
 	}
 
 	/*
@@ -1206,9 +1207,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * int)
 	 */
 	@Override
-	public String[] sortedSetsRange(String key, int start, int stop)
+	public List<String> sortedSetsRange(String key, int start, int stop)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.ZRANGE, key, start, stop);
+		return super.sendRequestWithMultiReplay(RedisCommand.ZRANGE, key, start, stop);
 	}
 
 	/*
@@ -1217,9 +1218,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#zrangebyscore(java.lang.String[])
 	 */
 	@Override
-	public String[] sortedSetsRangeByScore(String key, int min, int max)
+	public List<String> sortedSetsRangeByScore(String key, int min, int max)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.ZRANGEBYSCORE, key, min, max);
+		return super.sendRequestWithMultiReplay(RedisCommand.ZRANGEBYSCORE, key, min, max);
 	}
 
 	/*
@@ -1278,9 +1279,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * int)
 	 */
 	@Override
-	public String[] sortedSetsRevRange(String key, int start, int stop)
+	public List<String> sortedSetsRevRange(String key, int start, int stop)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.ZREVRANGE, key, start, stop);
+		return super.sendRequestWithMultiReplay(RedisCommand.ZREVRANGE, key, start, stop);
 	}
 
 	/*
@@ -1290,9 +1291,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * com.handinfo.redis4j.api.IDatabase#zrevrangebyscore(java.lang.String[])
 	 */
 	@Override
-	public String[] sortedSetsRevRangeByScore(String key, int max, int min)
+	public List<String> sortedSetsRevRangeByScore(String key, int max, int min)
 	{
-		return super.sendRequest(String[].class, null, RedisCommand.ZREVRANGEBYSCORE, key, max, min);
+		return super.sendRequestWithMultiReplay(RedisCommand.ZREVRANGEBYSCORE, key, max, min);
 	}
 
 	/*

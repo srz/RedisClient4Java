@@ -1,5 +1,6 @@
 package com.handinfo.redis4j.test.database.junit;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.junit.After;
@@ -9,7 +10,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
-import com.handinfo.redis4j.impl.transfers.handler.ReconnectNetworkHandler;
 import com.handinfo.redis4j.impl.util.LogUtil;
 import com.handinfo.redis4j.test.Helper;
 
@@ -46,12 +46,20 @@ public abstract class RedisCommandTestBase extends Assert
 	public void tearDown() throws Exception
 	{
 	}
+
+	protected void assertEquals(String[] expected, String[] actual)
+	{
+		for (int i = 0; i < expected.length; i++)
+		{
+			assertEquals(null, expected[i], actual[i]);
+		}
+	}
 	
-	protected void assertEquals(String[] expected, String[] actual )
-	 {
-	  for(int i = 0; i < expected.length; i++)
-	  {
-	   assertEquals(null, expected[i], actual[i]);
-	  }
-	 }
+	protected void assertEquals(List<String> expected, List<String> actual)
+	{
+		for (int i = 0; i < expected.size(); i++)
+		{
+			assertEquals(null, expected.get(i), actual.get(i));
+		}
+	}
 }

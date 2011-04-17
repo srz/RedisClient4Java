@@ -1,5 +1,8 @@
 package com.handinfo.redis4j.test.database.junit.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 import com.handinfo.redis4j.api.ListPosition;
@@ -13,7 +16,7 @@ public class Lists extends RedisCommandTestBase
 	@Test
 	public void blpop() throws InterruptedException
 	{
-		String[] result = client.listBlockLeftPop(1, "foo");
+		List<String> result = client.listBlockLeftPop(1, "foo");
 		assertNull(result);
 
 		new Thread(new Runnable()
@@ -36,15 +39,15 @@ public class Lists extends RedisCommandTestBase
 
 		result = client.listBlockLeftPop(1, "foo");
 		assertNotNull(result);
-		assertEquals(2, result.length);
-		assertEquals("foo", result[0]);
-		assertEquals("bar", result[1]);
+		assertEquals(2, result.size());
+		assertEquals("foo", result.get(0));
+		assertEquals("bar", result.get(1));
 	}
 	
 	@Test
 	public void brpop() throws InterruptedException
 	{
-		String[] result = client.listBlockRightPop(1, "foo");
+		List<String> result = client.listBlockRightPop(1, "foo");
 		assertNull(result);
 
 		new Thread(new Runnable()
@@ -67,9 +70,9 @@ public class Lists extends RedisCommandTestBase
 
 		result = client.listBlockRightPop(1, "foo");
 		assertNotNull(result);
-		assertEquals(2, result.length);
-		assertEquals("foo", result[0]);
-		assertEquals("bar", result[1]);
+		assertEquals(2, result.size());
+		assertEquals("foo", result.get(0));
+		assertEquals("bar", result.get(1));
 	}
 	
 	@Test
@@ -98,7 +101,7 @@ public class Lists extends RedisCommandTestBase
 
 		assertEquals("a", element);
 		assertEquals(1, client.listLength("bar").intValue());
-		assertEquals("a", client.listRange("bar", 0, -1)[0]);
+		assertEquals("a", client.listRange("bar", 0, -1).get(0));
 	}
 	
 	@Test
@@ -108,10 +111,10 @@ public class Lists extends RedisCommandTestBase
 		client.listLeftPush("foo", "2");
 		client.listLeftPush("foo", "3");
 
-		String[] expected = new String[3];
-		expected[0] = "3";
-		expected[1] = "bar";
-		expected[2] = "1";
+		List<String> expected = new ArrayList<String>(3);
+		expected.add("3");
+		expected.add("bar");
+		expected.add("1");
 
 		Boolean status = client.listSet("foo", 1, "bar");
 		assertEquals(true, status);
@@ -128,10 +131,10 @@ public class Lists extends RedisCommandTestBase
 		status = client.listLeftInsert("foo", ListPosition.AFTER, "a", "b");
 		assertEquals(2, status.intValue());
 
-		String[] actual = client.listRange("foo", 0, 100);
-		String[] expected = new String[2];
-		expected[0] = "a";
-		expected[1] = "b";
+		List<String> actual = client.listRange("foo", 0, 100);
+		List<String> expected = new ArrayList<String>(2);
+		expected.add("a");
+		expected.add("b");
 
 		assertEquals(expected, actual);
 
@@ -165,9 +168,9 @@ public class Lists extends RedisCommandTestBase
 		String element = client.listLeftPop("foo");
 		assertEquals("a", element);
 
-		String[] expected = new String[2];
-		expected[0] = "b";
-		expected[1] = "c";
+		List<String> expected = new ArrayList<String>(2);
+		expected.add("b");
+		expected.add("c");
 
 		assertEquals(expected, client.listRange("foo", 0, 1000));
 		client.listLeftPop("foo");
@@ -204,25 +207,25 @@ public class Lists extends RedisCommandTestBase
 		client.listRightPush("foo", "b");
 		client.listRightPush("foo", "c");
 
-		String[] expected = new String[3];
-		expected[0] = "a";
-		expected[1] = "b";
-		expected[2] = "c";
+		List<String> expected = new ArrayList<String>(3);
+		expected.add("a");
+		expected.add("b");
+		expected.add("c");
 
-		String[] range = client.listRange("foo", 0, 2);
+		List<String> range = client.listRange("foo", 0, 2);
 		assertEquals(expected, range);
 
 		range = client.listRange("foo", 0, 20);
 		assertEquals(expected, range);
 
-		expected = new String[2];
-		expected[0] = "b";
-		expected[1] = "c";
+		expected = new ArrayList<String>(2);
+		expected.add("b");
+		expected.add("c");
 
 		range = client.listRange("foo", 1, 2);
 		assertEquals(expected, range);
 
-		expected = new String[0];
+		expected = new ArrayList<String>(0);
 		range = client.listRange("foo", 2, 1);
 		assertEquals(expected, range);
 	}
@@ -241,12 +244,12 @@ public class Lists extends RedisCommandTestBase
 		Integer count = client.listRemove("foo", -2, "hello");
 		assertEquals(2, count.intValue());
 
-		String[] expected = new String[5];
-		expected[0] = "a";
-		expected[1] = "b";
-		expected[2] = "c";
-		expected[3] = "hello";
-		expected[4] = "x";
+		List<String> expected = new ArrayList<String>(5);
+		expected.add("a");
+		expected.add("b");
+		expected.add("c");
+		expected.add("hello");
+		expected.add("x");
 		
 		assertEquals(expected, client.listRange("foo", 0, 1000));
 		assertEquals(0, client.listRemove("bar", 100, "foo").intValue());
@@ -272,9 +275,9 @@ public class Lists extends RedisCommandTestBase
 		Boolean status = client.listTrim("foo", 0, 1);
 		assertEquals(true, status);
 
-		String[] expected = new String[2];
-		expected[0] = "3";
-		expected[1] = "2";
+		List<String> expected = new ArrayList<String>(2);
+		expected.add("3");
+		expected.add("2");
 		assertEquals(2, client.listLength("foo").intValue());
 		assertEquals(expected, client.listRange("foo", 0, 100));
 	}
@@ -289,9 +292,9 @@ public class Lists extends RedisCommandTestBase
 		String element = client.listRightPop("foo");
 		assertEquals("c", element);
 
-		String[] expected = new String[2];
-		expected[0] = "a";
-		expected[1] = "b";
+		List<String> expected = new ArrayList<String>(2);
+		expected.add("a");
+		expected.add("b");
 
 		assertEquals(expected, client.listRange("foo", 0, 1000));
 		client.listRightPop("foo");
@@ -315,14 +318,14 @@ public class Lists extends RedisCommandTestBase
 
 		assertEquals("c", element);
 
-		String[] srcExpected = new String[2];
-		srcExpected[0] = "a";
-		srcExpected[1] = "b";
+		List<String> srcExpected = new ArrayList<String>(2);
+		srcExpected.add("a");
+		srcExpected.add("b");
 
-		String[] dstExpected = new String[3];
-		dstExpected[0] = "c";
-		dstExpected[1] = "foo";
-		dstExpected[2] = "bar";
+		List<String> dstExpected = new ArrayList<String>(3);
+		dstExpected.add("c");
+		dstExpected.add("foo");
+		dstExpected.add("bar");
 
 
 		assertEquals(srcExpected, client.listRange("foo", 0, 1000));

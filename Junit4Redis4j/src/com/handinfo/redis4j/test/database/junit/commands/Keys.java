@@ -1,5 +1,7 @@
 package com.handinfo.redis4j.test.database.junit.commands;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import com.handinfo.redis4j.test.database.junit.RedisCommandTestBase;
@@ -69,6 +71,7 @@ public class Keys extends RedisCommandTestBase
 
 		client.set(key, "I am WillBeDeletedKey 1");
 
+		time = 1303036700L;//System.currentTimeMillis();1303036700937
 		assertEquals(true, client.expireAsTimestamp(key, time));
 	}
 
@@ -76,7 +79,7 @@ public class Keys extends RedisCommandTestBase
 	public void testKeys() 
 	{
 		int successStep = 0;
-		String[] keys = client.keys("*");
+		List<String> keys = client.keys("*");
 		if (keys == null)
 		{
 			successStep++;
@@ -91,13 +94,13 @@ public class Keys extends RedisCommandTestBase
 		keys = client.keys("*");
 		if (keys != null)
 		{
-			if (client.keys("*").length == allKeyNumber)
+			if (client.keys("*").size() == allKeyNumber)
 			{
 				successStep++;
 			}
 		}
 
-		assertTrue(successStep == 2);
+		assertEquals(2, successStep);
 	}
 
 	@Test

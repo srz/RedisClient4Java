@@ -1,6 +1,8 @@
 package com.handinfo.redis4j.test.database.junit.commands;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -157,26 +159,26 @@ public class Strings extends RedisCommandTestBase
 	@Test
 	public void mget()
 	{
-		String[] values = client.multipleGet("foo", "bar");
-		String[] expected = new String[2];
-		expected[0] = null;
-		expected[1] = null;
+		List<String> values = client.multipleGet("foo", "bar");
+		List<String> expected = new ArrayList<String>(2);
+		expected.add(null);
+		expected.add(null);
 		assertEquals(expected, values);
 
 		client.set("foo", "bar");
 
-		expected = new String[2];
-		expected[0] = "bar";
-		expected[1] = null;
+		expected = new ArrayList<String>(2);
+		expected.add("bar");
+		expected.add(null);
 		values = client.multipleGet("foo", "bar");
 
 		assertEquals(expected, values);
 
 		client.set("bar", "foo");
 
-		expected = new String[2];
-		expected[0] = "bar";
-		expected[1] = "foo";
+		expected = new ArrayList<String>(2);
+		expected.add("bar");
+		expected.add("foo");
 		values = client.multipleGet("foo", "bar");
 
 		assertEquals(expected, values);

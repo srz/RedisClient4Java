@@ -3,7 +3,7 @@
  */
 package com.handinfo.redis4j.api;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -90,7 +90,7 @@ public interface IDatabase
 	 * @param fields
 	 * @return
 	 */
-	public String[] hashesMultipleFieldGet(String key, String... fields);
+	public List<String> hashesMultipleFieldGet(String key, String... fields);
 
 
 	/**
@@ -116,7 +116,7 @@ public interface IDatabase
 	 * @param key
 	 * @return
 	 */
-	public String[] hashesGetAllField(String key);
+	public List<String> hashesGetAllField(String key);
 
 	/**
 	 * [HMSET]Set multiple hash fields to multiple values
@@ -147,7 +147,7 @@ public interface IDatabase
 	 * @param pattern
 	 * @return
 	 */
-	public String[] keys(String pattern);
+	public List<String> keys(String pattern);
 
 	/**
 	 * [RENAME]Rename a key
@@ -211,7 +211,7 @@ public interface IDatabase
 	 * @return
 	 * TODO 暂时先写个简单版本的,后面在追加重载版本
 	 */
-	public Object[] sort(String key, String... args);
+	public List<String> sort(String key, String... args);
 
 	/**
 	 * [EXPIREAT]Set the expiration for a key as a UNIX timestamp
@@ -241,7 +241,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public String[] listBlockLeftPop(int timeout, String... keys);
+	public List<String> listBlockLeftPop(int timeout, String... keys);
 
 	/**
 	 * [LLEN]Get the length of a list
@@ -273,7 +273,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public String[] listBlockRightPop(int timeout, String... keys);
+	public List<String> listBlockRightPop(int timeout, String... keys);
 
 	/**
 	 * [LPOP]Remove and get the first element in a list
@@ -365,7 +365,7 @@ public interface IDatabase
 	 * @param stop
 	 * @return
 	 */
-	public String[] listRange(String key, int start, int stop);
+	public List<String> listRange(String key, int start, int stop);
 
 	/**
 	 * [RPOPLPUSH]Remove the last element in a list, append it to another list and return it
@@ -490,7 +490,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public String[] setsInter(String... keys);
+	public List<String> setsInter(String... keys);
 
 	/**
 	 * [SMOVE]Move a member from one set to another
@@ -506,7 +506,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public String[] setsUnion(String... keys);
+	public List<String> setsUnion(String... keys);
 
 	/**
 	 * [SCARD]Get the number of members in a set
@@ -543,7 +543,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public String[] setsDiff(String... keys);
+	public List<String> setsDiff(String... keys);
 
 	/**
 	 * [SISMEMBER]Determine if a given value is a member of a set
@@ -573,7 +573,7 @@ public interface IDatabase
 	 * @param key
 	 * @return
 	 */
-	public String[] setsMembers(String key);
+	public List<String> setsMembers(String key);
 
 	/**
 	 * [SREM]Remove a member from a set
@@ -595,7 +595,7 @@ public interface IDatabase
 
 	/**
 	 * [ZINTERSTORE]Intersect multiple sorted sets and store the resulting sorted set in a new key
-	 * @param destination TODO
+	 * @param destination 
 	 * @param keys
 	 * @return
 	 */
@@ -611,12 +611,12 @@ public interface IDatabase
 
 	/**
 	 * [ZREVRANGEBYSCORE]Return a range of members in a sorted set, by score, with scores ordered from high to low
-	 * @param key TODO
-	 * @param max TODO
-	 * @param min TODO
+	 * @param key 
+	 * @param max 
+	 * @param min 
 	 * @return
 	 */
-	public String[] sortedSetsRevRangeByScore(String key, int max, int min);
+	public List<String> sortedSetsRevRangeByScore(String key, int max, int min);
 
 	/**
 	 * [ZCARD]Get the number of members in a sorted set
@@ -632,7 +632,7 @@ public interface IDatabase
 	 * @param stop
 	 * @return
 	 */
-	public String[] sortedSetsRange(String key, int start, int stop);
+	public List<String> sortedSetsRange(String key, int start, int stop);
 
 	/**
 	 * [ZREMRANGEBYRANK]Remove all members in a sorted set within the given indexes
@@ -662,12 +662,12 @@ public interface IDatabase
 
 	/**
 	 * [ZRANGEBYSCORE]Return a range of members in a sorted set, by score
-	 * @param key TODO
-	 * @param min TODO
-	 * @param max TODO
+	 * @param key 
+	 * @param min 
+	 * @param max 
 	 * @return
 	 */
-	public String[] sortedSetsRangeByScore(String key, int min, int max);
+	public List<String> sortedSetsRangeByScore(String key, int min, int max);
 
 	/**
 	 * [ZREMRANGEBYSCORE]Remove all members in a sorted set within the given scores
@@ -710,11 +710,11 @@ public interface IDatabase
 	 * @param stop
 	 * @return
 	 */
-	public String[] sortedSetsRevRange(String key, int start, int stop);
+	public List<String> sortedSetsRevRange(String key, int start, int stop);
 
 	/**
 	 * [ZUNIONSTORE]Add multiple sorted sets and store the resulting sorted set in a new key
-	 * @param destination TODO
+	 * @param destination 
 	 * @param keys
 	 * @return
 	 */
@@ -743,7 +743,7 @@ public interface IDatabase
 	 * @param keyAndValue
 	 * @return
 	 */
-	public Boolean multipleSet(HashMap<String, String> keyAndValue);
+	public Boolean multipleSet(Map<String, String> keyAndValue);
 
 	/**
 	 * [SETNX]Set the value of a key, only if the key does not exist
@@ -773,7 +773,7 @@ public interface IDatabase
 	 * @param keyAndValue
 	 * @return
 	 */
-	public Boolean multipleSetOnNotExist(HashMap<String, String> keyAndValue);
+	public Boolean multipleSetOnNotExist(Map<String, String> keyAndValue);
 
 	/**
 	 * [SETRANGE]Overwrite part of a string at key starting at the specified offset
@@ -851,7 +851,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public String[] multipleGet(String... keys);
+	public List<String> multipleGet(String... keys);
 
 	/**
 	 * [SETEX]Set the value and expiration of a key

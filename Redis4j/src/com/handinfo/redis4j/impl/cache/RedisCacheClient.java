@@ -3,14 +3,14 @@
  */
 package com.handinfo.redis4j.impl.cache;
 
-import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.handinfo.redis4j.api.ListPosition;
 import com.handinfo.redis4j.api.RedisCommand;
 import com.handinfo.redis4j.api.RedisResponse;
 import com.handinfo.redis4j.api.RedisResponseMessage;
@@ -21,6 +21,7 @@ import com.handinfo.redis4j.api.cache.IRedisCacheClient;
 import com.handinfo.redis4j.api.exception.CleanLockedThreadException;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.impl.util.ObjectWrapper;
+import com.handinfo.redis4j.impl.util.ParameterConvert;
 
 /**
  * @author Administrator
@@ -45,7 +46,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#append(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public int append(String key, String value)
+	public Integer append(String key, String value)
 	{
 		return this.sendRequest(Integer.class, null, RedisCommand.APPEND, key, value);
 	}
@@ -55,7 +56,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#decrement(java.lang.String)
 	 */
 	@Override
-	public int decrement(String key)
+	public Integer decrement(String key)
 	{
 		return this.sendRequest(Integer.class, null, RedisCommand.DECRBY, key);
 	}
@@ -65,7 +66,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#decrementByValue(java.lang.String, int)
 	 */
 	@Override
-	public int decrementByValue(String key, int decrement)
+	public Integer decrementByValue(String key, int decrement)
 	{
 		return this.sendRequest(Integer.class, null, RedisCommand.DECRBY, key, decrement);
 	}
@@ -75,7 +76,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#del(java.lang.String[])
 	 */
 	@Override
-	public int del(String... keys)
+	public Integer del(String... keys)
 	{
 		List<Integer> resultList = this.sendMultipleKeysNoArgsAndSingleReplay(Integer.class, null, RedisCommand.DEL, keys);
 		int result=0;
@@ -91,7 +92,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#exists(java.lang.String)
 	 */
 	@Override
-	public boolean exists(String key)
+	public Boolean exists(String key)
 	{
 		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.EXISTS, key);
 	}
@@ -101,7 +102,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#expire(java.lang.String, int)
 	 */
 	@Override
-	public boolean expire(String key, int seconds)
+	public Boolean expire(String key, int seconds)
 	{
 		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.EXPIRE, key, seconds);
 	}
@@ -111,7 +112,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#expireAsTimestamp(java.lang.String, long)
 	 */
 	@Override
-	public boolean expireAsTimestamp(String key, long timestamp)
+	public Boolean expireAsTimestamp(String key, long timestamp)
 	{
 		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.EXPIREAT, key, timestamp);
 	}
@@ -135,10 +136,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#getBit(java.lang.String, int)
 	 */
 	@Override
-	public int getBit(String key, int offset)
+	public Boolean getBit(String key, int offset)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.GETBIT, key, offset);
 	}
 
 	/*
@@ -148,8 +148,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public String getRange(String key, int start, int end)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.sendRequest(String.class, null, RedisCommand.GETRANGE, key, start, end);
 	}
 
 	/*
@@ -159,8 +158,12 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> T getSet(String key, T value)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		ObjectWrapper<T> obj = new ObjectWrapper<T>(value);
+		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.GETSET, key, obj);
+
+		ObjectWrapper<T> returnObj = new ObjectWrapper<T>(objectbyte);
+
+		return returnObj.getOriginal();
 	}
 
 	/*
@@ -168,10 +171,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesDel(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean hashesDel(String key, String field)
+	public Boolean hashesDel(String key, String field)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.HDEL, key, field);
 	}
 
 	/*
@@ -179,10 +181,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesExists(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean hashesExists(String key, String field)
+	public Boolean hashesExists(String key, String field)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.HEXISTS, key, field);
 	}
 
 	/*
@@ -192,8 +193,11 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> T hashesGet(String key, String field)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.HGET, key, field);
+
+		ObjectWrapper<T> obj = new ObjectWrapper<T>(objectbyte);
+
+		return obj.getOriginal();
 	}
 
 	/*
@@ -201,10 +205,11 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesGetAll(java.lang.String)
 	 */
 	@Override
-	public <T> HashMap<String, T> hashesGetAll(String key)
+	public <T> Map<String, T> hashesGetAll(String key)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.HGETALL, key);
+
+		return ParameterConvert.objectArrayToMap(objectbytes);
 	}
 
 	/*
@@ -212,7 +217,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesGetAllField(java.lang.String)
 	 */
 	@Override
-	public String[] hashesGetAllField(String key)
+	public List<String> hashesGetAllField(String key)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -223,7 +228,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesGetAllValue(java.lang.String)
 	 */
 	@Override
-	public <T> T[] hashesGetAllValue(String key)
+	public <T> List<T> hashesGetAllValue(String key)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -234,7 +239,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesIncrementByValue(java.lang.String, java.lang.String, int)
 	 */
 	@Override
-	public int hashesIncrementByValue(String key, String field, int increment)
+	public Integer hashesIncrementByValue(String key, String field, int increment)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -245,7 +250,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesLength(java.lang.String)
 	 */
 	@Override
-	public int hashesLength(String key)
+	public Integer hashesLength(String key)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -256,7 +261,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesMultipleFieldGet(java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public <T> T[] hashesMultipleFieldGet(String key, String... fields)
+	public <T> List<T> hashesMultipleFieldGet(String key, String... fields)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -267,7 +272,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesMultipleSet(java.lang.String, java.util.HashMap)
 	 */
 	@Override
-	public <T> boolean hashesMultipleSet(String key, HashMap<String, T> fieldAndValue)
+	public <T> Boolean hashesMultipleSet(String key, HashMap<String, T> fieldAndValue)
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -278,7 +283,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesSet(java.lang.String, java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> boolean hashesSet(String key, String field, T value)
+	public <T> Boolean hashesSet(String key, String field, T value)
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -289,7 +294,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesSetNotExistField(java.lang.String, java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> boolean hashesSetNotExistField(String key, String field, T value)
+	public <T> Boolean hashesSetNotExistField(String key, String field, T value)
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -300,7 +305,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#increment(java.lang.String)
 	 */
 	@Override
-	public int increment(String key)
+	public Integer increment(String key)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -311,7 +316,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#incrementByValue(java.lang.String, int)
 	 */
 	@Override
-	public int incrementByValue(String key, int increment)
+	public Integer incrementByValue(String key, int increment)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -322,7 +327,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#keys(java.lang.String)
 	 */
 	@Override
-	public String[] keys(String pattern)
+	public List<String> keys(String pattern)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -377,7 +382,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listLeftInsert(java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> int listLeftInsert(String key, String BEFORE_AFTER, String pivot, T value)
+	public <T> Integer listLeftInsert(String key, ListPosition beforeOrAfter, String pivot, T value)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -399,7 +404,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listLeftPush(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> int listLeftPush(String key, T value)
+	public <T> Integer listLeftPush(String key, T value)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -410,7 +415,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listLeftPushOnExist(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> int listLeftPushOnExist(String key, T value)
+	public <T> Integer listLeftPushOnExist(String key, T value)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -421,7 +426,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listLength(java.lang.String)
 	 */
 	@Override
-	public int listLength(String key)
+	public Integer listLength(String key)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -432,7 +437,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listRange(java.lang.String, int, int)
 	 */
 	@Override
-	public <T> T[] listRange(String key, int start, int stop)
+	public <T> List<T> listRange(String key, int start, int stop)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -443,7 +448,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listRemove(java.lang.String, int, java.lang.Object)
 	 */
 	@Override
-	public <T> int listRemove(String key, int count, T value)
+	public <T> Integer listRemove(String key, int count, T value)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -476,7 +481,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listRightPush(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> int listRightPush(String key, T value)
+	public <T> Integer listRightPush(String key, T value)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -487,7 +492,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listRightPushOnExist(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> int listRightPushOnExist(String key, T value)
+	public <T> Integer listRightPushOnExist(String key, T value)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -498,7 +503,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listSet(java.lang.String, int, java.lang.Object)
 	 */
 	@Override
-	public <T> boolean listSet(String key, int index, T value)
+	public <T> Boolean listSet(String key, int index, T value)
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -509,7 +514,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listTrim(java.lang.String, int, int)
 	 */
 	@Override
-	public boolean listTrim(String key, int start, int stop)
+	public Boolean listTrim(String key, int start, int stop)
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -520,7 +525,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#move(java.lang.String, int)
 	 */
 	@Override
-	public boolean move(String key, int indexDB)
+	public Boolean move(String key, int indexDB)
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -573,7 +578,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#persist(java.lang.String)
 	 */
 	@Override
-	public boolean persist(String key)
+	public Boolean persist(String key)
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -581,21 +586,10 @@ public class RedisCacheClient implements IRedisCacheClient
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.handinfo.redis4j.api.ICache#randomKey(java.net.InetSocketAddress)
-	 */
-	@Override
-	public String randomKey(InetSocketAddress server)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#rename(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean rename(String key, String newKey)
+	public Boolean rename(String key, String newKey)
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -606,7 +600,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#renameOnNotExistNewKey(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public boolean renameOnNotExistNewKey(String key, String newKey)
+	public Boolean renameOnNotExistNewKey(String key, String newKey)
 	{
 		// TODO Auto-generated method stub
 		return false;
@@ -617,7 +611,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#set(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> boolean set(String key, T value)
+	public <T> Boolean set(String key, T value)
 	{
 		ObjectWrapper<T> obj = new ObjectWrapper<T>(value);
 		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.SET, key, obj);
@@ -628,7 +622,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setAndExpire(java.lang.String, int, java.lang.Object)
 	 */
 	@Override
-	public <T> boolean setAndExpire(String key, int seconds, T value)
+	public <T> Boolean setAndExpire(String key, int seconds, T value)
 	{
 		ObjectWrapper<T> obj = new ObjectWrapper<T>(value);
 		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.SETEX, key, seconds, obj);
@@ -639,10 +633,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setBit(java.lang.String, int, int)
 	 */
 	@Override
-	public int setBit(String key, int offset, int value)
+	public Boolean setBit(String key, int offset, int value)
 	{
 		// TODO Auto-generated method stub
-		return 0;
+		return null;
 	}
 
 	/*
@@ -661,7 +655,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setRange(java.lang.String, int, java.lang.String)
 	 */
 	@Override
-	public int setRange(String key, int offset, String value)
+	public Integer setRange(String key, int offset, String value)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -683,7 +677,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setsCard(java.lang.String)
 	 */
 	@Override
-	public int setsCard(String key)
+	public Integer setsCard(String key)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -694,7 +688,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setsDiff(java.lang.String[])
 	 */
 	@Override
-	public <T> T[] setsDiff(String... keys)
+	public <T> List<T> setsDiff(String... keys)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -705,7 +699,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setsDiffStore(java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public int setsDiffStore(String destination, String... keys)
+	public Integer setsDiffStore(String destination, String... keys)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -716,7 +710,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setsInter(java.lang.String[])
 	 */
 	@Override
-	public <T> T[] setsInter(String... keys)
+	public <T> List<T> setsInter(String... keys)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -727,7 +721,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setsInterStore(java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public int setsInterStore(String destination, String... keys)
+	public Integer setsInterStore(String destination, String... keys)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -749,7 +743,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setsMembers(java.lang.String)
 	 */
 	@Override
-	public <T> T[] setsMembers(String key)
+	public <T> List<T> setsMembers(String key)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -804,7 +798,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setsUnion(java.lang.String[])
 	 */
 	@Override
-	public <T> T[] setsUnion(String... keys)
+	public <T> List<T> setsUnion(String... keys)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -815,7 +809,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setsUnionStore(java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public int setsUnionStore(String destination, String... keys)
+	public Integer setsUnionStore(String destination, String... keys)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -837,7 +831,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsCard(java.lang.String)
 	 */
 	@Override
-	public int sortedSetsCard(String key)
+	public Integer sortedSetsCard(String key)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -848,7 +842,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsCount(java.lang.String, int, int)
 	 */
 	@Override
-	public int sortedSetsCount(String key, int min, int max)
+	public Integer sortedSetsCount(String key, int min, int max)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -859,7 +853,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsIncrementByValue(java.lang.String, int, java.lang.Object)
 	 */
 	@Override
-	public <T> String sortedSetsIncrementByValue(String key, int increment, T member)
+	public <T> Double sortedSetsIncrementByValue(String key, int increment, T member)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -870,7 +864,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsInterStore(java.lang.String[])
 	 */
 	@Override
-	public int sortedSetsInterStore(String... args)
+	public Integer sortedSetsInterStore(String... args)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -881,7 +875,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsRange(java.lang.String, int, int)
 	 */
 	@Override
-	public <T> T[] sortedSetsRange(String key, int start, int stop)
+	public <T> List<T> sortedSetsRange(String key, int start, int stop)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -892,7 +886,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsRangeByScore(java.lang.String[])
 	 */
 	@Override
-	public <T> T[] sortedSetsRangeByScore(String... args)
+	public <T> List<T> sortedSetsRangeByScore(String... args)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -903,7 +897,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsRank(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> int sortedSetsRank(String key, T member)
+	public <T> Integer sortedSetsRank(String key, T member)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -925,7 +919,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsRemoveRangeByRank(java.lang.String, int, int)
 	 */
 	@Override
-	public int sortedSetsRemoveRangeByRank(String key, int start, int stop)
+	public Integer sortedSetsRemoveRangeByRank(String key, int start, int stop)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -936,7 +930,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsRemoveRangeByScore(java.lang.String, int, int)
 	 */
 	@Override
-	public int sortedSetsRemoveRangeByScore(String key, int min, int max)
+	public Integer sortedSetsRemoveRangeByScore(String key, int min, int max)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -947,7 +941,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsRevRange(java.lang.String, int, int)
 	 */
 	@Override
-	public <T> T[] sortedSetsRevRange(String key, int start, int stop)
+	public <T> List<T> sortedSetsRevRange(String key, int start, int stop)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -958,7 +952,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsRevRangeByScore(java.lang.String[])
 	 */
 	@Override
-	public <T> T[] sortedSetsRevRangeByScore(String... args)
+	public <T> List<T> sortedSetsRevRangeByScore(String... args)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -969,7 +963,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsRevRank(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> int sortedSetsRevRank(String key, T member)
+	public <T> Integer sortedSetsRevRank(String key, T member)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -980,7 +974,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsScore(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> String sortedSetsScore(String key, T member)
+	public <T> Integer sortedSetsScore(String key, T member)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -991,7 +985,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#strLength(java.lang.String)
 	 */
 	@Override
-	public int strLength(String key)
+	public Integer strLength(String key)
 	{
 		// TODO Auto-generated method stub
 		return 0;
@@ -1002,7 +996,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#timeToLive(java.lang.String)
 	 */
 	@Override
-	public int timeToLive(String key)
+	public Integer timeToLive(String key)
 	{
 		// TODO Auto-generated method stub
 		return 0;

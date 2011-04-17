@@ -1,7 +1,9 @@
 package com.handinfo.redis4j.test.database.junit.commands;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -79,10 +81,10 @@ public class Hashes extends RedisCommandTestBase
 		hash.put("car", "bar");
 		client.hashesMultipleSet("foo", hash);
 
-		String[] keys = client.hashesGetAllField("foo");
-		String[] expected = new String[2];
-		expected[0] = "bar";
-		expected[1] = "car";
+		List<String> keys = client.hashesGetAllField("foo");
+		List<String> expected = new ArrayList<String>(2);
+		expected.add("bar");
+		expected.add("car");
 		assertEquals(expected, keys);
 	}
 
@@ -105,12 +107,12 @@ public class Hashes extends RedisCommandTestBase
 		hash.put("bar", "car");
 		hash.put("car", "bar");
 		client.hashesMultipleSet("foo", hash);
-
-		String[] values = client.hashesMultipleFieldGet("foo", "bar", "car", "foo");
-		String[] expected = new String[3];
-		expected[0] = "car";
-		expected[1] = "bar";
-		expected[2] = null;
+		
+		List<String> values = client.hashesMultipleFieldGet("foo", "bar", "car", "foo");
+		List<String> expected = new ArrayList<String>(3);
+		expected.add("car");
+		expected.add("bar");
+		expected.add(null);
 
 		assertEquals(expected, values);
 	}

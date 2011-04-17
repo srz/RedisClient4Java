@@ -1,7 +1,7 @@
 package com.handinfo.redis4j.impl.database;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.handinfo.redis4j.api.IDatabase;
@@ -84,7 +84,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#blpop(java.lang.String, int)
 	 */
 	@Override
-	public String[] listBlockLeftPop(int timeout, String... keys)
+	public List<String> listBlockLeftPop(int timeout, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		System.arraycopy(keys, 0, args, 0, keys.length);
@@ -100,7 +100,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#brpop(java.lang.String, int)
 	 */
 	@Override
-	public String[] listBlockRightPop(int timeout, String... keys)
+	public List<String> listBlockRightPop(int timeout, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		System.arraycopy(keys, 0, args, 0, keys.length);
@@ -424,7 +424,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#hkeys(java.lang.String)
 	 */
 	@Override
-	public String[] hashesGetAllField(String key)
+	public List<String> hashesGetAllField(String key)
 	{
 		this.addCommand(RedisCommand.HKEYS, key);
 		return null;
@@ -449,7 +449,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public String[] hashesMultipleFieldGet(String key, String... fields)
+	public List<String> hashesMultipleFieldGet(String key, String... fields)
 	{
 		Object[] args = new Object[fields.length+1];
 		args[0] = key;
@@ -556,7 +556,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#keys(java.lang.String)
 	 */
 	@Override
-	public String[] keys(String pattern)
+	public List<String> keys(String pattern)
 	{
 		this.addCommand(RedisCommand.KEYS, pattern);
 		return null;
@@ -656,7 +656,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * int)
 	 */
 	@Override
-	public String[] listRange(String key, int start, int stop)
+	public List<String> listRange(String key, int start, int stop)
 	{
 		this.addCommand(RedisCommand.LRANGE, key, start, stop);
 		return null;
@@ -706,7 +706,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#mget(java.lang.String[])
 	 */
 	@Override
-	public String[] multipleGet(String... keys)
+	public List<String> multipleGet(String... keys)
 	{
 		this.addCommand(RedisCommand.MGET, (Object[])keys);
 		return null;
@@ -731,7 +731,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public Boolean multipleSet(HashMap<String, String> keyAndValue)
+	public Boolean multipleSet(Map<String, String> keyAndValue)
 	{
 		Object[] allKey = ParameterConvert.mapToStringArray(keyAndValue);
 		this.addCommand(RedisCommand.MSET, allKey);
@@ -745,7 +745,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String)
 	 */
 	@Override
-	public Boolean multipleSetOnNotExist(HashMap<String, String> keyAndValue)
+	public Boolean multipleSetOnNotExist(Map<String, String> keyAndValue)
 	{
 		Object[] allKey = ParameterConvert.mapToStringArray(keyAndValue);
 		this.addCommand(RedisCommand.MSETNX, allKey);
@@ -908,7 +908,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#sdiff(java.lang.String[])
 	 */
 	@Override
-	public String[] setsDiff(String... keys)
+	public List<String> setsDiff(String... keys)
 	{
 		this.addCommand(RedisCommand.SDIFF, (Object[])keys);
 		return null;
@@ -1016,7 +1016,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#sinter(java.lang.String[])
 	 */
 	@Override
-	public String[] setsInter(String... keys)
+	public List<String> setsInter(String... keys)
 	{
 		this.addCommand(RedisCommand.SINTER, (Object[])keys);
 		return null;
@@ -1070,7 +1070,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#smembers(java.lang.String)
 	 */
 	@Override
-	public String[] setsMembers(String key)
+	public List<String> setsMembers(String key)
 	{
 		this.addCommand(RedisCommand.SMEMBERS, key);
 		return null;
@@ -1096,7 +1096,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String[])
 	 */
 	@Override
-	public Object[] sort(String key, String... params)
+	public List<String> sort(String key, String... params)
 	{
 		Object[] args = new Object[params.length+1];
 		args[0] = key;
@@ -1161,7 +1161,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#sunion(java.lang.String[])
 	 */
 	@Override
-	public String[] setsUnion(String... keys)
+	public List<String> setsUnion(String... keys)
 	{
 		this.addCommand(RedisCommand.SUNION, (Object[])keys);
 		return null;
@@ -1294,7 +1294,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * int)
 	 */
 	@Override
-	public String[] sortedSetsRange(String key, int start, int stop)
+	public List<String> sortedSetsRange(String key, int start, int stop)
 	{
 		this.addCommand(RedisCommand.ZRANGE, key, start, stop);
 		return null;
@@ -1306,7 +1306,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#zrangebyscore(java.lang.String[])
 	 */
 	@Override
-	public String[] sortedSetsRangeByScore(String key, int min, int max)
+	public List<String> sortedSetsRangeByScore(String key, int min, int max)
 	{
 		this.addCommand(RedisCommand.ZRANGEBYSCORE, key, min, max);
 		return null;
@@ -1372,7 +1372,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * int)
 	 */
 	@Override
-	public String[] sortedSetsRevRange(String key, int start, int stop)
+	public List<String> sortedSetsRevRange(String key, int start, int stop)
 	{
 		this.addCommand(RedisCommand.ZREVRANGE, key, start, stop);
 		return null;
@@ -1385,7 +1385,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * com.handinfo.redis4j.api.IDatabase#zrevrangebyscore(java.lang.String[])
 	 */
 	@Override
-	public String[] sortedSetsRevRangeByScore(String key, int max, int min)
+	public List<String> sortedSetsRevRangeByScore(String key, int max, int min)
 	{
 		this.addCommand(RedisCommand.ZREVRANGEBYSCORE, key, max, min);
 		return null;

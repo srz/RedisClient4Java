@@ -1,7 +1,8 @@
 package com.handinfo.redis4j.impl.database;
 
 import java.nio.charset.Charset;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.handinfo.redis4j.api.RedisCommand;
@@ -63,9 +64,7 @@ public abstract class DatabaseClient
 				return classType.cast(Boolean.valueOf(((String) arg).equalsIgnoreCase(compareValue.getValue())));
 			else
 				return classType.cast(Boolean.FALSE);
-		} else if (classType == String[].class)
-			return classType.cast(arg);
-		else
+		} else
 			return null;
 	}
 
@@ -73,13 +72,13 @@ public abstract class DatabaseClient
 	 * 发送请求
 	 * 
 	 * @param <T>
-	 *            classType 返回数据类型
+	 *                classType 返回数据类型
 	 * @param compareValue
-	 *            与返回结果做对比用的数据,以生成boolean型返回值
+	 *                与返回结果做对比用的数据,以生成boolean型返回值
 	 * @param command
-	 *            发送的命令
+	 *                发送的命令
 	 * @param args
-	 *            命令参数
+	 *                命令参数
 	 * @return
 	 * @throws IllegalStateException
 	 * @throws CleanLockedThreadException
@@ -98,43 +97,22 @@ public abstract class DatabaseClient
 				switch (response.getType())
 				{
 				case SingleLineReply:
-					{
-						return castResult(classType, response.getTextValue(), compareValue);
-					}
+				{
+					return castResult(classType, response.getTextValue(), compareValue);
+				}
 				case IntegerReply:
-					{
-						return castResult(classType, response.getTextValue(), compareValue);
-					}
+				{
+					return castResult(classType, response.getTextValue(), compareValue);
+				}
 				case BulkReplies:
+				{
+					if (response.getBulkValue() == null)
+						return null;
+					else
 					{
-						if (response.getBulkValue() == null)
-							return null;
-						else
-						{
-							return castResult(classType, new String(response.getBulkValue(), Charset.forName("UTF-8")), compareValue);
-						}
+						return castResult(classType, new String(response.getBulkValue(), Charset.forName("UTF-8")), compareValue);
 					}
-				case MultiBulkReplies:
-					{
-						if (response.getMultiBulkValue()==null || response.getMultiBulkValue().size() == 0)
-							return null;
-
-						String[] result = new String[response.getMultiBulkValue().size()];
-						int i = 0;
-						for (RedisResponse res : response.getMultiBulkValue())
-						{
-							if(res.getBulkValue() != null)
-							{
-								result[i] = new String(res.getBulkValue(), Charset.forName("UTF-8"));
-							}
-							else
-							{
-								result[i] = null;
-							}
-							i++;
-						}
-						return castResult(classType, result, null);
-					}
+				}
 				default:
 					return null;
 				}
@@ -148,6 +126,40 @@ public abstract class DatabaseClient
 					else
 						throw new ErrorCommandException(response.getTextValue());
 				}
+			}
+		}
+
+		return null;
+	}
+
+	public List<String> sendRequestWithMultiReplay(RedisCommand command, Object... args)
+	{
+		RedisResponse response = connector.executeCommand(command, args);
+
+		if (response != null)
+		{
+			if (RedisResponseType.MultiBulkReplies == response.getType())
+			{
+				if (response.getMultiBulkValue() != null && response.getMultiBulkValue().size() > 0)
+				{
+					List<String> result = new ArrayList<String>(response.getMultiBulkValue().size());
+
+					for (RedisResponse res : response.getMultiBulkValue())
+					{
+						if (res.getBulkValue() != null)
+						{
+							result.add(new String(res.getBulkValue(), Charset.forName("UTF-8")));
+						} else
+						{
+							result.add(null);
+						}
+					}
+					return result;
+				}
+			}
+			else if (RedisResponseType.ErrorReply == response.getType())
+			{
+				throw new ErrorCommandException(response.getTextValue());
 			}
 		}
 

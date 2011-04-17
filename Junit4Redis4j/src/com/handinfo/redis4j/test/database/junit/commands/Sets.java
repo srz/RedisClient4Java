@@ -1,5 +1,8 @@
 package com.handinfo.redis4j.test.database.junit.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 import com.handinfo.redis4j.test.database.junit.RedisCommandTestBase;
@@ -43,11 +46,11 @@ public class Sets extends RedisCommandTestBase
 		client.setsAdd("car", "a");
 		client.setsAdd("car", "d");
 
-		String[] expected = new String[2];
-		expected[0] = "x";
-		expected[1] = "b";
+		List<String> expected = new ArrayList<String>(2);
+		expected.add("x");
+		expected.add("b");
 
-		String[] diff = client.setsDiff("foo", "bar", "car");
+		List<String> diff = client.setsDiff("foo", "bar", "car");
 		assertEquals(expected, diff);
 	}
 
@@ -64,9 +67,9 @@ public class Sets extends RedisCommandTestBase
 		client.setsAdd("car", "a");
 		client.setsAdd("car", "d");
 
-		String[] expected = new String[2];
-		expected[0] = "d";
-		expected[1] = "a";
+		List<String> expected = new ArrayList<String>(2);
+		expected.add("d");
+		expected.add("a");
 
 		Integer status = client.setsDiffStore("tar", "foo", "bar", "car");
 		assertEquals(2, status.intValue());
@@ -82,10 +85,10 @@ public class Sets extends RedisCommandTestBase
 		client.setsAdd("bar", "b");
 		client.setsAdd("bar", "c");
 
-		String[] expected = new String[1];
-		expected[0] = "b";
+		List<String> expected = new ArrayList<String>(1);
+		expected.add("b");
 
-		String[] intersection = client.setsInter("foo", "bar");
+		List<String> intersection = client.setsInter("foo", "bar");
 		assertEquals(expected, intersection);
 	}
 
@@ -101,8 +104,8 @@ public class Sets extends RedisCommandTestBase
 		Integer status = client.setsInterStore("car", "foo", "bar");
 		assertEquals(1, status.intValue());
 
-		String[] expected = new String[1];
-		expected[0] = "b";
+		List<String> expected = new ArrayList<String>(1);
+		expected.add("b");
 		assertEquals(expected, client.setsMembers("car"));
 	}
 
@@ -123,11 +126,11 @@ public class Sets extends RedisCommandTestBase
 		client.setsAdd("foo", "a");
 		client.setsAdd("foo", "b");
 
-		String[] expected = new String[2];
-		expected[0] = "a";
-		expected[1] = "b";
+		List<String> expected = new ArrayList<String>(2);
+		expected.add("a");
+		expected.add("b");
 
-		String[] members = client.setsMembers("foo");
+		List<String> members = client.setsMembers("foo");
 
 		assertEquals(expected, members);
 	}
@@ -143,12 +146,12 @@ public class Sets extends RedisCommandTestBase
 		Boolean status = client.setsMove("foo", "bar", "a");
 		assertEquals(status, true);
 
-		String[] expectedSrc = new String[1];
-		expectedSrc[0] = "b";
+		List<String> expectedSrc = new ArrayList<String>(1);
+		expectedSrc.add("b");
 
-		String[] expectedDst = new String[2];
-		expectedDst[0] = "c";
-		expectedDst[1] = "a";
+		List<String> expectedDst = new ArrayList<String>(2);
+		expectedDst.add("c");
+		expectedDst.add("a");
 
 		assertEquals(expectedSrc, client.setsMembers("foo"));
 		assertEquals(expectedDst, client.setsMembers("bar"));
@@ -167,7 +170,7 @@ public class Sets extends RedisCommandTestBase
 		String member = client.setsPop("foo");
 
 		assertTrue("a".equals(member) || "b".equals(member));
-		assertEquals(1, client.setsMembers("foo").length);
+		assertEquals(1, client.setsMembers("foo").size());
 
 		member = client.setsPop("bar");
 		assertNull(member);
@@ -182,7 +185,7 @@ public class Sets extends RedisCommandTestBase
 		String member = client.setsRandMember("foo");
 
 		assertTrue("a".equals(member) || "b".equals(member));
-		assertEquals(2, client.setsMembers("foo").length);
+		assertEquals(2, client.setsMembers("foo").size());
 
 		member = client.setsRandMember("bar");
 		assertNull(member);
@@ -197,8 +200,8 @@ public class Sets extends RedisCommandTestBase
 		Boolean status = client.setsRemove("foo", "a");
 		assertEquals(true, status);
 
-		String[] expected = new String[1];
-		expected[0] = "b";
+		List<String> expected = new ArrayList<String>(1);
+		expected.add("b");
 
 		assertEquals(expected, client.setsMembers("foo"));
 
@@ -216,12 +219,12 @@ public class Sets extends RedisCommandTestBase
 		client.setsAdd("bar", "b");
 		client.setsAdd("bar", "c");
 
-		String[] expected = new String[3];
-		expected[0] = "c";
-		expected[1] = "a";
-		expected[2] = "b";
+		List<String> expected = new ArrayList<String>(3);
+		expected.add("c");
+		expected.add("a");
+		expected.add("b");
 
-		String[] union = client.setsUnion("foo", "bar");
+		List<String> union = client.setsUnion("foo", "bar");
 		assertEquals(expected, union);
 	}
 
@@ -234,10 +237,10 @@ public class Sets extends RedisCommandTestBase
 		client.setsAdd("bar", "b");
 		client.setsAdd("bar", "c");
 
-		String[] expected = new String[3];
-		expected[0] = "c";
-		expected[1] = "a";
-		expected[2] = "b";
+		List<String> expected = new ArrayList<String>(3);
+		expected.add("c");
+		expected.add("a");
+		expected.add("b");
 
 		Integer status = client.setsUnionStore("car", "foo", "bar");
 		assertEquals(3, status.intValue());

@@ -210,54 +210,54 @@ public class Session implements ISession
 			throw new IllegalStateException("connection has been disconnected.");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see
-	 * com.handinfo.redis4j.impl.transfers.IConnector#executeCommand(java.lang
-	 * .String, java.lang.Object)
-	 */
-	@Override
-	public RedisResponse executeCommand(String key, RedisCommand command, Object... args)
-	{
-		if (channel != null && channel.isConnected())
-		{
-			Object[] redisCommand = new Object[args.length + command.getValue().length];
-			System.arraycopy(command.getValue(), 0, redisCommand, 0, command.getValue().length);
-			System.arraycopy(args, 0, redisCommand, command.getValue().length, args.length);
-
-			final CommandWrapper cmdWrapper = new CommandWrapper(command, CommandWrapper.Type.SYNC, redisCommand);
-
-			channel.write(cmdWrapper);
-
-			if (cmdWrapper.getException() != null)
-			{
-				if (cmdWrapper.getException() instanceof CleanLockedThreadException)
-				{
-					throw (CleanLockedThreadException) cmdWrapper.getException();
-				} else
-				{
-					throw cmdWrapper.getException();
-				}
-			} else
-			{
-				RedisResponse response = cmdWrapper.getSyncResult().get(0);
-				if (response != null)
-				{
-					if (response.getType() != RedisResponseType.ErrorReply)
-					{
-						return response;
-					} else
-					{
-						throw new ErrorCommandException(response.getTextValue());
-					}
-				} else
-				{
-					throw new ErrorCommandException("Error back value");
-				}
-			}
-		} else
-			throw new IllegalStateException("connection has been disconnected.");
-	}
+//	/*
+//	 * (non-Javadoc)
+//	 * @see
+//	 * com.handinfo.redis4j.impl.transfers.IConnector#executeCommand(java.lang
+//	 * .String, java.lang.Object)
+//	 */
+//	@Override
+//	public RedisResponse executeCommand(String key, RedisCommand command, Object... args)
+//	{
+//		if (channel != null && channel.isConnected())
+//		{
+//			Object[] redisCommand = new Object[args.length + command.getValue().length];
+//			System.arraycopy(command.getValue(), 0, redisCommand, 0, command.getValue().length);
+//			System.arraycopy(args, 0, redisCommand, command.getValue().length, args.length);
+//
+//			final CommandWrapper cmdWrapper = new CommandWrapper(command, CommandWrapper.Type.SYNC, redisCommand);
+//
+//			channel.write(cmdWrapper);
+//
+//			if (cmdWrapper.getException() != null)
+//			{
+//				if (cmdWrapper.getException() instanceof CleanLockedThreadException)
+//				{
+//					throw (CleanLockedThreadException) cmdWrapper.getException();
+//				} else
+//				{
+//					throw cmdWrapper.getException();
+//				}
+//			} else
+//			{
+//				RedisResponse response = cmdWrapper.getSyncResult().get(0);
+//				if (response != null)
+//				{
+//					if (response.getType() != RedisResponseType.ErrorReply)
+//					{
+//						return response;
+//					} else
+//					{
+//						throw new ErrorCommandException(response.getTextValue());
+//					}
+//				} else
+//				{
+//					throw new ErrorCommandException("Error back value");
+//				}
+//			}
+//		} else
+//			throw new IllegalStateException("connection has been disconnected.");
+//	}
 
 	@Override
 	public List<RedisResponse> executeBatch(List<Object[]> commandList)

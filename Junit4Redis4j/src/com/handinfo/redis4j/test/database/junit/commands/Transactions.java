@@ -1,5 +1,7 @@
 package com.handinfo.redis4j.test.database.junit.commands;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,9 +28,9 @@ public class Transactions extends RedisCommandTestBase
 		Boolean result = trans.commit();
 		assertEquals(true, result);
 
-		String[] expected = new String[2];
-		expected[0] = "a";
-		expected[1] = "b";
+		List<String> expected = new ArrayList<String>(2);
+		expected.add("a");
+		expected.add("b");
 
 		assertEquals(expected, client.setsMembers("foo"));
 	}

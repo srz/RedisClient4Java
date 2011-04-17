@@ -3,6 +3,7 @@ package com.handinfo.redis4j.api;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 当把Redis作为缓存时,实现以下基础功能
@@ -30,7 +31,7 @@ public interface ICache
 	 * @param field
 	 * @return
 	 */
-	public boolean hashesDel(String key, String field);
+	public Boolean hashesDel(String key, String field);
 
 
 	/**
@@ -39,7 +40,7 @@ public interface ICache
 	 * @param key
 	 * @return 
 	 */
-	public <T> T[] hashesGetAllValue(String key);
+	public <T> List<T> hashesGetAllValue(String key);
 
 	/**
 	 * 获取指定Hashe对象的长度
@@ -47,7 +48,7 @@ public interface ICache
 	 * @param key
 	 * @return
 	 */
-	public int hashesLength(String key);
+	public Integer hashesLength(String key);
 
 	/**
 	 * [HSET]Set the string value of a hash field
@@ -56,7 +57,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public <T> boolean hashesSet(String key, String field, T value);
+	public <T> Boolean hashesSet(String key, String field, T value);
 
 
 	/**
@@ -65,7 +66,7 @@ public interface ICache
 	 * @param field
 	 * @return
 	 */
-	public boolean hashesExists(String key, String field);
+	public Boolean hashesExists(String key, String field);
 
 
 	/**
@@ -75,7 +76,7 @@ public interface ICache
 	 * @param increment
 	 * @return
 	 */
-	public int hashesIncrementByValue(String key, String field, int increment);
+	public Integer hashesIncrementByValue(String key, String field, int increment);
 
 
 	/**
@@ -84,7 +85,7 @@ public interface ICache
 	 * @param fields
 	 * @return
 	 */
-	public <T> T[] hashesMultipleFieldGet(String key, String... fields);
+	public <T> List<T> hashesMultipleFieldGet(String key, String... fields);
 
 
 	/**
@@ -94,7 +95,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public <T> boolean hashesSetNotExistField(String key, String field, T value);
+	public <T> Boolean hashesSetNotExistField(String key, String field, T value);
 
 
 	/**
@@ -110,7 +111,7 @@ public interface ICache
 	 * @param key
 	 * @return
 	 */
-	public String[] hashesGetAllField(String key);
+	public List<String> hashesGetAllField(String key);
 
 	/**
 	 * [HMSET]Set multiple hash fields to multiple values
@@ -118,7 +119,7 @@ public interface ICache
 	 * @param fieldAndValue
 	 * @return
 	 */
-	public <T> boolean hashesMultipleSet(String key, HashMap<String, T> fieldAndValue);
+	public <T> Boolean hashesMultipleSet(String key, HashMap<String, T> fieldAndValue);
 
 
 	/**
@@ -126,7 +127,7 @@ public interface ICache
 	 * @param key
 	 * @return
 	 */
-	public <T> HashMap<String, T> hashesGetAll(String key);
+	public <T> Map<String, T> hashesGetAll(String key);
 	
 	//keys
 	/**
@@ -134,14 +135,14 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public int del(String... keys);
+	public Integer del(String... keys);
 
 	/**
 	 * [KEYS]Find all keys matching the given pattern
 	 * @param pattern
 	 * @return
 	 */
-	public String[] keys(String pattern);
+	public List<String> keys(String pattern);
 
 	/**
 	 * [RENAME]Rename a key
@@ -149,7 +150,7 @@ public interface ICache
 	 * @param newKey
 	 * @return
 	 */
-	public boolean rename(String key, String newKey);
+	public Boolean rename(String key, String newKey);
 
 	/**
 	 * [TYPE]Determine the type stored at key
@@ -163,7 +164,7 @@ public interface ICache
 	 * @param key
 	 * @return
 	 */
-	public boolean exists(String key);
+	public Boolean exists(String key);
 
 	/**
 	 * [MOVE]Move a key to another database
@@ -171,7 +172,7 @@ public interface ICache
 	 * @param indexDB
 	 * @return
 	 */
-	public boolean move(String key, int indexDB);
+	public Boolean move(String key, int indexDB);
 
 
 	/**
@@ -181,7 +182,7 @@ public interface ICache
 	 * @param newKey
 	 * @return
 	 */
-	public boolean renameOnNotExistNewKey(String key, String newKey);
+	public Boolean renameOnNotExistNewKey(String key, String newKey);
 
 	/**
 	 * [EXPIRE]Set a key's time to live in seconds
@@ -189,14 +190,14 @@ public interface ICache
 	 * @param seconds
 	 * @return
 	 */
-	public boolean expire(String key, int seconds);
+	public Boolean expire(String key, int seconds);
 
 	/**
 	 * [PERSIST]Remove the expiration from a key
 	 * @param key
 	 * @return
 	 */
-	public boolean persist(String key);
+	public Boolean persist(String key);
 
 	/**
 	 * [EXPIREAT]Set the expiration for a key as a UNIX timestamp
@@ -204,20 +205,14 @@ public interface ICache
 	 * @param timestamp
 	 * @return
 	 */
-	public boolean expireAsTimestamp(String key, long timestamp);
-
-	/**
-	 * [RANDOMKEY]Return a random key from the keyspace
-	 * @return
-	 */
-	public String randomKey(InetSocketAddress server);
+	public Boolean expireAsTimestamp(String key, long timestamp);
 
 	/**
 	 * [TTL]Get the time to live for a key
 	 * @param key
 	 * @return
 	 */
-	public int timeToLive(String key);
+	public Integer timeToLive(String key);
 	
 	//Lists
 	/**
@@ -233,7 +228,7 @@ public interface ICache
 	 * @param key
 	 * @return
 	 */
-	public int listLength(String key);
+	public Integer listLength(String key);
 
 	/**
 	 * [LREM]Remove elements from a list
@@ -242,7 +237,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public <T> int listRemove(String key, int count, T value);
+	public <T> Integer listRemove(String key, int count, T value);
 
 	/**
 	 * [RPUSH]Append a value to a list
@@ -250,7 +245,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public <T> int listRightPush(String key, T value);
+	public <T> Integer listRightPush(String key, T value);
 
 	/**
 	 * [BRPOP]Remove and get the last element in a list, or block until one is available
@@ -274,7 +269,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public <T> boolean listSet(String key, int index, T value);
+	public <T> Boolean listSet(String key, int index, T value);
 	
 	/**
 	 * [RPUSHX]Append a value to a list, only if the list exists
@@ -282,7 +277,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public <T> int listRightPushOnExist(String key, T value);
+	public <T> Integer listRightPushOnExist(String key, T value);
 
 	/**
 	 * [BRPOPLPUSH]Pop a value from a list, push it to another list and return it; or block until one is available
@@ -299,7 +294,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public <T> int listLeftPush(String key, T value);
+	public <T> Integer listLeftPush(String key, T value);
 
 	/**
 	 * [LTRIM]Trim a list to the specified range
@@ -308,7 +303,7 @@ public interface ICache
 	 * @param stop
 	 * @return
 	 */
-	public boolean listTrim(String key, int start, int stop);
+	public Boolean listTrim(String key, int start, int stop);
 
 	/**
 	 * [LINDEX]Get an element from a list by its index
@@ -324,7 +319,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public <T> int listLeftPushOnExist(String key, T value);
+	public <T> Integer listLeftPushOnExist(String key, T value);
 
 	/**
 	 * [RPOP]Remove and get the last element in a list
@@ -336,12 +331,12 @@ public interface ICache
 	/**
 	 * [LINSERT]Insert an element before or after another element in a list
 	 * @param key
-	 * @param BEFORE_AFTER
+	 * @param beforeOrAfter
 	 * @param pivot
 	 * @param value
 	 * @return
 	 */
-	public <T> int listLeftInsert(String key, String BEFORE_AFTER, String pivot, T value);
+	public <T> Integer listLeftInsert(String key, ListPosition beforeOrAfter, String pivot, T value);
 
 	/**
 	 * [LRANGE]Get a range of elements from a list
@@ -350,7 +345,7 @@ public interface ICache
 	 * @param stop
 	 * @return
 	 */
-	public <T> T[] listRange(String key, int start, int stop);
+	public <T> List<T> listRange(String key, int start, int stop);
 
 	/**
 	 * [RPOPLPUSH]Remove the last element in a list, append it to another list and return it
@@ -374,7 +369,7 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public <T> T[] setsInter(String... keys);
+	public <T> List<T> setsInter(String... keys);
 
 	/**
 	 * [SMOVE]Move a member from one set to another
@@ -390,14 +385,14 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public <T> T[] setsUnion(String... keys);
+	public <T> List<T> setsUnion(String... keys);
 
 	/**
 	 * [SCARD]Get the number of members in a set
 	 * @param key
 	 * @return
 	 */
-	public int setsCard(String key);
+	public Integer setsCard(String key);
 
 	/**
 	 * [SINTERSTORE]Intersect multiple sets and store the resulting set in a key
@@ -405,7 +400,7 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public int setsInterStore(String destination, String... keys);
+	public Integer setsInterStore(String destination, String... keys);
 
 	/**
 	 * [SPOP]Remove and return a random member from a set
@@ -420,14 +415,14 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public int setsUnionStore(String destination, String... keys);
+	public Integer setsUnionStore(String destination, String... keys);
 
 	/**
 	 * [SDIFF]Subtract multiple sets
 	 * @param keys
 	 * @return
 	 */
-	public <T> T[] setsDiff(String... keys);
+	public <T> List<T> setsDiff(String... keys);
 
 	/**
 	 * [SISMEMBER]Determine if a given value is a member of a set
@@ -450,14 +445,14 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public int setsDiffStore(String destination, String... keys);
+	public Integer setsDiffStore(String destination, String... keys);
 
 	/**
 	 * [SMEMBERS]Get all the members in a set
 	 * @param key
 	 * @return
 	 */
-	public <T> T[] setsMembers(String key);
+	public <T> List<T> setsMembers(String key);
 
 	/**
 	 * [SREM]Remove a member from a set
@@ -482,7 +477,7 @@ public interface ICache
 	 * @param args
 	 * @return
 	 */
-	public int sortedSetsInterStore(String... args);
+	public Integer sortedSetsInterStore(String... args);
 
 	/**
 	 * [ZREM]Remove a member from a sorted set
@@ -497,14 +492,14 @@ public interface ICache
 	 * @param args
 	 * @return
 	 */
-	public <T> T[] sortedSetsRevRangeByScore(String... args);
+	public <T> List<T> sortedSetsRevRangeByScore(String... args);
 
 	/**
 	 * [ZCARD]Get the number of members in a sorted set
 	 * @param key
 	 * @return
 	 */
-	public int sortedSetsCard(String key);
+	public Integer sortedSetsCard(String key);
 
 	/**
 	 * [ZRANGE]Return a range of members in a sorted set, by index
@@ -513,7 +508,7 @@ public interface ICache
 	 * @param stop
 	 * @return
 	 */
-	public <T> T[] sortedSetsRange(String key, int start, int stop);
+	public <T> List<T> sortedSetsRange(String key, int start, int stop);
 
 	/**
 	 * [ZREMRANGEBYRANK]Remove all members in a sorted set within the given indexes
@@ -522,7 +517,7 @@ public interface ICache
 	 * @param stop
 	 * @return
 	 */
-	public int sortedSetsRemoveRangeByRank(String key, int start, int stop);
+	public Integer sortedSetsRemoveRangeByRank(String key, int start, int stop);
 
 	/**
 	 * [ZREVRANK]Determine the index of a member in a sorted set, with scores ordered from high to low
@@ -530,7 +525,7 @@ public interface ICache
 	 * @param member
 	 * @return
 	 */
-	public <T> int sortedSetsRevRank(String key, T member);
+	public <T> Integer sortedSetsRevRank(String key, T member);
 
 	/**
 	 * [ZCOUNT]Count the members in a sorted set with scores within the given values
@@ -539,14 +534,14 @@ public interface ICache
 	 * @param max
 	 * @return
 	 */
-	public int sortedSetsCount(String key, int min, int max);
+	public Integer sortedSetsCount(String key, int min, int max);
 
 	/**
 	 * [ZRANGEBYSCORE]Return a range of members in a sorted set, by score
 	 * @param args
 	 * @return
 	 */
-	public <T> T[] sortedSetsRangeByScore(String... args);
+	public <T> List<T> sortedSetsRangeByScore(String... args);
 
 	/**
 	 * [ZREMRANGEBYSCORE]Remove all members in a sorted set within the given scores
@@ -555,7 +550,7 @@ public interface ICache
 	 * @param max
 	 * @return
 	 */
-	public int sortedSetsRemoveRangeByScore(String key, int min, int max);
+	public Integer sortedSetsRemoveRangeByScore(String key, int min, int max);
 
 	/**
 	 * [ZSCORE]Get the score associated with the given member in a sorted set
@@ -563,7 +558,7 @@ public interface ICache
 	 * @param member
 	 * @return
 	 */
-	public <T> String sortedSetsScore(String key, T member);
+	public <T> Integer sortedSetsScore(String key, T member);
 
 	/**
 	 * [ZINCRBY]Increment the score of a member in a sorted set
@@ -572,7 +567,7 @@ public interface ICache
 	 * @param member
 	 * @return
 	 */
-	public <T> String sortedSetsIncrementByValue(String key, int increment, T member);
+	public <T> Double sortedSetsIncrementByValue(String key, int increment, T member);
 
 	/**
 	 * [ZRANK]Determine the index of a member in a sorted set
@@ -580,7 +575,7 @@ public interface ICache
 	 * @param member
 	 * @return
 	 */
-	public <T> int sortedSetsRank(String key, T member);
+	public <T> Integer sortedSetsRank(String key, T member);
 
 	/**
 	 * [ZREVRANGE]Return a range of members in a sorted set, by index, with scores ordered from high to low
@@ -589,7 +584,7 @@ public interface ICache
 	 * @param stop
 	 * @return
 	 */
-	public <T> T[] sortedSetsRevRange(String key, int start, int stop);
+	public <T> List<T> sortedSetsRevRange(String key, int start, int stop);
 	
 	//Strings
 	/**
@@ -598,7 +593,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public int append(String key, String value);
+	public Integer append(String key, String value);
 
 	/**
 	 * [GETRANGE]Get a substring of the string stored at a key
@@ -629,7 +624,7 @@ public interface ICache
 	 * @param key
 	 * @return
 	 */
-	public int decrement(String key);
+	public Integer decrement(String key);
 
 	/**
 	 * [GETSET]Set the string value of a key and return its old value
@@ -653,7 +648,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public int setRange(String key, int offset, String value);
+	public Integer setRange(String key, int offset, String value);
 
 	/**
 	 * [DECRBY]Decrement the integer value of a key by the given number
@@ -661,14 +656,14 @@ public interface ICache
 	 * @param decrement
 	 * @return
 	 */
-	public int decrementByValue(String key, int decrement);
+	public Integer decrementByValue(String key, int decrement);
 
 	/**
 	 * [INCR]Increment the integer value of a key by one
 	 * @param key
 	 * @return
 	 */
-	public int increment(String key);
+	public Integer increment(String key);
 
 	/**
 	 * [SET]Set the string value of a key
@@ -676,14 +671,14 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public <T> boolean set(String key, T value);
+	public <T> Boolean set(String key, T value);
 
 	/**
 	 * [STRLEN]Get the length of the value stored in a key
 	 * @param key
 	 * @return
 	 */
-	public int strLength(String key);
+	public Integer strLength(String key);
 
 	/**
 	 * [GET]Get the value of a key
@@ -698,7 +693,7 @@ public interface ICache
 	 * @param increment
 	 * @return
 	 */
-	public int incrementByValue(String key, int increment);
+	public Integer incrementByValue(String key, int increment);
 
 	/**
 	 * [SETBIT]Sets or clears the bit at offset in the string value stored at key
@@ -707,7 +702,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public int setBit(String key, int offset, int value);
+	public Boolean setBit(String key, int offset, int value);
 
 	/**
 	 * [GETBIT]Returns the bit value at offset in the string value stored at key
@@ -715,7 +710,7 @@ public interface ICache
 	 * @param offset
 	 * @return
 	 */
-	public int getBit(String key, int offset);
+	public Boolean getBit(String key, int offset);
 
 	/**
 	 * [MGET]Get the values of all the given keys
@@ -731,5 +726,5 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public <T> boolean setAndExpire(String key, int seconds, T value);
+	public <T> Boolean setAndExpire(String key, int seconds, T value);
 }
