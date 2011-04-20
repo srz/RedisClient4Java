@@ -40,4 +40,20 @@ public class User implements Serializable
 		this.timestamp = timestamp;
 	}
 
+	/**
+	 * @param id
+	 * @param name
+	 * @param timestamp
+	 */
+	public User(int id, String name, long timestamp)
+	{
+		super();
+		this.id = id;
+		this.name = name;
+		this.timestamp = timestamp;
+	}
+	
+	public User()
+	{
+	}
 }

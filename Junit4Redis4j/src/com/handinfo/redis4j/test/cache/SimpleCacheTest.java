@@ -1,6 +1,8 @@
 package com.handinfo.redis4j.test.cache;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
@@ -28,29 +30,39 @@ public class SimpleCacheTest
 			{
 				try
 				{
-					User user = new User();
-					user.setId(11);
-					user.setName("qqq");
-					boolean b = client.set("qqq", user);
-					logger.info(String.valueOf(b));
-
-					user.setId(22);
-					user.setName("qqw1");
-					b = client.set("qqw1", user);
-					logger.info(String.valueOf(b));
-
-					//List<User> result = client.multipleGet("qqq", "xx", "qqw1", "yy");
-					List<User> result = client.multipleGet("sdsd");
-					for (User cacheUser : result)
-					{
-						if (cacheUser != null)
-							logger.info("=======" + cacheUser.getName());
-						else
-							logger.info("=======null");
-					}
-
-					int i = client.del("qqw1", "qqq");
-					logger.info("+++++" + String.valueOf(i));
+					Map<String, User> map = new HashMap<String, User>();
+					map.put("f1", new User(11, "f1f1f1", 0));
+					map.put("f2", new User(22, "f2ff2f2f2", 0));
+					boolean b = client.hashesMultipleSet("qqq", map);
+					logger.info("===" + String.valueOf(b));
+					
+					map.clear();
+					map = client.hashesGetAll("qqq");
+					logger.info("===oooo");
+					
+//					User user = new User();
+//					user.setId(11);
+//					user.setName("qqq");
+//					boolean b = client.set("qqq", user);
+//					logger.info(String.valueOf(b));
+//
+//					user.setId(22);
+//					user.setName("qqw1");
+//					b = client.set("qqw1", user);
+//					logger.info(String.valueOf(b));
+//
+//					//List<User> result = client.multipleGet("qqq", "xx", "qqw1", "yy");
+//					List<User> result = client.multipleGet("sdsd");
+//					for (User cacheUser : result)
+//					{
+//						if (cacheUser != null)
+//							logger.info("=======" + cacheUser.getName());
+//						else
+//							logger.info("=======null");
+//					}
+//
+//					int i = client.del("qqw1", "qqq");
+//					logger.info("+++++" + String.valueOf(i));
 
 					// User s = client.get("qqq");
 					// logger.info(s.getName());

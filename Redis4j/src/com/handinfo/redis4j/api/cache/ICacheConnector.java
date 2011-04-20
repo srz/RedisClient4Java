@@ -18,7 +18,9 @@ public interface ICacheConnector
 	
 	public RedisResponse executeMultiKeysNoArgsAndMultiReplay(RedisCommand command, String... keys);
 	
-	public List<RedisResponse> executeMultiKeysNoArgsAndSingleReplay(RedisCommand command, String... keys);
+	//public List<RedisResponse> executeMultiKeysNoArgsAndSingleReplay(RedisCommand command, String... keys);
+	
+	public List<RedisResponse> executeMultiKeysWithSameArgAndSingleReplay(RedisCommand command, Object arg, String... keys);
 
 	public void disConnect();
 }

@@ -100,11 +100,11 @@ public class CacheConnector implements ICacheConnector
 		}
 		return sessionList;
 	}
-	
+
 	private Map<ISession, Map<String, Integer>> getSessionAndKeysMapWithIndex(RedisCommand command, String... keys)
 	{
 		Map<ISession, Map<String, Integer>> sessionList = new LinkedHashMap<ISession, Map<String, Integer>>(sessions.length);
-		for (int i=0; i<keys.length; i++)
+		for (int i = 0; i < keys.length; i++)
 		{
 			ISession session = getSessionByKey(keys[i]);
 			if (sessionList.containsKey(session))
@@ -119,14 +119,14 @@ public class CacheConnector implements ICacheConnector
 		}
 		return sessionList;
 	}
-	
+
 	@Override
 	public RedisResponse executeMultiKeysNoArgsAndMultiReplay(RedisCommand command, String... keys)
 	{
 		Map<ISession, Map<String, Integer>> sessionList = getSessionAndKeysMapWithIndex(command, keys);
 
 		List<RedisResponse> responseList = new ArrayList<RedisResponse>(keys.length);
-		for (int i=0; i<keys.length; i++)
+		for (int i = 0; i < keys.length; i++)
 		{
 			responseList.add(i, null);
 		}
@@ -141,7 +141,7 @@ public class CacheConnector implements ICacheConnector
 			List<RedisResponse> responseMultiValue = session.executeCommand(command, keyList.keySet().toArray()).getMultiBulkValue();
 
 			Iterator<Entry<String, Integer>> keyItem = keyList.entrySet().iterator();
-			int i=0;
+			int i = 0;
 			while (keyItem.hasNext())
 			{
 				Entry<String, Integer> keyEntry = keyItem.next();
@@ -154,12 +154,12 @@ public class CacheConnector implements ICacheConnector
 		return response;
 	}
 
-	@Override
+	//@Override
 	public List<RedisResponse> executeMultiKeysNoArgsAndSingleReplay(RedisCommand command, String... keys)
 	{
 		Map<ISession, List<String>> sessionList = getSessionAndKeysMap(command, keys);
-		
-		List<RedisResponse> responseList = new ArrayList<RedisResponse>(keys.length);
+
+		List<RedisResponse> responseList = new ArrayList<RedisResponse>(sessionList.size());
 
 		Iterator<Entry<ISession, List<String>>> iterator = sessionList.entrySet().iterator();
 		while (iterator.hasNext())
@@ -169,6 +169,41 @@ public class CacheConnector implements ICacheConnector
 			List<String> keyList = entry.getValue();
 
 			RedisResponse response = session.executeCommand(command, keyList.toArray());
+
+			if (response != null)
+			{
+				responseList.add(response);
+			}
+		}
+
+		return responseList;
+	}
+
+	@Override
+	public List<RedisResponse> executeMultiKeysWithSameArgAndSingleReplay(RedisCommand command, Object arg, String... keys)
+	{
+		Map<ISession, List<String>> sessionList = getSessionAndKeysMap(command, keys);
+
+		List<RedisResponse> responseList = new ArrayList<RedisResponse>(sessionList.size());
+
+		Iterator<Entry<ISession, List<String>>> iterator = sessionList.entrySet().iterator();
+		while (iterator.hasNext())
+		{
+			Entry<ISession, List<String>> entry = iterator.next();
+			ISession session = entry.getKey();
+			List<String> keyList = entry.getValue();
+
+			Object[] args = null;
+			if (arg == null)
+			{
+				args = keyList.toArray();
+			} else
+			{
+				args = new Object[keyList.size() + 1];
+				args[0] = arg;
+				System.arraycopy(keyList.toArray(), 0, args, 1, keyList.size());
+			}
+			RedisResponse response = session.executeCommand(command, args);
 
 			if (response != null)
 			{

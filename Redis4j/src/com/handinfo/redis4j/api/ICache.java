@@ -1,7 +1,6 @@
 package com.handinfo.redis4j.api;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -119,7 +118,7 @@ public interface ICache
 	 * @param fieldAndValue
 	 * @return
 	 */
-	public <T> Boolean hashesMultipleSet(String key, HashMap<String, T> fieldAndValue);
+	public <T> Boolean hashesMultipleSet(String key, Map<String, T> fieldAndValue);
 
 
 	/**
@@ -217,11 +216,11 @@ public interface ICache
 	//Lists
 	/**
 	 * [BLPOP]Remove and get the first element in a list, or block until one is available
+	 * @param key TODO
 	 * @param timeout
-	 * @param keys
 	 * @return
 	 */
-	public <T> T listBlockLeftPop(int timeout, String key);
+	public <T> T listBlockLeftPop(String key, int timeout);
 
 	/**
 	 * [LLEN]Get the length of a list
@@ -249,11 +248,11 @@ public interface ICache
 
 	/**
 	 * [BRPOP]Remove and get the last element in a list, or block until one is available
+	 * @param key TODO
 	 * @param timeout
-	 * @param keys
 	 * @return
 	 */
-	public <T> T listBlockRightPop(int timeout, String key);
+	public <T> T listBlockRightPop(String key, int timeout);
 
 	/**
 	 * [LPOP]Remove and get the first element in a list
@@ -400,7 +399,7 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public Integer setsInterStore(String destination, String... keys);
+	//public Integer setsInterStore(String destination, String... keys);
 
 	/**
 	 * [SPOP]Remove and return a random member from a set
@@ -415,7 +414,7 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public Integer setsUnionStore(String destination, String... keys);
+	//public Integer setsUnionStore(String destination, String... keys);
 
 	/**
 	 * [SDIFF]Subtract multiple sets
@@ -445,7 +444,7 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public Integer setsDiffStore(String destination, String... keys);
+	//public Integer setsDiffStore(String destination, String... keys);
 
 	/**
 	 * [SMEMBERS]Get all the members in a set
@@ -474,10 +473,11 @@ public interface ICache
 
 	/**
 	 * [ZINTERSTORE]Intersect multiple sorted sets and store the resulting sorted set in a new key
-	 * @param args
+	 * @param destination TODO
+	 * @param keys
 	 * @return
 	 */
-	public Integer sortedSetsInterStore(String... args);
+	//public Integer sortedSetsInterStore(String destination, String... keys);
 
 	/**
 	 * [ZREM]Remove a member from a sorted set
@@ -489,10 +489,12 @@ public interface ICache
 
 	/**
 	 * [ZREVRANGEBYSCORE]Return a range of members in a sorted set, by score, with scores ordered from high to low
-	 * @param args
+	 * @param key TODO
+	 * @param max TODO
+	 * @param min TODO
 	 * @return
 	 */
-	public <T> List<T> sortedSetsRevRangeByScore(String... args);
+	public <T> List<T> sortedSetsRevRangeByScore(String key, int max, int min);
 
 	/**
 	 * [ZCARD]Get the number of members in a sorted set
@@ -538,10 +540,12 @@ public interface ICache
 
 	/**
 	 * [ZRANGEBYSCORE]Return a range of members in a sorted set, by score
-	 * @param args
+	 * @param key TODO
+	 * @param min TODO
+	 * @param max TODO
 	 * @return
 	 */
-	public <T> List<T> sortedSetsRangeByScore(String... args);
+	public <T> List<T> sortedSetsRangeByScore(String key, int min, int max);
 
 	/**
 	 * [ZREMRANGEBYSCORE]Remove all members in a sorted set within the given scores
@@ -609,7 +613,7 @@ public interface ICache
 	 * @param keyAndValue
 	 * @return
 	 */
-	public <T> Boolean multipleSet(HashMap<String, T> keyAndValue);
+	public <T> Boolean multipleSet(Map<String, T> keyAndValue);
 
 	/**
 	 * [SETNX]Set the value of a key, only if the key does not exist
@@ -639,7 +643,7 @@ public interface ICache
 	 * @param keyAndValue
 	 * @return
 	 */
-	public Boolean multipleSetOnNotExist(HashMap<String, String> keyAndValue);
+	public Boolean multipleSetOnNotExist(Map<String, String> keyAndValue);
 
 	/**
 	 * [SETRANGE]Overwrite part of a string at key starting at the specified offset
@@ -663,7 +667,7 @@ public interface ICache
 	 * @param key
 	 * @return
 	 */
-	public Integer increment(String key);
+	public Long increment(String key);
 
 	/**
 	 * [SET]Set the string value of a key
@@ -693,7 +697,7 @@ public interface ICache
 	 * @param increment
 	 * @return
 	 */
-	public Integer incrementByValue(String key, int increment);
+	public Long incrementByValue(String key, int increment);
 
 	/**
 	 * [SETBIT]Sets or clears the bit at offset in the string value stored at key
@@ -702,7 +706,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public Boolean setBit(String key, int offset, int value);
+	public Boolean setBit(String key, int offset, boolean value);
 
 	/**
 	 * [GETBIT]Returns the bit value at offset in the string value stored at key

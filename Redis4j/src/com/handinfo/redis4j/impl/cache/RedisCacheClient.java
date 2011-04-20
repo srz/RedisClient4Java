@@ -4,7 +4,6 @@
 package com.handinfo.redis4j.impl.cache;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -78,9 +77,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer del(String... keys)
 	{
-		List<Integer> resultList = this.sendMultipleKeysNoArgsAndSingleReplay(Integer.class, null, RedisCommand.DEL, keys);
-		int result=0;
-		for(Integer i : resultList)
+		List<Integer> resultList = this.sendMultipleKeysWithSameArgsAndSingleReplay(Integer.class, null, RedisCommand.DEL, null, keys);
+		int result = 0;
+		for (Integer i : resultList)
 		{
 			result += i;
 		}
@@ -126,9 +125,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	{
 		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.GET, key);
 
-		ObjectWrapper<T> obj = new ObjectWrapper<T>(objectbyte);
-
-		return obj.getOriginal();
+		return new ObjectWrapper<T>(objectbyte).getOriginal();
 	}
 
 	/*
@@ -161,9 +158,7 @@ public class RedisCacheClient implements IRedisCacheClient
 		ObjectWrapper<T> obj = new ObjectWrapper<T>(value);
 		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.GETSET, key, obj);
 
-		ObjectWrapper<T> returnObj = new ObjectWrapper<T>(objectbyte);
-
-		return returnObj.getOriginal();
+		return new ObjectWrapper<T>(objectbyte).getOriginal();
 	}
 
 	/*
@@ -195,9 +190,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	{
 		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.HGET, key, field);
 
-		ObjectWrapper<T> obj = new ObjectWrapper<T>(objectbyte);
-
-		return obj.getOriginal();
+		return new ObjectWrapper<T>(objectbyte).getOriginal();
 	}
 
 	/*
@@ -219,8 +212,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public List<String> hashesGetAllField(String key)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.HKEYS, key);
+
+		return ParameterConvert.byteArrayToStringList(objectbytes);
 	}
 
 	/*
@@ -230,8 +224,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> List<T> hashesGetAllValue(String key)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.HVALS, key);
+
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -241,8 +236,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer hashesIncrementByValue(String key, String field, int increment)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.HINCRBY, key, field, increment);
 	}
 
 	/*
@@ -252,8 +246,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer hashesLength(String key)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.HLEN, key);
 	}
 
 	/*
@@ -263,8 +256,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> List<T> hashesMultipleFieldGet(String key, String... fields)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.HMGET, key, (Object[]) fields);
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -272,10 +265,11 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#hashesMultipleSet(java.lang.String, java.util.HashMap)
 	 */
 	@Override
-	public <T> Boolean hashesMultipleSet(String key, HashMap<String, T> fieldAndValue)
+	public <T> Boolean hashesMultipleSet(String key, Map<String, T> fieldAndValue)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		List<Object> allKeys = ParameterConvert.mapToObjectArray(fieldAndValue);
+
+		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.HMSET, key, allKeys.toArray());
 	}
 
 	/*
@@ -285,8 +279,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean hashesSet(String key, String field, T value)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.HSET, key, field, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -296,8 +289,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean hashesSetNotExistField(String key, String field, T value)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.HSETNX, key, field, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -305,10 +297,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#increment(java.lang.String)
 	 */
 	@Override
-	public Integer increment(String key)
+	public Long increment(String key)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Long.class, null, RedisCommand.INCR, key);
 	}
 
 	/*
@@ -316,10 +307,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#incrementByValue(java.lang.String, int)
 	 */
 	@Override
-	public Integer incrementByValue(String key, int increment)
+	public Long incrementByValue(String key, int increment)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Long.class, null, RedisCommand.INCRBY, key, increment);
 	}
 
 	/*
@@ -329,8 +319,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public List<String> keys(String pattern)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.KEYS, pattern);
+		return ParameterConvert.byteArrayToStringList(objectbytes);
 	}
 
 	/*
@@ -338,10 +328,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listBlockLeftPop(int, java.lang.String)
 	 */
 	@Override
-	public <T> T listBlockLeftPop(int timeout, String key)
+	public <T> T listBlockLeftPop(String key, int timeout)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.BLPOP, key, timeout);
+		return new ObjectWrapper<T>(objectbyte).getOriginal();
 	}
 
 	/*
@@ -349,10 +339,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listBlockRightPop(int, java.lang.String)
 	 */
 	@Override
-	public <T> T listBlockRightPop(int timeout, String key)
+	public <T> T listBlockRightPop(String key, int timeout)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.BRPOP, key, timeout);
+		return new ObjectWrapper<T>(objectbyte).getOriginal();
 	}
 
 	/*
@@ -362,8 +352,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> T listBlockRightPopLeftPush(String source, String destination, int timeout)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.BRPOPLPUSH, source, destination, timeout);
+		return new ObjectWrapper<T>(objectbyte).getOriginal();
 	}
 
 	/*
@@ -373,8 +363,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> T listIndex(String key, int index)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.LINDEX, key, index);
+		return new ObjectWrapper<T>(objectbyte).getOriginal();
 	}
 
 	/*
@@ -384,8 +374,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Integer listLeftInsert(String key, ListPosition beforeOrAfter, String pivot, T value)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.LINSERT, key, beforeOrAfter.toString(), pivot, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -395,8 +384,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> T listLeftPop(String key)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.LPOP, key);
+		return new ObjectWrapper<T>(objectbyte).getOriginal();
 	}
 
 	/*
@@ -406,8 +395,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Integer listLeftPush(String key, T value)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.LPUSH, key, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -417,8 +405,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Integer listLeftPushOnExist(String key, T value)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.LPUSHX, key, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -428,8 +415,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer listLength(String key)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.LLEN, key);
 	}
 
 	/*
@@ -439,8 +425,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> List<T> listRange(String key, int start, int stop)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.LRANGE, key, start, stop);
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -450,8 +436,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Integer listRemove(String key, int count, T value)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.LREM, key, count, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -461,8 +446,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> T listRightPop(String key)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.RPOP, key);
+		return new ObjectWrapper<T>(objectbyte).getOriginal();
 	}
 
 	/*
@@ -472,8 +457,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> T listRightPopLeftPush(String source, String destination)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.RPOPLPUSH, source, destination);
+		return new ObjectWrapper<T>(objectbyte).getOriginal();
 	}
 
 	/*
@@ -483,8 +468,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Integer listRightPush(String key, T value)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.RPUSH, key, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -494,8 +478,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Integer listRightPushOnExist(String key, T value)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.RPUSHX, key, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -505,8 +488,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean listSet(String key, int index, T value)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.LSET, key, index, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -516,8 +498,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Boolean listTrim(String key, int start, int stop)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.LTRIM, key, start, stop);
 	}
 
 	/*
@@ -527,8 +508,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Boolean move(String key, int indexDB)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.MOVE, key, indexDB);
 	}
 
 	/*
@@ -539,16 +519,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	public <T> List<T> multipleGet(String... keys)
 	{
 		byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.MGET, keys);
-
-		List<T> result = new ArrayList<T>(objectbytes.length);;
-		for(byte[] object : objectbytes)
-		{
-			ObjectWrapper<T> obj = new ObjectWrapper<T>(object);
-			result.add(obj.getOriginal());
-		}
-		
-
-		return result;
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -556,10 +527,12 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#multipleSet(java.util.HashMap)
 	 */
 	@Override
-	public <T> Boolean multipleSet(HashMap<String, T> keyAndValue)
+	public <T> Boolean multipleSet(Map<String, T> keyAndValue)
 	{
-		// TODO Auto-generated method stub
+//		List<Object> allKeys = ParameterConvert.mapToObjectArray(keyAndValue);
+//		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.MSET, allKeys.toArray());
 		return null;
+		//TODO 需要添加带参数的多key操作函数
 	}
 
 	/*
@@ -567,9 +540,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#multipleSetOnNotExist(java.util.HashMap)
 	 */
 	@Override
-	public Boolean multipleSetOnNotExist(HashMap<String, String> keyAndValue)
+	public Boolean multipleSetOnNotExist(Map<String, String> keyAndValue)
 	{
-		// TODO Auto-generated method stub
+		// TODO 需要添加带参数的多key操作函数
 		return null;
 	}
 
@@ -580,8 +553,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Boolean persist(String key)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.PERSIST, key);
 	}
 
 	/*
@@ -591,8 +563,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Boolean rename(String key, String newKey)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.RENAME, key, newKey);
 	}
 
 	/*
@@ -602,8 +573,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Boolean renameOnNotExistNewKey(String key, String newKey)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.RENAMENX, key, newKey);
 	}
 
 	/*
@@ -613,8 +583,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean set(String key, T value)
 	{
-		ObjectWrapper<T> obj = new ObjectWrapper<T>(value);
-		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.SET, key, obj);
+		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.SET, key, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -624,8 +593,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean setAndExpire(String key, int seconds, T value)
 	{
-		ObjectWrapper<T> obj = new ObjectWrapper<T>(value);
-		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.SETEX, key, seconds, obj);
+		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.SETEX, key, seconds, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -633,10 +601,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#setBit(java.lang.String, int, int)
 	 */
 	@Override
-	public Boolean setBit(String key, int offset, int value)
+	public Boolean setBit(String key, int offset, boolean value)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SETBIT, key, offset, value ? 1: 0);
 	}
 
 	/*
@@ -646,8 +613,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean setOnNotExist(String key, T value)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SETNX, key, new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -657,8 +623,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer setRange(String key, int offset, String value)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.SETRANGE, key, offset, value);
 	}
 
 	/*
@@ -668,8 +633,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean setsAdd(String key, T member)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SADD, key,  new ObjectWrapper<T>(member));
 	}
 
 	/*
@@ -679,8 +643,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer setsCard(String key)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.SCARD, key);
 	}
 
 	/*
@@ -690,20 +653,19 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> List<T> setsDiff(String... keys)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.SDIFF, keys);
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#setsDiffStore(java.lang.String, java.lang.String[])
 	 */
-	@Override
-	public Integer setsDiffStore(String destination, String... keys)
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
+//	@Override
+//	public Integer setsDiffStore(String destination, String... keys)
+//	{
+//		return 0;
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -712,20 +674,19 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> List<T> setsInter(String... keys)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.SINTER, keys);
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#setsInterStore(java.lang.String, java.lang.String[])
 	 */
-	@Override
-	public Integer setsInterStore(String destination, String... keys)
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
+//	@Override
+//	public Integer setsInterStore(String destination, String... keys)
+//	{
+//		return 0;
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -734,8 +695,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean setsIsMember(String key, T member)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SISMEMBER, key, new ObjectWrapper<T>(member));
 	}
 
 	/*
@@ -745,8 +705,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> List<T> setsMembers(String key)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.SMEMBERS, key);
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -756,8 +716,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean setsMove(String source, String destination, T member)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SMOVE, source, destination, new ObjectWrapper<T>(member));
 	}
 
 	/*
@@ -767,8 +726,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> T setsPop(String key)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new ObjectWrapper<T>(this.sendRequest(byte[].class, null, RedisCommand.SPOP, key)).getOriginal();
 	}
 
 	/*
@@ -778,8 +736,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> T setsRandMember(String key)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new ObjectWrapper<T>(this.sendRequest(byte[].class, null, RedisCommand.SRANDMEMBER, key)).getOriginal();
 	}
 
 	/*
@@ -789,8 +746,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean setsRemove(String key, T member)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SREM, key, new ObjectWrapper<T>(member));
 	}
 
 	/*
@@ -800,20 +756,19 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> List<T> setsUnion(String... keys)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.SUNION, keys);
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#setsUnionStore(java.lang.String, java.lang.String[])
 	 */
-	@Override
-	public Integer setsUnionStore(String destination, String... keys)
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
+//	@Override
+//	public Integer setsUnionStore(String destination, String... keys)
+//	{
+//		return 0;
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -822,8 +777,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean sortedSetsAdd(String key, int score, T member)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.ZADD, key, score, new ObjectWrapper<T>(member));
 	}
 
 	/*
@@ -833,8 +787,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer sortedSetsCard(String key)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.ZCARD, key);
 	}
 
 	/*
@@ -844,8 +797,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer sortedSetsCount(String key, int min, int max)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.ZCOUNT, key, min, max);
 	}
 
 	/*
@@ -855,20 +807,18 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Double sortedSetsIncrementByValue(String key, int increment, T member)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.sendRequest(Double.class, null, RedisCommand.ZINCRBY, key, increment, new ObjectWrapper<T>(member));
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsInterStore(java.lang.String[])
 	 */
-	@Override
-	public Integer sortedSetsInterStore(String... args)
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
+//	@Override
+//	public Integer sortedSetsInterStore(String destination, String... keys)
+//	{
+//		return 0;
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -877,8 +827,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> List<T> sortedSetsRange(String key, int start, int stop)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZRANGE, key, start, stop);
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -886,10 +836,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsRangeByScore(java.lang.String[])
 	 */
 	@Override
-	public <T> List<T> sortedSetsRangeByScore(String... args)
+	public <T> List<T> sortedSetsRangeByScore(String key, int min, int max)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZRANGEBYSCORE, key, min, max);
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -899,8 +849,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Integer sortedSetsRank(String key, T member)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.ZRANK, key, new ObjectWrapper<T>(member));
 	}
 
 	/*
@@ -910,8 +859,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean sortedSetsRem(String key, T member)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.ZREM, key, new ObjectWrapper<T>(member));
 	}
 
 	/*
@@ -921,8 +869,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer sortedSetsRemoveRangeByRank(String key, int start, int stop)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.ZREMRANGEBYRANK, key, start, stop);
 	}
 
 	/*
@@ -932,8 +879,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer sortedSetsRemoveRangeByScore(String key, int min, int max)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.ZREMRANGEBYSCORE, key, min, max);
 	}
 
 	/*
@@ -943,8 +889,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> List<T> sortedSetsRevRange(String key, int start, int stop)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZREVRANGE, key, start, stop);
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -952,10 +898,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsRevRangeByScore(java.lang.String[])
 	 */
 	@Override
-	public <T> List<T> sortedSetsRevRangeByScore(String... args)
+	public <T> List<T> sortedSetsRevRangeByScore(String key, int max, int min)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZREVRANGEBYSCORE, key, max, min);
+		return ParameterConvert.byteArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -965,8 +911,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Integer sortedSetsRevRank(String key, T member)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.ZREVRANK, key, new ObjectWrapper<T>(member));
 	}
 
 	/*
@@ -976,8 +921,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Integer sortedSetsScore(String key, T member)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.sendRequest(Integer.class, null, RedisCommand.ZSCORE, key, new ObjectWrapper<T>(member));
 	}
 
 	/*
@@ -987,8 +931,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer strLength(String key)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.STRLEN, key);
 	}
 
 	/*
@@ -998,8 +941,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer timeToLive(String key)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return this.sendRequest(Integer.class, null, RedisCommand.TTL, key);
 	}
 
 	/*
@@ -1008,6 +950,19 @@ public class RedisCacheClient implements IRedisCacheClient
 	 */
 	@Override
 	public String type(String key)
+	{
+		return this.sendRequest(String.class, null, RedisCommand.TYPE, key);
+	}
+	
+	@Override
+	public Boolean flushAllDB()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean flushCurrentDB()
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -1067,6 +1022,7 @@ public class RedisCacheClient implements IRedisCacheClient
 
 		return null;
 	}
+
 	private <T, V> T castResult(Class<T> classType, V arg, RedisResponseMessage compareValue)
 	{
 		if (arg == null)
@@ -1120,12 +1076,12 @@ public class RedisCacheClient implements IRedisCacheClient
 
 		return handleResponse(response, classType, compareValue, command);
 	}
-	
-	public <T> List<T> sendMultipleKeysNoArgsAndSingleReplay(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, String... keys)
+
+	public <T> List<T> sendMultipleKeysWithSameArgsAndSingleReplay(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, Object arg, String... keys)
 	{
-		List<RedisResponse> responseList = connector.executeMultiKeysNoArgsAndSingleReplay(command, keys);
+		List<RedisResponse> responseList = connector.executeMultiKeysWithSameArgAndSingleReplay(command, arg, keys);
 		List<T> result = new ArrayList<T>(responseList.size());
-		for(RedisResponse response : responseList)
+		for (RedisResponse response : responseList)
 		{
 			result.add(handleResponse(response, classType, compareValue, command));
 		}
@@ -1150,24 +1106,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	public Set<Sharding> getShardGroupInfo()
 	{
 		Set<Sharding> shardGroup = new HashSet<Sharding>();
-		for(Sharding sharding : serverList)
+		for (Sharding sharding : serverList)
 		{
 			shardGroup.add(sharding.clone());
 		}
 		return shardGroup;
-	}
-
-	@Override
-	public Boolean flushAllDB()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Boolean flushCurrentDB()
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 }
