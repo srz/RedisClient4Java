@@ -3,6 +3,7 @@ package com.handinfo.redis4j.impl.database;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.handinfo.redis4j.api.IDatabase;
 import com.handinfo.redis4j.api.ListPosition;
@@ -84,7 +85,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#blpop(java.lang.String, int)
 	 */
 	@Override
-	public List<String> listBlockLeftPop(int timeout, String... keys)
+	public Entry<String, String> listBlockLeftPop(int timeout, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		System.arraycopy(keys, 0, args, 0, keys.length);
@@ -100,7 +101,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#brpop(java.lang.String, int)
 	 */
 	@Override
-	public List<String> listBlockRightPop(int timeout, String... keys)
+	public Entry<String, String> listBlockRightPop(int timeout, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		System.arraycopy(keys, 0, args, 0, keys.length);
@@ -399,7 +400,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * @see com.handinfo.redis4j.api.IDatabase#hgetall(java.lang.String)
 	 */
 	@Override
-	public Map<String, String> hashesGetAllValue(String key)
+	public List<String> hashesGetAllValue(String key)
 	{
 		this.addCommand(RedisCommand.HVALS, key);
 		return null;
@@ -593,7 +594,7 @@ public abstract class BatchCommandlist implements IDatabase
 	 * java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public Integer listLeftInsert(String key, ListPosition beforeOrAfter, String pivot, String value)
+	public Integer listInsert(String key, ListPosition beforeOrAfter, String pivot, String value)
 	{
 		this.addCommand(RedisCommand.LINSERT, key, beforeOrAfter.toString(), pivot, value);
 		return null;

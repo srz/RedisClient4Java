@@ -62,7 +62,7 @@ public class ParameterConvert
 		return map;
 	}
 	
-	public static List<String> byteArrayToStringList(byte[][] result)
+	public static List<String> objectArrayToStringList(byte[][] result)
 	{
 		List<String> list = new ArrayList<String>(result.length);
 		for(int i=0; i<result.length; i++)
@@ -72,7 +72,7 @@ public class ParameterConvert
 		return list;
 	}
 	
-	public static <T> List<T> byteArrayToObjectList(byte[][] result)
+	public static <T> List<T> objectArrayToObjectList(byte[][] result)
 	{
 		List<T> list = new ArrayList<T>(result.length);
 		for(int i=0; i<result.length; i++)
@@ -81,5 +81,17 @@ public class ParameterConvert
 			list.add(obj.getOriginal());
 		}
 		return list;
+	}
+	
+	public static <T> Map<String, Object> normalMapToWrapperMap(Map<String, T> map)
+	{
+		Iterator<Entry<String, T>> iterator = map.entrySet().iterator();
+		Map<String, Object> newMap = new HashMap<String, Object>();
+		while (iterator.hasNext())
+		{
+			Map.Entry<String, T> entry = iterator.next();
+			newMap.put(entry.getKey(), new ObjectWrapper<T>(entry.getValue()));
+		}
+		return newMap;
 	}
 }

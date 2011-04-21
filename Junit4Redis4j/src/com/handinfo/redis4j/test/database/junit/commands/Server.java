@@ -1,7 +1,6 @@
 package com.handinfo.redis4j.test.database.junit.commands;
 
 import java.util.Map;
-import java.util.concurrent.BrokenBarrierException;
 
 import org.junit.Test;
 

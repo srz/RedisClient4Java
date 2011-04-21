@@ -61,9 +61,6 @@ public interface ISession
 
 	public RedisResponse executeCommand(RedisCommand command, Object... args);
 	
-	//TODO 可能用不上,最后再删
-	//public RedisResponse executeCommand(String key, RedisCommand command, Object... args);
-	
 	public List<RedisResponse> executeBatch(List<Object[]> commandList);
 
 	public void executeAsyncCommand(IRedisAsyncClient.Result notify, RedisCommand command, Object... args) throws InterruptedException;

@@ -140,7 +140,7 @@ public abstract class DatabaseClient
 		{
 			if (RedisResponseType.MultiBulkReplies == response.getType())
 			{
-				if (response.getMultiBulkValue() != null && response.getMultiBulkValue().size() > 0)
+				if (response.getMultiBulkValue() != null)
 				{
 					List<String> result = new ArrayList<String>(response.getMultiBulkValue().size());
 

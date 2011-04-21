@@ -3,8 +3,10 @@
  */
 package com.handinfo.redis4j.impl.database;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.handinfo.redis4j.api.ListPosition;
 import com.handinfo.redis4j.api.RedisCommand;
@@ -88,14 +90,21 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#blpop(java.lang.String, int)
 	 */
 	@Override
-	public List<String> listBlockLeftPop(int timeout, String... keys)
+	public Entry<String, String> listBlockLeftPop(int timeout, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		System.arraycopy(keys, 0, args, 0, keys.length);
 		args[keys.length] = timeout;
 
-		return super.sendRequestWithMultiReplay(RedisCommand.BLPOP, args);
-		//return super.sendRequest(String[].class, null, RedisCommand.BLPOP, args);
+		List<String> list = super.sendRequestWithMultiReplay(RedisCommand.BLPOP, args);
+		
+		if(list == null)
+			return null;
+		
+		Map<String,String> map = new HashMap<String,String>();
+		map.put(list.get(0), list.get(1));
+
+		return map.entrySet().iterator().next();
 	}
 
 	/*
@@ -104,12 +113,20 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#brpop(java.lang.String, int)
 	 */
 	@Override
-	public List<String> listBlockRightPop(int timeout, String... keys)
+	public Entry<String, String> listBlockRightPop(int timeout, String... keys)
 	{
 		Object[] args = new Object[keys.length+1];
 		System.arraycopy(keys, 0, args, 0, keys.length);
 		args[keys.length] = timeout;
-		return super.sendRequestWithMultiReplay(RedisCommand.BRPOP, args);
+		List<String> list = super.sendRequestWithMultiReplay(RedisCommand.BRPOP, args);
+		
+		if(list == null)
+			return null;
+		
+		Map<String,String> map = new HashMap<String,String>();
+		map.put(list.get(0), list.get(1));
+
+		return map.entrySet().iterator().next();
 	}
 
 	/*
@@ -378,10 +395,9 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * @see com.handinfo.redis4j.api.IDatabase#hgetall(java.lang.String)
 	 */
 	@Override
-	public Map<String, String> hashesGetAllValue(String key)
+	public List<String> hashesGetAllValue(String key)
 	{
-		List<String> result = super.sendRequestWithMultiReplay(RedisCommand.HGETALL, key);
-		return ParameterConvert.stringArrayToMap(result);
+		return super.sendRequestWithMultiReplay(RedisCommand.HVALS, key);
 	}
 
 	/*
@@ -560,7 +576,7 @@ public final class RedisDatabaseClient extends DatabaseClient implements IRedisD
 	 * java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public Integer listLeftInsert(String key, ListPosition beforeOrAfter, String pivot, String value)
+	public Integer listInsert(String key, ListPosition beforeOrAfter, String pivot, String value)
 	{
 		return super.sendRequest(Integer.class, null, RedisCommand.LINSERT, key, beforeOrAfter.toString(), pivot, value);
 	}

@@ -1,4 +1,4 @@
-package com.handinfo.redis4j.test.database.junit.commands;
+package com.handinfo.redis4j.test.cache.junit.commands;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.handinfo.redis4j.test.database.junit.RedisCommandTestBase;
+import com.handinfo.redis4j.test.cache.junit.RedisCommandTestBase;
 
 public class Hashes extends RedisCommandTestBase
 {

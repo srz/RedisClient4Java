@@ -8,7 +8,6 @@ public class ErrorCommandException extends RedisClientException
 	public ErrorCommandException()
 	{
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -18,7 +17,6 @@ public class ErrorCommandException extends RedisClientException
 	public ErrorCommandException(String message, Throwable cause)
 	{
 		super(message, cause);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -28,7 +26,6 @@ public class ErrorCommandException extends RedisClientException
 	{
 		super(message);
 		super.fillInStackTrace();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -37,7 +34,6 @@ public class ErrorCommandException extends RedisClientException
 	public ErrorCommandException(Throwable cause)
 	{
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
 
 	private static final long serialVersionUID = 1L;

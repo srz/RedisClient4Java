@@ -1,4 +1,4 @@
-package com.handinfo.redis4j.test.database.junit.commands;
+package com.handinfo.redis4j.test.cache.junit.commands;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.List;
 import org.junit.Test;
 
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
-import com.handinfo.redis4j.test.database.junit.RedisCommandTestBase;
+import com.handinfo.redis4j.test.cache.junit.RedisCommandTestBase;
 
 public class Strings extends RedisCommandTestBase
 {
@@ -16,10 +16,10 @@ public class Strings extends RedisCommandTestBase
 	{
 		long value = client.append("foo", "bar");
 		assertEquals(3, value);
-		assertEquals("bar", client.get("foo"));
+		assertEquals("bar", client.getRange("foo", 0, -1));
 		value = client.append("foo", "bar");
 		assertEquals(6, value);
-		assertEquals("barbar", client.get("foo"));
+		assertEquals("barbar", client.getRange("foo", 0, -1));
 	}
 	
 	@Test(expected = ErrorCommandException.class)
@@ -77,22 +77,22 @@ public class Strings extends RedisCommandTestBase
 	}
 
 	@Test
-	public void setAndgetrange()
+	public void setAndGetRange()
 	{
-		client.set("key1", "Hello World");
+		client.append("key1", "Hello World");
 		Integer reply = client.setRange("key1", 6, "Redis");
 		assertEquals(11, reply.intValue());
 
-		assertEquals(client.get("key1"), "Hello Jedis");
+		assertEquals("Hello Redis", client.getRange("key1", 0, -1));
 
 		assertEquals("Hello", client.getRange("key1", 0, 4));
-		assertEquals("Jedis", client.getRange("key1", 6, 11));
+		assertEquals("Redis", client.getRange("key1", 6, 11));
 	}
 	
 	@Test
 	public void getRange()
 	{
-		client.set("s", "This is a string");
+		client.append("s", "This is a string");
 		assertEquals("This", client.getRange("s", 0, 3));
 		assertEquals("ing", client.getRange("s", -3, -1));
 		assertEquals("This is a string", client.getRange("s", 0, -1));
@@ -243,9 +243,9 @@ public class Strings extends RedisCommandTestBase
 	public void setRange()
 	{
 		assertEquals(11, client.setRange("key2", 6, "Redis").intValue());
-		client.set("key1", "Hello World");
+		client.append("key1", "Hello World");
 		assertEquals(11, client.setRange("key1", 6, "Redis").intValue());
-		assertEquals("Hello Redis", client.get("key1"));
+		assertEquals("Hello Redis", client.getRange("key1", 0, -1));
 	}
 	
 
@@ -253,7 +253,7 @@ public class Strings extends RedisCommandTestBase
 	public void strlen()
 	{
 		assertEquals(0, client.strLength("s").intValue());
-		client.set("s", "This is a string");
+		client.append("s", "This is a string");
 		assertEquals("This is a string".length(), client.strLength("s").intValue());
 	}
 }

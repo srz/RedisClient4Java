@@ -154,7 +154,7 @@ public class CacheConnector implements ICacheConnector
 		return response;
 	}
 
-	//@Override
+	// @Override
 	public List<RedisResponse> executeMultiKeysNoArgsAndSingleReplay(RedisCommand command, String... keys)
 	{
 		Map<ISession, List<String>> sessionList = getSessionAndKeysMap(command, keys);
@@ -212,6 +212,90 @@ public class CacheConnector implements ICacheConnector
 		}
 
 		return responseList;
+	}
+
+	private Map<ISession, List<Object>> getSessionAndKeyValueMap(RedisCommand command, Map<String, Object> map)
+	{
+		Map<ISession, List<Object>> sessionList = new LinkedHashMap<ISession, List<Object>>(sessions.length);
+		for (String key : map.keySet())
+		{
+			ISession session = getSessionByKey(key);
+			if (sessionList.containsKey(session))
+			{
+				sessionList.get(session).add(key);
+				sessionList.get(session).add(map.get(key));
+			} else
+			{
+				List<Object> keyList = new ArrayList<Object>(map.size());
+				keyList.add(key);
+				keyList.add(map.get(key));
+				sessionList.put(session, keyList);
+			}
+		}
+		return sessionList;
+	}
+
+	@Override
+	public List<RedisResponse> executeMultiKeyValueAndSingleReplay(RedisCommand command, Map<String, Object> map)
+	{
+		Map<ISession, List<Object>> sessionList = getSessionAndKeyValueMap(command, map);
+
+		List<RedisResponse> responseList = new ArrayList<RedisResponse>(sessionList.size());
+
+		Iterator<Entry<ISession, List<Object>>> iterator = sessionList.entrySet().iterator();
+		while (iterator.hasNext())
+		{
+			Entry<ISession, List<Object>> entry = iterator.next();
+			ISession session = entry.getKey();
+			List<Object> keyList = entry.getValue();
+
+			RedisResponse response = session.executeCommand(command, keyList.toArray());
+
+			if (response != null)
+			{
+				responseList.add(response);
+			}
+		}
+
+		return responseList;
+	}
+
+	@Override
+	public List<RedisResponse> executeCommandOnAllShardingAndSingleReplay(RedisCommand command, Object... args)
+	{
+		List<RedisResponse> responseList = new ArrayList<RedisResponse>(sessions.length);
+
+		for (ISession session : sessions)
+		{
+			RedisResponse response = session.executeCommand(command, args);
+
+			if (response != null)
+			{
+				responseList.add(response);
+			}
+		}
+		return responseList;
+	}
+
+	@Override
+	public RedisResponse executeCommandOnAllShardingAndMultiReplay(RedisCommand command, Object... args)
+	{
+		List<RedisResponse> responseList = new ArrayList<RedisResponse>(sessions.length);
+
+		for (ISession session : sessions)
+		{
+			RedisResponse response = session.executeCommand(command, args);
+
+			if (response != null)
+			{
+				responseList.addAll(response.getMultiBulkValue());
+			}
+		}
+		
+		RedisResponse response = new RedisResponse(RedisResponseType.MultiBulkReplies);
+		response.setMultiBulkValue(responseList);
+		
+		return response;
 	}
 
 	@Override

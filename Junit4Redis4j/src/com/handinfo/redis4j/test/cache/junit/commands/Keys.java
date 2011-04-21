@@ -1,10 +1,10 @@
-package com.handinfo.redis4j.test.database.junit.commands;
+package com.handinfo.redis4j.test.cache.junit.commands;
 
 import java.util.List;
 
 import org.junit.Test;
 
-import com.handinfo.redis4j.test.database.junit.RedisCommandTestBase;
+import com.handinfo.redis4j.test.cache.junit.RedisCommandTestBase;
 
 public class Keys extends RedisCommandTestBase
 {
@@ -131,56 +131,6 @@ public class Keys extends RedisCommandTestBase
 		assertTrue(client.timeToLive(key) == -1);
 	}
 
-	@Test
-	public void testRandomKey() 
-	{
-		String key = "WillBeDeletedKey1";
-
-		assertEquals(null, client.randomKey());
-
-		client.set(key, "I am WillBeDeletedKey 1");
-
-		assertTrue(client.randomKey().equalsIgnoreCase(key));
-	}
-
-	@Test
-	public void testRename() 
-	{
-		String key_1 = "WillBeRenamedKey_1";
-		String value = "I am WillBeRenamedKey";
-		String key_2 = "WillBeRenamedKey_2";
-
-		assertTrue(!client.rename(key_1, key_2));
-
-		client.set(key_1, value);
-
-		assertTrue(client.rename(key_1, key_2));
-
-		String str_1 = client.get(key_1);
-		String str_2 = client.get(key_2);
-		client.del(key_1, key_2);
-
-		assertTrue(str_1 == null && str_2.equalsIgnoreCase(value));
-	}
-
-	@Test
-	public void testRenameNX() 
-	{
-		String key_1 = "WillBeRenamedKey_1";
-		String value = "I am WillBeRenamedKey";
-		String key_2 = "WillBeRenamedKey_2";
-
-		assertTrue(!client.renameOnNotExistNewKey(key_1, key_2));
-
-		client.set(key_1, value);
-		client.set(key_2, value);
-
-		assertTrue(!client.renameOnNotExistNewKey(key_1, key_2));
-
-		client.del(key_2);
-
-		assertTrue(client.renameOnNotExistNewKey(key_1, key_2));
-	}
 
 	@Test
 	public void testSort() 

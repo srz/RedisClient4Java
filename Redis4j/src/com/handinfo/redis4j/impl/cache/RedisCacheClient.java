@@ -3,11 +3,14 @@
  */
 package com.handinfo.redis4j.impl.cache;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import com.handinfo.redis4j.api.ListPosition;
 import com.handinfo.redis4j.api.RedisCommand;
@@ -57,7 +60,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Integer decrement(String key)
 	{
-		return this.sendRequest(Integer.class, null, RedisCommand.DECRBY, key);
+		return this.sendRequest(Integer.class, null, RedisCommand.DECR, key);
 	}
 
 	/*
@@ -145,7 +148,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public String getRange(String key, int start, int end)
 	{
-		return this.sendRequest(String.class, null, RedisCommand.GETRANGE, key, start, end);
+		byte[] objectbyts = this.sendRequest(byte[].class, null, RedisCommand.GETRANGE, key, start, end);
+		if(objectbyts == null)
+			return null;
+		return new String(objectbyts, Charset.forName("UTF-8"));
 	}
 
 	/*
@@ -214,7 +220,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.HKEYS, key);
 
-		return ParameterConvert.byteArrayToStringList(objectbytes);
+		return ParameterConvert.objectArrayToStringList(objectbytes);
 	}
 
 	/*
@@ -226,7 +232,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.HVALS, key);
 
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -257,7 +263,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	public <T> List<T> hashesMultipleFieldGet(String key, String... fields)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.HMGET, key, (Object[]) fields);
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -319,8 +325,8 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public List<String> keys(String pattern)
 	{
-		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.KEYS, pattern);
-		return ParameterConvert.byteArrayToStringList(objectbytes);
+		byte[][] objectBytes = this.sendRequestOnAllShardingAndMultiReplay(byte[][].class, null, RedisCommand.KEYS, pattern);
+		return ParameterConvert.objectArrayToStringList(objectBytes);
 	}
 
 	/*
@@ -328,10 +334,17 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listBlockLeftPop(int, java.lang.String)
 	 */
 	@Override
-	public <T> T listBlockLeftPop(String key, int timeout)
+	public <T> Entry<String, T> listBlockLeftPop(String key, int timeout)
 	{
-		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.BLPOP, key, timeout);
-		return new ObjectWrapper<T>(objectbyte).getOriginal();
+		byte[][] objectbyte = this.sendRequest(byte[][].class, null, RedisCommand.BLPOP, key, timeout);
+
+		if (objectbyte == null)
+			return null;
+
+		Map<String, T> map = new HashMap<String, T>();
+		map.put(new String(objectbyte[0], Charset.forName("UTF-8")), new ObjectWrapper<T>(objectbyte[1]).getOriginal());
+
+		return map.entrySet().iterator().next();
 	}
 
 	/*
@@ -339,22 +352,29 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listBlockRightPop(int, java.lang.String)
 	 */
 	@Override
-	public <T> T listBlockRightPop(String key, int timeout)
+	public <T> Entry<String, T> listBlockRightPop(String key, int timeout)
 	{
-		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.BRPOP, key, timeout);
-		return new ObjectWrapper<T>(objectbyte).getOriginal();
+		byte[][] objectbyte = this.sendRequest(byte[][].class, null, RedisCommand.BRPOP, key, timeout);
+
+		if (objectbyte == null)
+			return null;
+
+		Map<String, T> map = new HashMap<String, T>();
+		map.put(new String(objectbyte[0], Charset.forName("UTF-8")), new ObjectWrapper<T>(objectbyte[1]).getOriginal());
+
+		return map.entrySet().iterator().next();
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#listBlockRightPopLeftPush(java.lang.String, java.lang.String, int)
 	 */
-	@Override
-	public <T> T listBlockRightPopLeftPush(String source, String destination, int timeout)
-	{
-		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.BRPOPLPUSH, source, destination, timeout);
-		return new ObjectWrapper<T>(objectbyte).getOriginal();
-	}
+	// @Override
+	// public <T> T listBlockRightPopLeftPush(String source, String destination, int timeout)
+	// {
+	// byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.BRPOPLPUSH, source, destination, timeout);
+	// return new ObjectWrapper<T>(objectbyte).getOriginal();
+	// }
 
 	/*
 	 * (non-Javadoc)
@@ -372,9 +392,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#listLeftInsert(java.lang.String, java.lang.String, java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> Integer listLeftInsert(String key, ListPosition beforeOrAfter, String pivot, T value)
+	public <T> Integer listInsert(String key, ListPosition beforeOrAfter, T pivot, T value)
 	{
-		return this.sendRequest(Integer.class, null, RedisCommand.LINSERT, key, beforeOrAfter.toString(), pivot, new ObjectWrapper<T>(value));
+		return this.sendRequest(Integer.class, null, RedisCommand.LINSERT, key, beforeOrAfter.toString(), new ObjectWrapper<T>(pivot), new ObjectWrapper<T>(value));
 	}
 
 	/*
@@ -426,7 +446,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	public <T> List<T> listRange(String key, int start, int stop)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.LRANGE, key, start, stop);
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -454,12 +474,12 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#listRightPopLeftPush(java.lang.String, java.lang.String)
 	 */
-	@Override
-	public <T> T listRightPopLeftPush(String source, String destination)
-	{
-		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.RPOPLPUSH, source, destination);
-		return new ObjectWrapper<T>(objectbyte).getOriginal();
-	}
+	// @Override
+	// public <T> T listRightPopLeftPush(String source, String destination)
+	// {
+	// byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.RPOPLPUSH, source, destination);
+	// return new ObjectWrapper<T>(objectbyte).getOriginal();
+	// }
 
 	/*
 	 * (non-Javadoc)
@@ -519,7 +539,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	public <T> List<T> multipleGet(String... keys)
 	{
 		byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.MGET, keys);
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -529,10 +549,13 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean multipleSet(Map<String, T> keyAndValue)
 	{
-//		List<Object> allKeys = ParameterConvert.mapToObjectArray(keyAndValue);
-//		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.MSET, allKeys.toArray());
-		return null;
-		//TODO 需要添加带参数的多key操作函数
+		List<Boolean> resultList = this.sendMultiKeyValueAndSingleReplay(Boolean.class, RedisResponseMessage.OK, RedisCommand.MSET, ParameterConvert.normalMapToWrapperMap(keyAndValue));
+		for (boolean boo : resultList)
+		{
+			if (boo == false)
+				return false;
+		}
+		return true;
 	}
 
 	/*
@@ -542,8 +565,13 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Boolean multipleSetOnNotExist(Map<String, String> keyAndValue)
 	{
-		// TODO 需要添加带参数的多key操作函数
-		return null;
+		List<Boolean> resultList = this.sendMultiKeyValueAndSingleReplay(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.MSETNX, ParameterConvert.normalMapToWrapperMap(keyAndValue));
+		for (boolean boo : resultList)
+		{
+			if (boo == false)
+				return false;
+		}
+		return true;
 	}
 
 	/*
@@ -560,21 +588,21 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#rename(java.lang.String, java.lang.String)
 	 */
-	@Override
-	public Boolean rename(String key, String newKey)
-	{
-		return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.RENAME, key, newKey);
-	}
+	// @Override
+	// public Boolean rename(String key, String newKey)
+	// {
+	// return this.sendRequest(Boolean.class, RedisResponseMessage.OK, RedisCommand.RENAME, key, newKey);
+	// }
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#renameOnNotExistNewKey(java.lang.String, java.lang.String)
 	 */
-	@Override
-	public Boolean renameOnNotExistNewKey(String key, String newKey)
-	{
-		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.RENAMENX, key, newKey);
-	}
+	// @Override
+	// public Boolean renameOnNotExistNewKey(String key, String newKey)
+	// {
+	// return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.RENAMENX, key, newKey);
+	// }
 
 	/*
 	 * (non-Javadoc)
@@ -603,7 +631,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public Boolean setBit(String key, int offset, boolean value)
 	{
-		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SETBIT, key, offset, value ? 1: 0);
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SETBIT, key, offset, value ? 1 : 0);
 	}
 
 	/*
@@ -633,7 +661,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	@Override
 	public <T> Boolean setsAdd(String key, T member)
 	{
-		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SADD, key,  new ObjectWrapper<T>(member));
+		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SADD, key, new ObjectWrapper<T>(member));
 	}
 
 	/*
@@ -650,43 +678,43 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#setsDiff(java.lang.String[])
 	 */
-	@Override
-	public <T> List<T> setsDiff(String... keys)
-	{
-		byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.SDIFF, keys);
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
-	}
+	// @Override
+	// public <T> List<T> setsDiff(String... keys)
+	// {
+	// byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.SDIFF, keys);
+	// return ParameterConvert.objectArrayToObjectList(objectbytes);
+	// }
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#setsDiffStore(java.lang.String, java.lang.String[])
 	 */
-//	@Override
-//	public Integer setsDiffStore(String destination, String... keys)
-//	{
-//		return 0;
-//	}
+	// @Override
+	// public Integer setsDiffStore(String destination, String... keys)
+	// {
+	// return 0;
+	// }
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#setsInter(java.lang.String[])
 	 */
-	@Override
-	public <T> List<T> setsInter(String... keys)
-	{
-		byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.SINTER, keys);
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
-	}
+	// @Override
+	// public <T> List<T> setsInter(String... keys)
+	// {
+	// byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.SINTER, keys);
+	// return ParameterConvert.objectArrayToObjectList(objectbytes);
+	// }
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#setsInterStore(java.lang.String, java.lang.String[])
 	 */
-//	@Override
-//	public Integer setsInterStore(String destination, String... keys)
-//	{
-//		return 0;
-//	}
+	// @Override
+	// public Integer setsInterStore(String destination, String... keys)
+	// {
+	// return 0;
+	// }
 
 	/*
 	 * (non-Javadoc)
@@ -706,18 +734,18 @@ public class RedisCacheClient implements IRedisCacheClient
 	public <T> List<T> setsMembers(String key)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.SMEMBERS, key);
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(objectbytes);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#setsMove(java.lang.String, java.lang.String, java.lang.Object)
 	 */
-	@Override
-	public <T> Boolean setsMove(String source, String destination, T member)
-	{
-		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SMOVE, source, destination, new ObjectWrapper<T>(member));
-	}
+	// @Override
+	// public <T> Boolean setsMove(String source, String destination, T member)
+	// {
+	// return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.SMOVE, source, destination, new ObjectWrapper<T>(member));
+	// }
 
 	/*
 	 * (non-Javadoc)
@@ -753,22 +781,22 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#setsUnion(java.lang.String[])
 	 */
-	@Override
-	public <T> List<T> setsUnion(String... keys)
-	{
-		byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.SUNION, keys);
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
-	}
+	// @Override
+	// public <T> List<T> setsUnion(String... keys)
+	// {
+	// byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.SUNION, keys);
+	// return ParameterConvert.objectArrayToObjectList(objectbytes);
+	// }
 
 	/*
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#setsUnionStore(java.lang.String, java.lang.String[])
 	 */
-//	@Override
-//	public Integer setsUnionStore(String destination, String... keys)
-//	{
-//		return 0;
-//	}
+	// @Override
+	// public Integer setsUnionStore(String destination, String... keys)
+	// {
+	// return 0;
+	// }
 
 	/*
 	 * (non-Javadoc)
@@ -814,11 +842,11 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * (non-Javadoc)
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsInterStore(java.lang.String[])
 	 */
-//	@Override
-//	public Integer sortedSetsInterStore(String destination, String... keys)
-//	{
-//		return 0;
-//	}
+	// @Override
+	// public Integer sortedSetsInterStore(String destination, String... keys)
+	// {
+	// return 0;
+	// }
 
 	/*
 	 * (non-Javadoc)
@@ -828,7 +856,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	public <T> List<T> sortedSetsRange(String key, int start, int stop)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZRANGE, key, start, stop);
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -839,7 +867,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	public <T> List<T> sortedSetsRangeByScore(String key, int min, int max)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZRANGEBYSCORE, key, min, max);
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -857,7 +885,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see com.handinfo.redis4j.api.ICache#sortedSetsRem(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> Boolean sortedSetsRem(String key, T member)
+	public <T> Boolean sortedSetsRemove(String key, T member)
 	{
 		return this.sendRequest(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.ZREM, key, new ObjectWrapper<T>(member));
 	}
@@ -890,7 +918,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	public <T> List<T> sortedSetsRevRange(String key, int start, int stop)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZREVRANGE, key, start, stop);
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -901,7 +929,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	public <T> List<T> sortedSetsRevRangeByScore(String key, int max, int min)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZREVRANGEBYSCORE, key, max, min);
-		return ParameterConvert.byteArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(objectbytes);
 	}
 
 	/*
@@ -953,19 +981,29 @@ public class RedisCacheClient implements IRedisCacheClient
 	{
 		return this.sendRequest(String.class, null, RedisCommand.TYPE, key);
 	}
-	
+
 	@Override
 	public Boolean flushAllDB()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		List<Boolean> resultList = this.sendRequestOnAllShardingAndSingleReplay(Boolean.class, RedisResponseMessage.OK, RedisCommand.FLUSHALL);
+		for (boolean boo : resultList)
+		{
+			if (boo == false)
+				return false;
+		}
+		return true;
 	}
 
 	@Override
 	public Boolean flushCurrentDB()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		List<Boolean> resultList = this.sendRequestOnAllShardingAndSingleReplay(Boolean.class, RedisResponseMessage.OK, RedisCommand.FLUSHDB);
+		for (boolean boo : resultList)
+		{
+			if (boo == false)
+				return false;
+		}
+		return true;
 	}
 
 	private <T> T handleResponse(RedisResponse response, Class<T> classType, RedisResponseMessage compareValue, RedisCommand command)
@@ -997,7 +1035,7 @@ public class RedisCacheClient implements IRedisCacheClient
 					}
 				case MultiBulkReplies:
 					{
-						if (response.getMultiBulkValue().size() == 0)
+						if (response.getMultiBulkValue() == null)
 							return null;
 
 						byte[][] result = new byte[response.getMultiBulkValue().size()][];
@@ -1034,16 +1072,35 @@ public class RedisCacheClient implements IRedisCacheClient
 		{
 			return classType.cast(arg);
 		} else if (classType == Integer.class)
+		{
+			if (arg instanceof byte[])
+				return classType.cast(Integer.valueOf(new String((byte[]) arg, Charset.forName("UTF-8"))));
 			return classType.cast(Integer.valueOf((String) arg));
+		}
 		else if (classType == Boolean.class)
 		{
 			if (compareValue != null)
+			{
+				if (arg instanceof byte[])
+					return classType.cast(Boolean.valueOf(new String((byte[]) arg, Charset.forName("UTF-8")).equalsIgnoreCase(compareValue.getValue())));
 				return classType.cast(Boolean.valueOf(((String) arg).equalsIgnoreCase(compareValue.getValue())));
+			}
 			else
 				return classType.cast(Boolean.FALSE);
 		} else if (classType == byte[][].class)
 			return classType.cast(arg);
-		else
+		else if (classType == Double.class)
+		{
+			if (arg instanceof byte[])
+				return classType.cast(Double.valueOf(new String((byte[]) arg, Charset.forName("UTF-8"))));
+			return classType.cast(Double.valueOf((String) arg));
+		}
+		else if (classType == Long.class)
+		{
+			if (arg instanceof byte[])
+				return classType.cast(Long.valueOf(new String((byte[]) arg, Charset.forName("UTF-8"))));
+			return classType.cast(Long.valueOf((String) arg));
+		} else
 			return null;
 	}
 
@@ -1087,6 +1144,36 @@ public class RedisCacheClient implements IRedisCacheClient
 		}
 
 		return result;
+	}
+
+	public <T> List<T> sendMultiKeyValueAndSingleReplay(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, Map<String, Object> map)
+	{
+		List<RedisResponse> responseList = connector.executeMultiKeyValueAndSingleReplay(command, map);
+		List<T> result = new ArrayList<T>(responseList.size());
+		for (RedisResponse response : responseList)
+		{
+			result.add(handleResponse(response, classType, compareValue, command));
+		}
+
+		return result;
+	}
+
+	public <T> List<T> sendRequestOnAllShardingAndSingleReplay(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, Object... args)
+	{
+		List<RedisResponse> responseList = connector.executeCommandOnAllShardingAndSingleReplay(command, args);
+		List<T> result = new ArrayList<T>(responseList.size());
+		for (RedisResponse response : responseList)
+		{
+			result.add(handleResponse(response, classType, compareValue, command));
+		}
+
+		return result;
+	}
+
+	public <T> T sendRequestOnAllShardingAndMultiReplay(Class<T> classType, RedisResponseMessage compareValue, RedisCommand command, Object... args)
+	{
+		RedisResponse response = connector.executeCommandOnAllShardingAndMultiReplay(command, args);
+		return handleResponse(response, classType, compareValue, command);
 	}
 
 	@Override

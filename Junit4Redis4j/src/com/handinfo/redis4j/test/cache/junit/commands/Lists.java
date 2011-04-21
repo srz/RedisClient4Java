@@ -1,4 +1,4 @@
-package com.handinfo.redis4j.test.database.junit.commands;
+package com.handinfo.redis4j.test.cache.junit.commands;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,17 +7,17 @@ import java.util.Map.Entry;
 import org.junit.Test;
 
 import com.handinfo.redis4j.api.ListPosition;
-import com.handinfo.redis4j.api.database.IRedisDatabaseClient;
+import com.handinfo.redis4j.api.cache.IRedisCacheClient;
 import com.handinfo.redis4j.api.exception.ErrorCommandException;
 import com.handinfo.redis4j.test.Helper;
-import com.handinfo.redis4j.test.database.junit.RedisCommandTestBase;
+import com.handinfo.redis4j.test.cache.junit.RedisCommandTestBase;
 
 public class Lists extends RedisCommandTestBase
 {
 	@Test
 	public void blpop() throws InterruptedException
 	{
-		Entry<String, String> result = client.listBlockLeftPop(1, "foo");
+		Entry<String, Object> result = client.listBlockLeftPop("foo", 1);
 		assertNull(result);
 
 		new Thread(new Runnable()
@@ -26,7 +26,7 @@ public class Lists extends RedisCommandTestBase
 			{
 				try
 				{
-					IRedisDatabaseClient cli = Helper.getRedisDatabaseClient();
+					IRedisCacheClient cli = Helper.getRedisCacheClient();
 					Integer res = cli.listLeftPush("foo", "bar");
 					cli.quit();
 					assertEquals(1, res.intValue());
@@ -38,7 +38,7 @@ public class Lists extends RedisCommandTestBase
 			}
 		}).start();
 
-		result = client.listBlockLeftPop(1, "foo");
+		result = client.listBlockLeftPop("foo", 1);
 		assertNotNull(result);
 		assertEquals("foo", result.getKey());
 		assertEquals("bar", result.getValue());
@@ -47,7 +47,7 @@ public class Lists extends RedisCommandTestBase
 	@Test
 	public void brpop() throws InterruptedException
 	{
-		Entry<String, String> result = client.listBlockRightPop(1, "foo");
+		Entry<String, Object> result = client.listBlockRightPop("foo", 1);
 		assertNull(result);
 
 		new Thread(new Runnable()
@@ -56,7 +56,7 @@ public class Lists extends RedisCommandTestBase
 			{
 				try
 				{
-					IRedisDatabaseClient cli = Helper.getRedisDatabaseClient();
+					IRedisCacheClient cli = Helper.getRedisCacheClient();
 					Integer res = cli.listLeftPush("foo", "bar");
 					cli.quit();
 					assertEquals(1, res.intValue());
@@ -68,39 +68,10 @@ public class Lists extends RedisCommandTestBase
 			}
 		}).start();
 
-		result = client.listBlockRightPop(1, "foo");
+		result = client.listBlockRightPop("foo", 1);
 		assertNotNull(result);
 		assertEquals("foo", result.getKey());
 		assertEquals("bar", result.getValue());
-	}
-	
-	@Test
-	public void brpoplpush()
-	{
-		(new Thread(new Runnable()
-		{
-			public void run()
-			{
-				try
-				{
-					Thread.sleep(2000);
-					IRedisDatabaseClient cli = Helper.getRedisDatabaseClient();
-					Integer res = cli.listLeftPush("foo", "a");
-					cli.quit();
-					assertEquals(1, res.intValue());
-				}
-				catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		})).start();
-
-		String element = client.listBlockRightPopLeftPush("foo", "bar", 0);
-
-		assertEquals("a", element);
-		assertEquals(1, client.listLength("bar").intValue());
-		assertEquals("a", client.listRange("bar", 0, -1).get(0));
 	}
 	
 	@Test
@@ -301,34 +272,6 @@ public class Lists extends RedisCommandTestBase
 
 		element = client.listRightPop("foo");
 		assertEquals(null, element);
-	}
-	
-	@Test
-	public void rpoplpush()
-	{
-		client.listRightPush("foo", "a");
-		client.listRightPush("foo", "b");
-		client.listRightPush("foo", "c");
-
-		client.listRightPush("dst", "foo");
-		client.listRightPush("dst", "bar");
-
-		String element = client.listRightPopLeftPush("foo", "dst");
-
-		assertEquals("c", element);
-
-		List<String> srcExpected = new ArrayList<String>(2);
-		srcExpected.add("a");
-		srcExpected.add("b");
-
-		List<String> dstExpected = new ArrayList<String>(3);
-		dstExpected.add("c");
-		dstExpected.add("foo");
-		dstExpected.add("bar");
-
-
-		assertEquals(srcExpected, client.listRange("foo", 0, 1000));
-		assertEquals(dstExpected, client.listRange("dst", 0, 1000));
 	}
 	
 	@Test

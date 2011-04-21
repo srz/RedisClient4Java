@@ -1,8 +1,8 @@
 package com.handinfo.redis4j.api;
 
-import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 当把Redis作为缓存时,实现以下基础功能
@@ -149,7 +149,7 @@ public interface ICache
 	 * @param newKey
 	 * @return
 	 */
-	public Boolean rename(String key, String newKey);
+	//public Boolean rename(String key, String newKey);
 
 	/**
 	 * [TYPE]Determine the type stored at key
@@ -181,7 +181,7 @@ public interface ICache
 	 * @param newKey
 	 * @return
 	 */
-	public Boolean renameOnNotExistNewKey(String key, String newKey);
+	//public Boolean renameOnNotExistNewKey(String key, String newKey);
 
 	/**
 	 * [EXPIRE]Set a key's time to live in seconds
@@ -216,11 +216,11 @@ public interface ICache
 	//Lists
 	/**
 	 * [BLPOP]Remove and get the first element in a list, or block until one is available
-	 * @param key TODO
+	 * @param key 
 	 * @param timeout
 	 * @return
 	 */
-	public <T> T listBlockLeftPop(String key, int timeout);
+	public <T> Entry<String, T> listBlockLeftPop(String key, int timeout);
 
 	/**
 	 * [LLEN]Get the length of a list
@@ -248,11 +248,11 @@ public interface ICache
 
 	/**
 	 * [BRPOP]Remove and get the last element in a list, or block until one is available
-	 * @param key TODO
+	 * @param key 
 	 * @param timeout
 	 * @return
 	 */
-	public <T> T listBlockRightPop(String key, int timeout);
+	public <T> Entry<String, T> listBlockRightPop(String key, int timeout);
 
 	/**
 	 * [LPOP]Remove and get the first element in a list
@@ -285,7 +285,7 @@ public interface ICache
 	 * @param timeout
 	 * @return
 	 */
-	public <T> T listBlockRightPopLeftPush(String source, String destination, int timeout);
+	//public <T> T listBlockRightPopLeftPush(String source, String destination, int timeout);
 
 	/**
 	 * [LPUSH]Prepend a value to a list
@@ -335,7 +335,7 @@ public interface ICache
 	 * @param value
 	 * @return
 	 */
-	public <T> Integer listLeftInsert(String key, ListPosition beforeOrAfter, String pivot, T value);
+	public <T> Integer listInsert(String key, ListPosition beforeOrAfter, T pivot, T value);
 
 	/**
 	 * [LRANGE]Get a range of elements from a list
@@ -352,7 +352,7 @@ public interface ICache
 	 * @param destination
 	 * @return
 	 */
-	public <T> T listRightPopLeftPush(String source, String destination);
+	//public <T> T listRightPopLeftPush(String source, String destination);
 	
 	//Sets
 	/**
@@ -368,7 +368,7 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public <T> List<T> setsInter(String... keys);
+	//public <T> List<T> setsInter(String... keys);
 
 	/**
 	 * [SMOVE]Move a member from one set to another
@@ -377,14 +377,14 @@ public interface ICache
 	 * @param member
 	 * @return
 	 */
-	public <T> Boolean setsMove(String source, String destination, T member);
+	//public <T> Boolean setsMove(String source, String destination, T member);
 
 	/**
 	 * [SUNION]Add multiple sets
 	 * @param keys
 	 * @return
 	 */
-	public <T> List<T> setsUnion(String... keys);
+	//public <T> List<T> setsUnion(String... keys);
 
 	/**
 	 * [SCARD]Get the number of members in a set
@@ -421,7 +421,7 @@ public interface ICache
 	 * @param keys
 	 * @return
 	 */
-	public <T> List<T> setsDiff(String... keys);
+	//public <T> List<T> setsDiff(String... keys);
 
 	/**
 	 * [SISMEMBER]Determine if a given value is a member of a set
@@ -473,7 +473,7 @@ public interface ICache
 
 	/**
 	 * [ZINTERSTORE]Intersect multiple sorted sets and store the resulting sorted set in a new key
-	 * @param destination TODO
+	 * @param destination 
 	 * @param keys
 	 * @return
 	 */
@@ -485,13 +485,13 @@ public interface ICache
 	 * @param member
 	 * @return
 	 */
-	public <T> Boolean sortedSetsRem(String key, T member);
+	public <T> Boolean sortedSetsRemove(String key, T member);
 
 	/**
 	 * [ZREVRANGEBYSCORE]Return a range of members in a sorted set, by score, with scores ordered from high to low
-	 * @param key TODO
-	 * @param max TODO
-	 * @param min TODO
+	 * @param key 
+	 * @param max 
+	 * @param min 
 	 * @return
 	 */
 	public <T> List<T> sortedSetsRevRangeByScore(String key, int max, int min);
@@ -540,9 +540,9 @@ public interface ICache
 
 	/**
 	 * [ZRANGEBYSCORE]Return a range of members in a sorted set, by score
-	 * @param key TODO
-	 * @param min TODO
-	 * @param max TODO
+	 * @param key 
+	 * @param min 
+	 * @param max
 	 * @return
 	 */
 	public <T> List<T> sortedSetsRangeByScore(String key, int min, int max);

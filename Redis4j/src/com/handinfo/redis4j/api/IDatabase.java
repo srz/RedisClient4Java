@@ -5,6 +5,7 @@ package com.handinfo.redis4j.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 当把Redis作为数据库时,实现以下功能
@@ -45,7 +46,7 @@ public interface IDatabase
 	 * @param key
 	 * @return
 	 */
-	public Map<String, String> hashesGetAllValue(String key);
+	public List<String> hashesGetAllValue(String key);
 
 	/**
 	 * 获取指定Hashe对象的长度
@@ -241,7 +242,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public List<String> listBlockLeftPop(int timeout, String... keys);
+	public Entry<String, String> listBlockLeftPop(int timeout, String... keys);
 
 	/**
 	 * [LLEN]Get the length of a list
@@ -273,7 +274,7 @@ public interface IDatabase
 	 * @param keys
 	 * @return
 	 */
-	public List<String> listBlockRightPop(int timeout, String... keys);
+	public Entry<String, String> listBlockRightPop(int timeout, String... keys);
 
 	/**
 	 * [LPOP]Remove and get the first element in a list
@@ -356,7 +357,7 @@ public interface IDatabase
 	 * @param value
 	 * @return
 	 */
-	public Integer listLeftInsert(String key, ListPosition beforeOrAfter, String pivot, String value);
+	public Integer listInsert(String key, ListPosition beforeOrAfter, String pivot, String value);
 
 	/**
 	 * [LRANGE]Get a range of elements from a list
