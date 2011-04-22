@@ -1,32 +1,62 @@
 package org.elk.redis4j.impl.util;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Properties;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 public class LogUtil
 {
-	private static Level level = Level.ALL;
-	private static LogFormatter logFormatter = new LogUtil.LogFormatter();
-	private static ConsoleHandler ch = new ConsoleHandler()
+	private static Level level;
+	private static LogFormatter logFormatter;
+	private static Handler handler;
+	
+	static
 	{
-		@Override
-		public void setFormatter(Formatter newFormatter) throws SecurityException
+		Properties pro = new Properties();
+		try
 		{
-			super.setFormatter(logFormatter);
+			pro.load(LogUtil.class.getClassLoader().getResourceAsStream("redis4j.log.properties"));
 		}
-
-		@Override
-		public synchronized void setLevel(Level newLevel) throws SecurityException
+		catch (IOException ex)
 		{
-			super.setLevel(level);
+			ex.printStackTrace();
 		}
 		
-	};
+		level = Level.parse(pro.getProperty("level"));
+		logFormatter = new LogFormatter();
+		if(pro.getProperty("handler").equalsIgnoreCase("java.util.logging.ConsoleHandler"))
+		{
+			handler = new ConsoleHandler();
+		}
+		else
+		{
+			try
+			{
+				String filePath = pro.getProperty("logFilePath");
+				if(filePath.isEmpty() || filePath.replace(" ", "").equals("\"\""))
+					filePath = LogUtil.class.getClassLoader().getResource("").toString().replace("file:/", "") + "redis4j.log";
+				handler = new FileHandler(filePath, true);
+			}
+			catch (SecurityException e)
+			{
+				e.printStackTrace();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		handler.setFormatter(logFormatter);
+		handler.setLevel(level);
+	}
 
 	private static class LogFormatter extends Formatter
 	{
@@ -65,7 +95,7 @@ public class LogUtil
 			sb.append(record.getSourceMethodName());
 			sb.append("】");
 
-			sb.append("\n");
+			sb.append("\r\n");
 
 			return sb.toString();
 		}
@@ -75,7 +105,7 @@ public class LogUtil
 	{
 		Logger logger = Logger.getLogger(loggerName);
 		logger.setUseParentHandlers(false);
-		logger.addHandler(ch);
+		logger.addHandler(handler);
 		logger.setLevel(level);
 		return logger;
 	}
