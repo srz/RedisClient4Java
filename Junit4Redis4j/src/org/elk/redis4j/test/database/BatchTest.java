@@ -1,5 +1,7 @@
 package org.elk.redis4j.test.database;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 
@@ -29,16 +31,24 @@ public class BatchTest
 			{
 				try
 				{
-					long start = System.currentTimeMillis();
+					//long start = System.currentTimeMillis();
 					
 					IDatabaseBatch batch = client.getNewBatch();
 					
-					for(int i=0; i<100; i++)
+					//Map<String, String> map = new HashMap<String, String>();
+					for(int i=0; i<1000; i++)
 					{
-						batch.echo(String.valueOf(i));
+						batch.set(String.valueOf(i), String.valueOf(i));
+						//client.set(String.valueOf(i), String.valueOf(i));
+						//map.put(String.valueOf(i), String.valueOf(i));
+						
 					}
 
+					
+					long start = System.currentTimeMillis();
+					
 					batch.execute();
+					//client.multipleSet(map);
 
 					
 					logger.info(String.valueOf(System.currentTimeMillis()-start));

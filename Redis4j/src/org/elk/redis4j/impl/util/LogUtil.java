@@ -10,7 +10,25 @@ import java.util.logging.Logger;
 
 public class LogUtil
 {
-	private class LogFormatter extends Formatter
+	private static Level level = Level.ALL;
+	private static LogFormatter logFormatter = new LogUtil.LogFormatter();
+	private static ConsoleHandler ch = new ConsoleHandler()
+	{
+		@Override
+		public void setFormatter(Formatter newFormatter) throws SecurityException
+		{
+			super.setFormatter(logFormatter);
+		}
+
+		@Override
+		public synchronized void setLevel(Level newLevel) throws SecurityException
+		{
+			super.setLevel(level);
+		}
+		
+	};
+
+	private static class LogFormatter extends Formatter
 	{
 		@Override
 		public String format(LogRecord record)
@@ -53,26 +71,21 @@ public class LogUtil
 		}
 	}
 	
-	//private final static StreamHandler streamHandler = new StreamHandler(System.out, new LogUtil().new LogFormatter());
-	
 	public static Logger getLogger(String loggerName)
 	{
 		Logger logger = Logger.getLogger(loggerName);
-		//streamHandler.setLevel(Level.INFO);
 		logger.setUseParentHandlers(false);
-		//logger.addHandler(streamHandler);
-		ConsoleHandler ch = new ConsoleHandler();
-		ch.setLevel(Level.ALL);
-		ch.setFormatter(new LogUtil().new LogFormatter());
 		logger.addHandler(ch);
+		logger.setLevel(level);
 		return logger;
 	}
 
 	public static void main(String[] args)
 	{
 		Logger logger = LogUtil.getLogger("test");
-		logger.log(Level.INFO, "xxxxxxxxxxx");
-		
+		logger.finest("aa");
+		logger.log(Level.INFO, "xxxxxxxxxxx=");
+		System.out.println("iiii");
 		Logger logger1 =  LogUtil.getLogger("test1");
 		logger1.log(Level.INFO, "xxxxxxxxxxx111");
 		//int a = 1/0;

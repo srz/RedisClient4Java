@@ -66,7 +66,7 @@ public class CacheConnector implements ICacheConnector
 		if (sessions.length == 1)
 			return sessions[0];
 		ISession session = locator.getPrimary(key);
-		logger.info("session=" + session.getName() + " key=" + key);
+		logger.fine("session=" + session.getName() + " key=" + key);
 		return session;
 	}
 

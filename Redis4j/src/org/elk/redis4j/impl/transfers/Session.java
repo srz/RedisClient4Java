@@ -3,7 +3,6 @@ package org.elk.redis4j.impl.transfers;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -305,7 +304,6 @@ public class Session implements ISession
 						{
 							throw new ErrorCommandException("Error back value");
 						}
-
 					}
 				}
 			}
