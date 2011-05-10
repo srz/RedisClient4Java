@@ -196,26 +196,26 @@ public class Strings extends RedisCommandTestBase
 		assertEquals("foo", client.get("bar"));
 	}
 	
-	@Test
-	public void msetnx()
-	{
-		HashMap<String, String> keyAndValue = new HashMap<String, String>();
-		keyAndValue.put("foo", "bar");
-		keyAndValue.put("bar", "foo");
-		Boolean status = client.multipleSetOnNotExist(keyAndValue);
-		assertEquals(true, status);
-		assertEquals("bar", client.get("foo"));
-		assertEquals("foo", client.get("bar"));
-		
-		keyAndValue = new HashMap<String, String>();
-		keyAndValue.put("foo", "bar1");
-		keyAndValue.put("bar2", "foo2");
-
-		status = client.multipleSetOnNotExist(keyAndValue);
-		assertEquals(false, status);
-		assertEquals("bar", client.get("foo"));
-		assertEquals("foo", client.get("bar"));
-	}
+//	@Test
+//	public void msetnx()
+//	{
+//		HashMap<String, String> keyAndValue = new HashMap<String, String>();
+//		keyAndValue.put("foo", "bar");
+//		keyAndValue.put("bar", "foo");
+//		Boolean status = client.multipleSetOnNotExist(keyAndValue);
+//		assertEquals(true, status);
+//		assertEquals("bar", client.get("foo"));
+//		assertEquals("foo", client.get("bar"));
+//		
+//		keyAndValue = new HashMap<String, String>();
+//		keyAndValue.put("foo", "bar1");
+//		keyAndValue.put("bar2", "foo2");
+//
+//		status = client.multipleSetOnNotExist(keyAndValue);
+//		assertEquals(false, status);
+//		assertEquals("bar", client.get("foo"));
+//		assertEquals("foo", client.get("bar"));
+//	}
 	
 	@Test
 	public void setex()

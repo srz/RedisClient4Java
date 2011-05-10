@@ -563,17 +563,17 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * (non-Javadoc)
 	 * @see org.elk.redis4j.api.ICache#multipleSetOnNotExist(java.util.HashMap)
 	 */
-	@Override
-	public Boolean multipleSetOnNotExist(Map<String, String> keyAndValue)
-	{
-		List<Boolean> resultList = this.sendMultiKeyValueAndSingleReplay(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.MSETNX, ParameterConvert.normalMapToWrapperMap(keyAndValue));
-		for (boolean boo : resultList)
-		{
-			if (boo == false)
-				return false;
-		}
-		return true;
-	}
+//	@Override
+//	public Boolean multipleSetOnNotExist(Map<String, String> keyAndValue)
+//	{
+//		List<Boolean> resultList = this.sendMultiKeyValueAndSingleReplay(Boolean.class, RedisResponseMessage.INTEGER_1, RedisCommand.MSETNX, ParameterConvert.normalMapToWrapperMap(keyAndValue));
+//		for (boolean boo : resultList)
+//		{
+//			if (boo == false)
+//				return false;
+//		}
+//		return true;
+//	}
 
 	/*
 	 * (non-Javadoc)

@@ -605,7 +605,7 @@ public interface ICache
 	public <T> Boolean sortedSetsRemove(String key, T member);
 
 	/**
-	 * 通过排序号的范围,获取指定 sorted set 集合中的一部分元素<br>
+	 * 通过排序号(score)的范围,获取指定 sorted set 集合中的一部分元素(按照score从高到低排序)<br>
 	 * [ZREVRANGEBYSCORE]Return a range of members in a sorted set, by score, with scores ordered from high to low
 	 * @see link http://redis.io/commands/zrevrangebyscore
 	 * @param key 要操作的key
@@ -657,255 +657,257 @@ public interface ICache
 	public <T> Integer sortedSetsRevRank(String key, T member);
 
 	/**
-	 * <br>
+	 * 计算指定的 sorted set 中指定score范围内的元素数量<br>
 	 * [ZCOUNT]Count the members in a sorted set with scores within the given values
 	 * @see link http://redis.io/commands/zcount
 	 * @param key 要操作的key
-	 * @param min
-	 * @param max
-	 * @return
+	 * @param min score最小值
+	 * @param max score最大值
+	 * @return 统计结果
 	 */
 	public Integer sortedSetsCount(String key, int min, int max);
 
 	/**
-	 * <br>
+	 * 通过排序号(score)的范围,获取指定 sorted set 集合中的一部分元素(按照score从低到高排序)<br>
 	 * [ZRANGEBYSCORE]Return a range of members in a sorted set, by score
 	 * @see link http://redis.io/commands/zrangebyscore
 	 * @param key 要操作的key
-	 * @param min 
-	 * @param max
-	 * @return
+	 * @param min score的最小值
+	 * @param max score的最大值
+	 * @return 查询到的结果集
 	 */
 	public <T> List<T> sortedSetsRangeByScore(String key, int min, int max);
 
 	/**
-	 * <br>
+	 * 从指定的 sorted set 集合中通过指定score范围删除一部分元素<br>
 	 * [ZREMRANGEBYSCORE]Remove all members in a sorted set within the given scores
 	 * @see link http://redis.io/commands/zremrangebyscore
 	 * @param key 要操作的key
-	 * @param min
-	 * @param max
-	 * @return
+	 * @param min score最小值
+	 * @param max score最大值
+	 * @return 删除掉的元素数
 	 */
 	public Integer sortedSetsRemoveRangeByScore(String key, int min, int max);
 
 	/**
-	 * <br>
+	 * 获取指定的 sorted set 集合中指定的元素 member 的score<br>
 	 * [ZSCORE]Get the score associated with the given member in a sorted set
 	 * @see link http://redis.io/commands/zscore
 	 * @param key 要操作的key
-	 * @param member
-	 * @return
+	 * @param member 要查询的成员
+	 * @return member的score值
 	 */
 	public <T> Integer sortedSetsScore(String key, T member);
 
 	/**
-	 * <br>
+	 * 为指定的 sorted set 集合中的指定元素 member 的score增加 increment<br>
 	 * [ZINCRBY]Increment the score of a member in a sorted set
 	 * @see link http://redis.io/commands/zincrby
 	 * @param key 要操作的key
-	 * @param increment
-	 * @param member
-	 * @return
+	 * @param increment 要增加的数值
+	 * @param member 要添加的元素
+	 * @return 元素member的新的score值
 	 */
 	public <T> Double sortedSetsIncrementByValue(String key, int increment, T member);
 
 	/**
-	 * <br>
+	 * 计算指定的 sorted set 集合中指定的元素 member 的索引号<br>
 	 * [ZRANK]Determine the index of a member in a sorted set
 	 * @see link http://redis.io/commands/zrank
 	 * @param key 要操作的key
-	 * @param member
-	 * @return
+	 * @param member 要计算的元素
+	 * @return member的索引号
 	 */
 	public <T> Integer sortedSetsRank(String key, T member);
 
 	/**
-	 * <br>
+	 * 对指定的 sorted set 集合按照score从高到低进行排序,然后按照索引号范围取出一部分元素<br>
 	 * [ZREVRANGE]Return a range of members in a sorted set, by index, with scores ordered from high to low
 	 * @see link http://redis.io/commands/zrevrange
 	 * @param key 要操作的key
-	 * @param start
-	 * @param stop
-	 * @return
+	 * @param start 起始索引号
+	 * @param stop 终止索引号
+	 * @return 部分元素
 	 */
 	public <T> List<T> sortedSetsRevRange(String key, int start, int stop);
 	
 	//Strings
 	/**
-	 * <br>
+	 * 向一个字符串对象追加新的字符串内容，当key对应的字符串不存在时会自动创建该key<br>
+	 * 注:此函数未对value进行对象序列化操作,所以不要与{@link #set(String, Object)}函数一起使用<br>
 	 * [APPEND]Append a value to a key
 	 * @see link http://redis.io/commands/append
 	 * @param key 要操作的key
-	 * @param value
-	 * @return
+	 * @param value 追加的新字符串
+	 * @return Redis服务器中该字符串的新长度
 	 */
 	public Integer append(String key, String value);
 
 	/**
-	 * <br>
+	 * 通过索引号范围获取一个字符串对象的子字符串<br>
 	 * [GETRANGE]Get a substring of the string stored at a key
 	 * @see link http://redis.io/commands/getrange
 	 * @param key 要操作的key
-	 * @param start
-	 * @param end
-	 * @return
+	 * @param start 索引号起始位置
+	 * @param end 索引号终止位置
+	 * @return 子字符串
 	 */
 	public String getRange(String key, int start, int end);
 
 	/**
-	 * <br>
+	 * 同时添加多个key及其value<br>
+	 * 注:此函数性能最好,比for循环多个set及批处理性能都好,在需要同时创建多个key而且value类型相同时,推荐使用此函数<br>
 	 * [MSET]Set multiple keys to multiple values
 	 * @see link http://redis.io/commands/mset
-	 * @param keyAndValue
-	 * @return
+	 * @param keyAndValue 多个key及其value
+	 * @return 是否成功
 	 */
 	public <T> Boolean multipleSet(Map<String, T> keyAndValue);
 
 	/**
-	 * <br>
+	 * 添加一个key,仅在这个key不存在时才会创建成功<br>
 	 * [SETNX]Set the value of a key, only if the key does not exist
 	 * @see link http://redis.io/commands/setnx
 	 * @param key 要操作的key
-	 * @param value
-	 * @return
+	 * @param value 要添加的值
+	 * @return 是否成功
 	 */
 	public <T> Boolean setOnNotExist(String key, T value);
 
 	/**
-	 * <br>
+	 * 为一个值为整形的key进行减一操作<br>
 	 * [DECR]Decrement the integer value of a key by one
 	 * @see link http://redis.io/commands/decr
 	 * @param key 要操作的key
-	 * @return
+	 * @return 在key的value被减一后的值
 	 */
 	public Integer decrement(String key);
 
 	/**
-	 * <br>
+	 * 为一个key设定一个新的值,同时返回其原来的值<br>
 	 * [GETSET]Set the string value of a key and return its old value
 	 * @see link http://redis.io/commands/getset
 	 * @param key 要操作的key
-	 * @param value
-	 * @return
+	 * @param value 新的值
+	 * @return key原来的值
 	 */
 	public <T> T getSet(String key, T value);
 
 	/**
-	 * <br>
+	 * 同时添加多个key,仅在这些key都不存在时才创建成功<br>
 	 * [MSETNX]Set multiple keys to multiple values, only if none of the keys exist
 	 * @see link http://redis.io/commands/msetnx
 	 * @param keyAndValue
 	 * @return
 	 */
-	public Boolean multipleSetOnNotExist(Map<String, String> keyAndValue);
+	//public Boolean multipleSetOnNotExist(Map<String, String> keyAndValue);
 
 	/**
-	 * <br>
+	 * 对一个String类型的key进行局部修改,修改位置从索引号为 offset 开始<br>
 	 * [SETRANGE]Overwrite part of a string at key starting at the specified offset
 	 * @see link http://redis.io/commands/setrange
 	 * @param key 要操作的key
-	 * @param offset
-	 * @param value
-	 * @return
+	 * @param offset 该字符串要开始修改的起始位置
+	 * @param value 要替换的新字符串
+	 * @return 字符串的新长度
 	 */
 	public Integer setRange(String key, int offset, String value);
 
 	/**
-	 * <br>
+	 * 对一个值为整形的key进行减法操作,减掉的值为decrement<br>
 	 * [DECRBY]Decrement the integer value of a key by the given number
 	 * @see link http://redis.io/commands/decrby
 	 * @param key 要操作的key
-	 * @param decrement
-	 * @return
+	 * @param decrement 要减掉的值
+	 * @return 减掉decrement后该key的值
 	 */
 	public Integer decrementByValue(String key, int decrement);
 
 	/**
-	 * <br>
+	 * 对一个值为整形的key进行加法操作,增加的值为1<br>
 	 * [INCR]Increment the integer value of a key by one
 	 * @see link http://redis.io/commands/incr
 	 * @param key 要操作的key
-	 * @return
+	 * @return key被加一后的新值
 	 */
 	public Long increment(String key);
 
 	/**
-	 * <br>
+	 * 添加指定的key及其value到服务器<br>
 	 * [SET]Set the string value of a key
 	 * @see link http://redis.io/commands/set
 	 * @param key 要操作的key
-	 * @param value
-	 * @return
+	 * @param value 值
+	 * @return 是否成功
 	 */
 	public <T> Boolean set(String key, T value);
 
 	/**
-	 * <br>
+	 * 计算String类型的key的值在 Redis服务器中的字符长度,当key不存在时返回0<br>
 	 * [STRLEN]Get the length of the value stored in a key
 	 * @see link http://redis.io/commands/strlen
 	 * @param key 要操作的key
-	 * @return
+	 * @return 字符串中的字符数
 	 */
 	public Integer strLength(String key);
 
 	/**
-	 * <br>
+	 * 获取指定的key的值<br>
 	 * [GET]Get the value of a key
 	 * @see link http://redis.io/commands/get
 	 * @param key 要操作的key
-	 * @return
+	 * @return 该key的值
 	 */
 	public <T> T get(String key);
 
 	/**
-	 * <br>
+	 * 为值为整形的key进行加法操作,增加的值为 increment<br>
 	 * [INCRBY]Increment the integer value of a key by the given number
 	 * @see link http://redis.io/commands/incrby
 	 * @param key 要操作的key
-	 * @param increment
-	 * @return
+	 * @param increment 待增加的值
+	 * @return key的新值
 	 */
 	public Long incrementByValue(String key, int increment);
 
 	/**
-	 * <br>
+	 * 对String类型的key的值,在偏移量为 offset 处的字符进行位运算<br>
 	 * [SETBIT]Sets or clears the bit at offset in the string value stored at key
 	 * @see link http://redis.io/commands/setbit
 	 * @param key 要操作的key
-	 * @param offset
-	 * @param value
-	 * @return
+	 * @param offset 偏移量
+	 * @param value 新的值
+	 * @return 原来的值
 	 */
 	public Boolean setBit(String key, int offset, boolean value);
 
 	/**
-	 * <br>
+	 * 获取String类型的key在offset处的bit value<br>
 	 * [GETBIT]Returns the bit value at offset in the string value stored at key
 	 * @see link http://redis.io/commands/getbit
 	 * @param key 要操作的key
-	 * @param offset
-	 * @return
+	 * @param offset 偏移量
+	 * @return 该偏移量处的bit值
 	 */
 	public Boolean getBit(String key, int offset);
 
 	/**
-	 * <br>
+	 * 同时获取多个相同类型的key的值<br>
 	 * [MGET]Get the values of all the given keys
 	 * @see link http://redis.io/commands/mget
-	 * @param keys
-	 * @return
+	 * @param keys 多个key
+	 * @return 多个key的value的集合
 	 */
 	public <T> List<T> multipleGet(String... keys);
 
 	/**
-	 * <br>
+	 * 创建指定的key及其value,同时为其设定过期时间<br>
 	 * [SETEX]Set the value and expiration of a key
 	 * @see link http://redis.io/commands/setex
 	 * @param key 要操作的key
-	 * @param seconds
-	 * @param value
-	 * @return
+	 * @param seconds 过期时间
+	 * @param value key的值
+	 * @return 是否成功
 	 */
 	public <T> Boolean setAndExpire(String key, int seconds, T value);
 }

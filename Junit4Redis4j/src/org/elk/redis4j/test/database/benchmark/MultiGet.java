@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
+import org.elk.redis4j.api.database.IDatabaseBatch;
 import org.elk.redis4j.api.database.IRedisDatabaseClient;
 import org.elk.redis4j.impl.util.LogUtil;
 import org.elk.redis4j.test.Helper;
@@ -59,10 +60,10 @@ public class MultiGet
 						List<String> result = null;
 						try
 						{
-							//IDatabaseBatch batch = client.getNewBatch();
-							//for (int j = 0; j < 20; j++)
+							IDatabaseBatch batch = client.getNewBatch();
+							for (int j = 0; j < 20; j++)
 							{
-								//batch.get("key_" + j);
+								batch.get("key_" + j);
 //								String b = client.get("key_" + j);
 //								if (b != null)
 //									numberOfAllExecute.incrementAndGet();
@@ -71,21 +72,21 @@ public class MultiGet
 //									logger.info("error=========");
 //								}
 							}
-							//batch.execute();
+							batch.execute();
 							//numberOfAllExecute.addAndGet(20);
 							
-							result = client.multipleGet(strArray);
+							//result = client.multipleGet(strArray);
 //							for(String s : result)
 //							{
 //								logger.info(s);
 //							}
-							//numberOfAllExecute.incrementAndGet();
-							if (result != null)
-								numberOfAllExecute.incrementAndGet();
-							else
-							{
-								logger.info("error=========");
-							}
+							numberOfAllExecute.incrementAndGet();
+//							if (result != null)
+//								numberOfAllExecute.incrementAndGet();
+//							else
+//							{
+//								logger.info("error=========");
+//							}
 						}
 						catch (Exception ex)
 						{
