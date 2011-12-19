@@ -9,6 +9,7 @@ import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.introspect.NopAnnotationIntrospector;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.smile.SmileFactory;
 
@@ -29,6 +30,8 @@ public class ObjectWrapper<T>
 					objectMapper = new ObjectMapper(new SmileFactory());
 					objectMapper.setVisibility(JsonMethod.FIELD, Visibility.ANY);
 					objectMapper.configure(SerializationConfig.Feature.USE_ANNOTATIONS, false);
+					//忽略注解,上面一行对smile无效
+					objectMapper.setAnnotationIntrospector(new NopAnnotationIntrospector());
 				}
 			}
 		}
