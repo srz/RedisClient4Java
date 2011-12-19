@@ -125,11 +125,11 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#get(java.lang.String)
 	 */
 	@Override
-	public <T> T get(String key)
+	public <T> T get(Class<T> clazz, String key)
 	{
 		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.GET, key);
 
-		return new ObjectWrapper<T>(objectbyte).getOriginal();
+		return new ObjectWrapper<T>(objectbyte, clazz).getOriginal();
 	}
 
 	/*
@@ -160,12 +160,12 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#getSet(java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public <T> T getSet(String key, T value)
+	public <T> T getSet(Class<T> clazz, String key, T value)
 	{
 		ObjectWrapper<T> obj = new ObjectWrapper<T>(value);
 		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.GETSET, key, obj);
 
-		return new ObjectWrapper<T>(objectbyte).getOriginal();
+		return new ObjectWrapper<T>(objectbyte, clazz).getOriginal();
 	}
 
 	/*
@@ -193,11 +193,11 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#hashesGet(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public <T> T hashesGet(String key, String field)
+	public <T> T hashesGet(Class<T> clazz, String key, String field)
 	{
 		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.HGET, key, field);
 
-		return new ObjectWrapper<T>(objectbyte).getOriginal();
+		return new ObjectWrapper<T>(objectbyte, clazz).getOriginal();
 	}
 
 	/*
@@ -205,11 +205,11 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#hashesGetAll(java.lang.String)
 	 */
 	@Override
-	public <T> Map<String, T> hashesGetAll(String key)
+	public <T> Map<String, T> hashesGetAll(Class<T> clazz, String key)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.HGETALL, key);
 
-		return ParameterConvert.objectArrayToMap(objectbytes);
+		return ParameterConvert.objectArrayToMap(clazz, objectbytes);
 	}
 
 	/*
@@ -229,11 +229,11 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#hashesGetAllValue(java.lang.String)
 	 */
 	@Override
-	public <T> List<T> hashesGetAllValue(String key)
+	public <T> List<T> hashesGetAllValue(Class<T> clazz, String key)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.HVALS, key);
 
-		return ParameterConvert.objectArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(clazz, objectbytes);
 	}
 
 	/*
@@ -261,10 +261,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#hashesMultipleFieldGet(java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public <T> List<T> hashesMultipleFieldGet(String key, String... fields)
+	public <T> List<T> hashesMultipleFieldGet(Class<T> clazz, String key, String... fields)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.HMGET, key, (Object[]) fields);
-		return ParameterConvert.objectArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(clazz, objectbytes);
 	}
 
 	/*
@@ -335,7 +335,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#listBlockLeftPop(int, java.lang.String)
 	 */
 	@Override
-	public <T> Entry<String, T> listBlockLeftPop(String key, int timeout)
+	public <T> Entry<String, T> listBlockLeftPop(Class<T> clazz, String key, int timeout)
 	{
 		byte[][] objectbyte = this.sendRequest(byte[][].class, null, RedisCommand.BLPOP, key, timeout);
 
@@ -343,7 +343,7 @@ public class RedisCacheClient implements IRedisCacheClient
 			return null;
 
 		Map<String, T> map = new HashMap<String, T>();
-		map.put(new String(objectbyte[0], Charset.forName("UTF-8")), new ObjectWrapper<T>(objectbyte[1]).getOriginal());
+		map.put(new String(objectbyte[0], Charset.forName("UTF-8")), new ObjectWrapper<T>(objectbyte[1], clazz).getOriginal());
 
 		return map.entrySet().iterator().next();
 	}
@@ -353,7 +353,7 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#listBlockRightPop(int, java.lang.String)
 	 */
 	@Override
-	public <T> Entry<String, T> listBlockRightPop(String key, int timeout)
+	public <T> Entry<String, T> listBlockRightPop(Class<T> clazz, String key, int timeout)
 	{
 		byte[][] objectbyte = this.sendRequest(byte[][].class, null, RedisCommand.BRPOP, key, timeout);
 
@@ -361,7 +361,7 @@ public class RedisCacheClient implements IRedisCacheClient
 			return null;
 
 		Map<String, T> map = new HashMap<String, T>();
-		map.put(new String(objectbyte[0], Charset.forName("UTF-8")), new ObjectWrapper<T>(objectbyte[1]).getOriginal());
+		map.put(new String(objectbyte[0], Charset.forName("UTF-8")), new ObjectWrapper<T>(objectbyte[1], clazz).getOriginal());
 
 		return map.entrySet().iterator().next();
 	}
@@ -382,10 +382,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#listIndex(java.lang.String, int)
 	 */
 	@Override
-	public <T> T listIndex(String key, int index)
+	public <T> T listIndex(Class<T> clazz, String key, int index)
 	{
 		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.LINDEX, key, index);
-		return new ObjectWrapper<T>(objectbyte).getOriginal();
+		return new ObjectWrapper<T>(objectbyte, clazz).getOriginal();
 	}
 
 	/*
@@ -403,10 +403,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#listLeftPop(java.lang.String)
 	 */
 	@Override
-	public <T> T listLeftPop(String key)
+	public <T> T listLeftPop(Class<T> clazz, String key)
 	{
 		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.LPOP, key);
-		return new ObjectWrapper<T>(objectbyte).getOriginal();
+		return new ObjectWrapper<T>(objectbyte, clazz).getOriginal();
 	}
 
 	/*
@@ -444,10 +444,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#listRange(java.lang.String, int, int)
 	 */
 	@Override
-	public <T> List<T> listRange(String key, int start, int stop)
+	public <T> List<T> listRange(Class<T> clazz, String key, int start, int stop)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.LRANGE, key, start, stop);
-		return ParameterConvert.objectArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(clazz, objectbytes);
 	}
 
 	/*
@@ -465,10 +465,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#listRightPop(java.lang.String)
 	 */
 	@Override
-	public <T> T listRightPop(String key)
+	public <T> T listRightPop(Class<T> clazz, String key)
 	{
 		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.RPOP, key);
-		return new ObjectWrapper<T>(objectbyte).getOriginal();
+		return new ObjectWrapper<T>(objectbyte, clazz).getOriginal();
 	}
 
 	/*
@@ -537,10 +537,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#multipleGet(java.lang.String[])
 	 */
 	@Override
-	public <T> List<T> multipleGet(String... keys)
+	public <T> List<T> multipleGet(Class<T> clazz, String... keys)
 	{
 		byte[][] objectbytes = this.sendMultipleKeysNoArgsAndMultiReplay(byte[][].class, null, RedisCommand.MGET, keys);
-		return ParameterConvert.objectArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(clazz, objectbytes);
 	}
 
 	/*
@@ -732,10 +732,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#setsMembers(java.lang.String)
 	 */
 	@Override
-	public <T> List<T> setsMembers(String key)
+	public <T> List<T> setsMembers(Class<T> clazz, String key)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.SMEMBERS, key);
-		return ParameterConvert.objectArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(clazz, objectbytes);
 	}
 
 	/*
@@ -753,9 +753,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#setsPop(java.lang.String)
 	 */
 	@Override
-	public <T> T setsPop(String key)
+	public <T> T setsPop(Class<T> clazz, String key)
 	{
-		return new ObjectWrapper<T>(this.sendRequest(byte[].class, null, RedisCommand.SPOP, key)).getOriginal();
+		return new ObjectWrapper<T>(this.sendRequest(byte[].class, null, RedisCommand.SPOP, key), clazz).getOriginal();
 	}
 
 	/*
@@ -763,9 +763,9 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#setsRandMember(java.lang.String)
 	 */
 	@Override
-	public <T> T setsRandMember(String key)
+	public <T> T setsRandMember(Class<T> clazz, String key)
 	{
-		return new ObjectWrapper<T>(this.sendRequest(byte[].class, null, RedisCommand.SRANDMEMBER, key)).getOriginal();
+		return new ObjectWrapper<T>(this.sendRequest(byte[].class, null, RedisCommand.SRANDMEMBER, key), clazz).getOriginal();
 	}
 
 	/*
@@ -854,10 +854,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#sortedSetsRange(java.lang.String, int, int)
 	 */
 	@Override
-	public <T> List<T> sortedSetsRange(String key, int start, int stop)
+	public <T> List<T> sortedSetsRange(Class<T> clazz, String key, int start, int stop)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZRANGE, key, start, stop);
-		return ParameterConvert.objectArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(clazz, objectbytes);
 	}
 
 	/*
@@ -865,10 +865,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#sortedSetsRangeByScore(java.lang.String[])
 	 */
 	@Override
-	public <T> List<T> sortedSetsRangeByScore(String key, int min, int max)
+	public <T> List<T> sortedSetsRangeByScore(Class<T> clazz, String key, int min, int max)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZRANGEBYSCORE, key, min, max);
-		return ParameterConvert.objectArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(clazz, objectbytes);
 	}
 
 	/*
@@ -916,10 +916,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#sortedSetsRevRange(java.lang.String, int, int)
 	 */
 	@Override
-	public <T> List<T> sortedSetsRevRange(String key, int start, int stop)
+	public <T> List<T> sortedSetsRevRange(Class<T> clazz, String key, int start, int stop)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZREVRANGE, key, start, stop);
-		return ParameterConvert.objectArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(clazz, objectbytes);
 	}
 
 	/*
@@ -927,10 +927,10 @@ public class RedisCacheClient implements IRedisCacheClient
 	 * @see org.elk.redis4j.api.ICache#sortedSetsRevRangeByScore(java.lang.String[])
 	 */
 	@Override
-	public <T> List<T> sortedSetsRevRangeByScore(String key, int max, int min)
+	public <T> List<T> sortedSetsRevRangeByScore(Class<T> clazz, String key, int max, int min)
 	{
 		byte[][] objectbytes = this.sendRequest(byte[][].class, null, RedisCommand.ZREVRANGEBYSCORE, key, max, min);
-		return ParameterConvert.objectArrayToObjectList(objectbytes);
+		return ParameterConvert.objectArrayToObjectList(clazz, objectbytes);
 	}
 
 	/*

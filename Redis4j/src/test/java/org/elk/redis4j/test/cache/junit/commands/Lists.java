@@ -17,7 +17,7 @@ public class Lists extends RedisCommandTestBase
 	@Test
 	public void blpop() throws InterruptedException
 	{
-		Entry<String, Object> result = client.listBlockLeftPop("foo", 1);
+		Entry<String, Object> result = client.listBlockLeftPop(Object.class, "foo", 1);
 		assertNull(result);
 
 		new Thread(new Runnable()
@@ -38,7 +38,7 @@ public class Lists extends RedisCommandTestBase
 			}
 		}).start();
 
-		result = client.listBlockLeftPop("foo", 1);
+		result = client.listBlockLeftPop(Object.class, "foo", 1);
 		assertNotNull(result);
 		assertEquals("foo", result.getKey());
 		assertEquals("bar", result.getValue());
@@ -47,7 +47,7 @@ public class Lists extends RedisCommandTestBase
 	@Test
 	public void brpop() throws InterruptedException
 	{
-		Entry<String, Object> result = client.listBlockRightPop("foo", 1);
+		Entry<String, Object> result = client.listBlockRightPop(Object.class, "foo", 1);
 		assertNull(result);
 
 		new Thread(new Runnable()
@@ -68,7 +68,7 @@ public class Lists extends RedisCommandTestBase
 			}
 		}).start();
 
-		result = client.listBlockRightPop("foo", 1);
+		result = client.listBlockRightPop(Object.class, "foo", 1);
 		assertNotNull(result);
 		assertEquals("foo", result.getKey());
 		assertEquals("bar", result.getValue());
@@ -88,7 +88,7 @@ public class Lists extends RedisCommandTestBase
 
 		Boolean status = client.listSet("foo", 1, "bar");
 		assertEquals(true, status);
-		assertEquals(expected, client.listRange("foo", 0, 100));
+		assertEquals(expected, client.listRange(String.class, "foo", 0, 100));
 	}
 	
 	@Test
@@ -101,7 +101,7 @@ public class Lists extends RedisCommandTestBase
 		status = client.listInsert("foo", ListPosition.AFTER, "a", "b");
 		assertEquals(2, status.intValue());
 
-		List<String> actual = client.listRange("foo", 0, 100);
+		List<String> actual = client.listRange(String.class, "foo", 0, 100);
 		List<String> expected = new ArrayList<String>(2);
 		expected.add("a");
 		expected.add("b");
@@ -135,18 +135,18 @@ public class Lists extends RedisCommandTestBase
 		client.listRightPush("foo", "b");
 		client.listRightPush("foo", "c");
 
-		String element = client.listLeftPop("foo");
+		String element = client.listLeftPop(String.class, "foo");
 		assertEquals("a", element);
 
 		List<String> expected = new ArrayList<String>(2);
 		expected.add("b");
 		expected.add("c");
 
-		assertEquals(expected, client.listRange("foo", 0, 1000));
-		client.listLeftPop("foo");
-		client.listLeftPop("foo");
+		assertEquals(expected, client.listRange(String.class, "foo", 0, 1000));
+		client.listLeftPop(String.class, "foo");
+		client.listLeftPop(String.class, "foo");
 
-		element = client.listLeftPop("foo");
+		element = client.listLeftPop(String.class, "foo");
 		assertEquals(null, element);
 	}
 	
@@ -182,21 +182,21 @@ public class Lists extends RedisCommandTestBase
 		expected.add("b");
 		expected.add("c");
 
-		List<String> range = client.listRange("foo", 0, 2);
+		List<String> range = client.listRange(String.class, "foo", 0, 2);
 		assertEquals(expected, range);
 
-		range = client.listRange("foo", 0, 20);
+		range = client.listRange(String.class, "foo", 0, 20);
 		assertEquals(expected, range);
 
 		expected = new ArrayList<String>(2);
 		expected.add("b");
 		expected.add("c");
 
-		range = client.listRange("foo", 1, 2);
+		range = client.listRange(String.class, "foo", 1, 2);
 		assertEquals(expected, range);
 
 		expected = new ArrayList<String>(0);
-		range = client.listRange("foo", 2, 1);
+		range = client.listRange(String.class, "foo", 2, 1);
 		assertEquals(expected, range);
 	}
 	
@@ -221,7 +221,7 @@ public class Lists extends RedisCommandTestBase
 		expected.add("hello");
 		expected.add("x");
 		
-		assertEquals(expected, client.listRange("foo", 0, 1000));
+		assertEquals(expected, client.listRange(String.class, "foo", 0, 1000));
 		assertEquals(0, client.listRemove("bar", 100, "foo").intValue());
 	}
 
@@ -232,8 +232,8 @@ public class Lists extends RedisCommandTestBase
 		client.listLeftPush("foo", "2");
 		client.listLeftPush("foo", "3");
 
-		assertEquals("3", client.listIndex("foo", 0));
-		assertEquals(null, client.listIndex("foo", 100));
+		assertEquals("3", client.listIndex(String.class, "foo", 0));
+		assertEquals(null, client.listIndex(String.class, "foo", 100));
 	}
 	
 	@Test
@@ -249,7 +249,7 @@ public class Lists extends RedisCommandTestBase
 		expected.add("3");
 		expected.add("2");
 		assertEquals(2, client.listLength("foo").intValue());
-		assertEquals(expected, client.listRange("foo", 0, 100));
+		assertEquals(expected, client.listRange(String.class, "foo", 0, 100));
 	}
 
 	@Test
@@ -259,18 +259,18 @@ public class Lists extends RedisCommandTestBase
 		client.listRightPush("foo", "b");
 		client.listRightPush("foo", "c");
 
-		String element = client.listRightPop("foo");
+		String element = client.listRightPop(String.class, "foo");
 		assertEquals("c", element);
 
 		List<String> expected = new ArrayList<String>(2);
 		expected.add("a");
 		expected.add("b");
 
-		assertEquals(expected, client.listRange("foo", 0, 1000));
-		client.listRightPop("foo");
-		client.listRightPop("foo");
+		assertEquals(expected, client.listRange(String.class, "foo", 0, 1000));
+		client.listRightPop(String.class, "foo");
+		client.listRightPop(String.class, "foo");
 
-		element = client.listRightPop("foo");
+		element = client.listRightPop(String.class, "foo");
 		assertEquals(null, element);
 	}
 	

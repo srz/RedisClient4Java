@@ -38,7 +38,7 @@ public class SimpleCacheTest
 					logger.info("===" + String.valueOf(b));
 					
 					map.clear();
-					map = client.hashesGetAll("qqq");
+					map = client.hashesGetAll(User.class, "qqq");
 					logger.info("===oooo");
 					
 //					User user = new User();

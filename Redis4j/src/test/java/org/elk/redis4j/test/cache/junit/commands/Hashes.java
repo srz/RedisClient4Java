@@ -23,7 +23,7 @@ public class Hashes extends RedisCommandTestBase
 		assertEquals(false, client.hashesDel("bar", "foo"));
 		assertEquals(false, client.hashesDel("foo", "foo"));
 		assertEquals(true, client.hashesDel("foo", "bar"));
-		assertEquals(null, client.hashesGet("foo", "bar"));
+		assertEquals(null, client.hashesGet(String.class, "foo", "bar"));
 	}
 
 	@Test
@@ -43,9 +43,9 @@ public class Hashes extends RedisCommandTestBase
 	public void hget()
 	{
 		client.hashesSet("foo", "bar", "car");
-		assertEquals(null, client.hashesGet("bar", "foo"));
-		assertEquals(null, client.hashesGet("foo", "car"));
-		assertEquals("car", client.hashesGet("foo", "bar"));
+		assertEquals(null, client.hashesGet(String.class, "bar", "foo"));
+		assertEquals(null, client.hashesGet(String.class, "foo", "car"));
+		assertEquals("car", client.hashesGet(String.class, "foo", "bar"));
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class Hashes extends RedisCommandTestBase
 		h.put("car", "bar");
 		client.hashesMultipleSet("foo", h);
 
-		Map<String, String> hash = client.hashesGetAll("foo");
+		Map<String, String> hash = client.hashesGetAll(String.class, "foo");
 		assertEquals(2, hash.size());
 		assertEquals("car", hash.get("bar"));
 		assertEquals("bar", hash.get("car"));
@@ -108,7 +108,7 @@ public class Hashes extends RedisCommandTestBase
 		hash.put("car", "bar");
 		client.hashesMultipleSet("foo", hash);
 		
-		List<String> values = client.hashesMultipleFieldGet("foo", "bar", "car", "foo");
+		List<String> values = client.hashesMultipleFieldGet(String.class, "foo", "bar", "car", "foo");
 		List<String> expected = new ArrayList<String>(3);
 		expected.add("car");
 		expected.add("bar");
@@ -125,8 +125,8 @@ public class Hashes extends RedisCommandTestBase
 		hash.put("car", "bar");
 		Boolean status = client.hashesMultipleSet("foo", hash);
 		assertEquals(true, status);
-		assertEquals("car", client.hashesGet("foo", "bar"));
-		assertEquals("bar", client.hashesGet("foo", "car"));
+		assertEquals("car", client.hashesGet(String.class, "foo", "bar"));
+		assertEquals("bar", client.hashesGet(String.class, "foo", "car"));
 	}
 
 	@Test
@@ -143,15 +143,15 @@ public class Hashes extends RedisCommandTestBase
 	{
 		Boolean status = client.hashesSetNotExistField("foo", "bar", "car");
 		assertEquals(true, status);
-		assertEquals("car", client.hashesGet("foo", "bar"));
+		assertEquals("car", client.hashesGet(String.class, "foo", "bar"));
 
 		status = client.hashesSetNotExistField("foo", "bar", "foo");
 		assertEquals(false, status);
-		assertEquals("car", client.hashesGet("foo", "bar"));
+		assertEquals("car", client.hashesGet(String.class, "foo", "bar"));
 
 		status = client.hashesSetNotExistField("foo", "car", "bar");
 		assertEquals(true, status);
-		assertEquals("bar", client.hashesGet("foo", "car"));
+		assertEquals("bar", client.hashesGet(String.class, "foo", "car"));
 	}
 
 	@Test
@@ -162,7 +162,7 @@ public class Hashes extends RedisCommandTestBase
 		hash.put("carKey", "bar");
 		client.hashesMultipleSet("foo", hash);
 
-		List<String> vals = client.hashesGetAllValue("foo");
+		List<String> vals = client.hashesGetAllValue(String.class, "foo");
 		assertEquals(2, vals.size());
 		assertTrue(vals.contains("car"));
 		assertTrue(vals.contains("bar"));

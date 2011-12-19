@@ -43,10 +43,11 @@ public interface ICache
 	 * 获取指定Hash对象中的全部字段<br>
 	 * [HVALS]Get all the values in a hash
 	 * @see link http://redis.io/commands/hvals
+	 * @param clazz 要获取的字段的类型
 	 * @param key 要操作的Hash对象的key
 	 * @return 包含全部字段值的List集合
 	 */
-	public <T> List<T> hashesGetAllValue(String key);
+	public <T> List<T> hashesGetAllValue(Class<T> clazz, String key);
 
 	/**
 	 * 获取指定Hash对象中包含的元素个数<br>
@@ -96,11 +97,12 @@ public interface ICache
 	 * 获取指定Hash对象的多个字段的值<br>
 	 * [HMGET]Get the values of all the given hash fields
 	 * @see link http://redis.io/commands/hmget
+	 * @param clazz 要获取的字段的类型
 	 * @param key  要操作的Hash对象的key
 	 * @param fields 要获取的字段名
 	 * @return 上述字段包含的值的List
 	 */
-	public <T> List<T> hashesMultipleFieldGet(String key, String... fields);
+	public <T> List<T> hashesMultipleFieldGet(Class<T> clazz, String key, String... fields);
 
 
 	/**
@@ -119,11 +121,12 @@ public interface ICache
 	 * 获取指定Hash对象的指定字段的值<br>
 	 * [HGET]Get the value of a hash field
 	 * @see link http://redis.io/commands/hget
+	 * @param clazz 要获取的字段的类型
 	 * @param key 要操作的Hash对象的key
 	 * @param field 要操作的字段名字
 	 * @return filed字段的值
 	 */
-	public <T> T hashesGet(String key, String field);
+	public <T> T hashesGet(Class<T> clazz, String key, String field);
 
 	/**
 	 * 获取指定Hash对象的全部字段名的集合<br>
@@ -149,10 +152,11 @@ public interface ICache
 	 * 获取指定Hash对象的全部字段和值<br>
 	 * [HGETALL]Get all the fields and values in a hash
 	 * @see link http://redis.io/commands/hgetall
+	 * @param clazz 要获取的字段的类型
 	 * @param key  要操作的Hash对象的key
 	 * @return 返回指定的Hash对象
 	 */
-	public <T> Map<String, T> hashesGetAll(String key);
+	public <T> Map<String, T> hashesGetAll(Class<T> clazz, String key);
 	
 	//keys
 	/**
@@ -265,11 +269,12 @@ public interface ICache
 	 * 由于此函数可能会被服务器阻塞住,导致当前调用线程也被阻塞住,所以在并发环境下请慎重使用,建议使用无阻塞版本{@link #listLeftPop(String)}}<br>
 	 * [BLPOP]Remove and get the first element in a list, or block until one is available
 	 * @see link http://redis.io/commands/blpop
+	 * @param clazz 取出的对象的类型
 	 * @param key 要操作的key
 	 * @param timeout 如果发生阻塞,超时值
 	 * @return Entry 返回从集合中取出的对象，key是List集合的名字,T是取出的对象的值
 	 */
-	public <T> Entry<String, T> listBlockLeftPop(String key, int timeout);
+	public <T> Entry<String, T> listBlockLeftPop(Class<T> clazz, String key, int timeout);
 
 	/**
 	 * 计算指定的List集合中包含的元素个数<br>
@@ -309,21 +314,23 @@ public interface ICache
 	 * 由于此函数可能会被服务器阻塞住,导致当前调用线程也被阻塞住,所以在并发环境下请慎重使用,建议使用无阻塞版本{@link #listRightPop(String)}}<br>
 	 * [BRPOP]Remove and get the last element in a list, or block until one is available
 	 * @see link http://redis.io/commands/brpop
+	 * @param clazz 取出的对象的类型
 	 * @param key 要操作的key
 	 * @param timeout 如果发生阻塞,超时值
 	 * @return Entry 返回从集合中取出的对象，key是List集合的名字,T是取出的对象的值
 	 */
-	public <T> Entry<String, T> listBlockRightPop(String key, int timeout);
+	public <T> Entry<String, T> listBlockRightPop(Class<T> clazz, String key, int timeout);
 
 	/**
 	 * 在List集合中从左侧取出一个对象并在集合中删除此对象<br>
 	 * 此函数是{@link #listBlockLeftPop(String, int)}的无阻塞版本<br>
 	 * [LPOP]Remove and get the first element in a list
 	 * @see link http://redis.io/commands/lpop
+	 * @param clazz 取出的对象的类型
 	 * @param key 要操作的key
 	 * @return 取出的对象
 	 */
-	public <T> T listLeftPop(String key);
+	public <T> T listLeftPop(Class<T> clazz, String key);
 
 	/**
 	 * 在List集合中设定index位置的元素的值<br>
@@ -381,11 +388,12 @@ public interface ICache
 	 * 取出指定List集合中index位置的元素<br>
 	 * [LINDEX]Get an element from a list by its index
 	 * @see link http://redis.io/commands/lindex
+	 * @param clazz 取出的元素的类型
 	 * @param key 要操作的key
 	 * @param index 元素的索引号
 	 * @return 取出的元素
 	 */
-	public <T> T listIndex(String key, int index);
+	public <T> T listIndex(Class<T> clazz, String key, int index);
 
 	/**
 	 * 当key对应的List集合存在时,向该List左侧插入新的元素<br>
@@ -402,10 +410,11 @@ public interface ICache
 	 * 此函数是{@link #listBlockRightPop(String, int)的无阻塞版本<br>
 	 * [RPOP]Remove and get the last element in a list
 	 * @see link http://redis.io/commands/rpop
+	 * @param clazz 取出的对象的类型
 	 * @param key 要操作的key
 	 * @return 取出的对象
 	 */
-	public <T> T listRightPop(String key);
+	public <T> T listRightPop(Class<T> clazz, String key);
 
 	/**
 	 * 向指定的List集合中元素为 pivot 的前面或后面(取决于beforeOrAfter)插入新的元素<br>
@@ -423,12 +432,13 @@ public interface ICache
 	 * 从指定的List中取出一部分元素<br>
 	 * [LRANGE]Get a range of elements from a list
 	 * @see link http://redis.io/commands/lrange
+	 * @param clazz 取出的元素的类型
 	 * @param key 要操作的key
 	 * @param start 要取出的元素的起始位置
 	 * @param stop 要取出的元素的终止位置
 	 * @return 取出的元素的集合
 	 */
-	public <T> List<T> listRange(String key, int start, int stop);
+	public <T> List<T> listRange(Class<T> clazz, String key, int start, int stop);
 
 	/**
 	 * <br>
@@ -500,10 +510,11 @@ public interface ICache
 	 * 从set集合中随机取出一个元素并在set中删除它<br>
 	 * [SPOP]Remove and return a random member from a set
 	 * @see link http://redis.io/commands/spop
+	 * @param clazz 取出的元素的类型
 	 * @param key 要操作的key
 	 * @return set中的一个随机元素
 	 */
-	public <T> T setsPop(String key);
+	public <T> T setsPop(Class<T> clazz, String key);
 
 	/**
 	 * <br>
@@ -538,10 +549,11 @@ public interface ICache
 	 * 从指定set集合中随机获取一个元素<br>
 	 * [SRANDMEMBER]Get a random member from a set
 	 * @see link http://redis.io/commands/srandmember
+	 * @param clazz 取出的元素的类型
 	 * @param key 要操作的key
 	 * @return 取出的元素
 	 */
-	public <T> T setsRandMember(String key);
+	public <T> T setsRandMember(Class<T> clazz, String key);
 
 	/**
 	 * <br>
@@ -557,10 +569,11 @@ public interface ICache
 	 * 返回指定set集合中的全部元素<br>
 	 * [SMEMBERS]Get all the members in a set
 	 * @see link http://redis.io/commands/smembers
+	 * @param clazz 取出的元素的类型
 	 * @param key 要操作的key
 	 * @return set集合中的全部元素
 	 */
-	public <T> List<T> setsMembers(String key);
+	public <T> List<T> setsMembers(Class<T> clazz, String key);
 
 	/**
 	 * 从指定的set集合中删除 member<br>
@@ -608,12 +621,13 @@ public interface ICache
 	 * 通过排序号(score)的范围,获取指定 sorted set 集合中的一部分元素(按照score从高到低排序)<br>
 	 * [ZREVRANGEBYSCORE]Return a range of members in a sorted set, by score, with scores ordered from high to low
 	 * @see link http://redis.io/commands/zrevrangebyscore
+	 * @param clazz 取出的集合中单个对象的类型
 	 * @param key 要操作的key
 	 * @param max score的最大值
 	 * @param min score的最小值
 	 * @return 查询到的结果集
 	 */
-	public <T> List<T> sortedSetsRevRangeByScore(String key, int max, int min);
+	public <T> List<T> sortedSetsRevRangeByScore(Class<T> clazz, String key, int max, int min);
 
 	/**
 	 * 获取指定sorted set集合中的元素数量<br>
@@ -628,12 +642,13 @@ public interface ICache
 	 * 通过元素的索引号范围,获取指定 sorted set 集合中的一部分元素<br>
 	 * [ZRANGE]Return a range of members in a sorted set, by index
 	 * @see link http://redis.io/commands/zrange
+	 * @param clazz 取出的结果集中单个对象的类型
 	 * @param key 要操作的key
 	 * @param start 起始索引号
 	 * @param stop 终止索引号
 	 * @return 查询到的结果集
 	 */
-	public <T> List<T> sortedSetsRange(String key, int start, int stop);
+	public <T> List<T> sortedSetsRange(Class<T> clazz, String key, int start, int stop);
 
 	/**
 	 * 通过元素的索引号范围,删除指定 sorted set 集合中的一部分元素<br>
@@ -671,12 +686,13 @@ public interface ICache
 	 * 通过排序号(score)的范围,获取指定 sorted set 集合中的一部分元素(按照score从低到高排序)<br>
 	 * [ZRANGEBYSCORE]Return a range of members in a sorted set, by score
 	 * @see link http://redis.io/commands/zrangebyscore
+	 * @param clazz 取出的结果集中单个对象的类型
 	 * @param key 要操作的key
 	 * @param min score的最小值
 	 * @param max score的最大值
 	 * @return 查询到的结果集
 	 */
-	public <T> List<T> sortedSetsRangeByScore(String key, int min, int max);
+	public <T> List<T> sortedSetsRangeByScore(Class<T> clazz, String key, int min, int max);
 
 	/**
 	 * 从指定的 sorted set 集合中通过指定score范围删除一部分元素<br>
@@ -724,12 +740,13 @@ public interface ICache
 	 * 对指定的 sorted set 集合按照score从高到低进行排序,然后按照索引号范围取出一部分元素<br>
 	 * [ZREVRANGE]Return a range of members in a sorted set, by index, with scores ordered from high to low
 	 * @see link http://redis.io/commands/zrevrange
+	 * @param clazz 取出的元素集合中单个对象的类型
 	 * @param key 要操作的key
 	 * @param start 起始索引号
 	 * @param stop 终止索引号
 	 * @return 部分元素
 	 */
-	public <T> List<T> sortedSetsRevRange(String key, int start, int stop);
+	public <T> List<T> sortedSetsRevRange(Class<T> clazz, String key, int start, int stop);
 	
 	//Strings
 	/**
@@ -787,11 +804,12 @@ public interface ICache
 	 * 为一个key设定一个新的值,同时返回其原来的值<br>
 	 * [GETSET]Set the string value of a key and return its old value
 	 * @see link http://redis.io/commands/getset
+	 * @param clazz 取出的对象的类型
 	 * @param key 要操作的key
 	 * @param value 新的值
 	 * @return key原来的值
 	 */
-	public <T> T getSet(String key, T value);
+	public <T> T getSet(Class<T> clazz, String key, T value);
 
 	/**
 	 * 同时添加多个key,仅在这些key都不存在时才创建成功<br>
@@ -855,10 +873,11 @@ public interface ICache
 	 * 获取指定的key的值<br>
 	 * [GET]Get the value of a key
 	 * @see link http://redis.io/commands/get
+	 * @param clazz 取出的对象的类型
 	 * @param key 要操作的key
 	 * @return 该key的值
 	 */
-	public <T> T get(String key);
+	public <T> T get(Class<T> clazz, String key);
 
 	/**
 	 * 为值为整形的key进行加法操作,增加的值为 increment<br>
@@ -895,10 +914,11 @@ public interface ICache
 	 * 同时获取多个相同类型的key的值<br>
 	 * [MGET]Get the values of all the given keys
 	 * @see link http://redis.io/commands/mget
+	 * @param clazz 取出的结果集中单个对象的类型
 	 * @param keys 多个key
 	 * @return 多个key的value的集合
 	 */
-	public <T> List<T> multipleGet(String... keys);
+	public <T> List<T> multipleGet(Class<T> clazz, String... keys);
 
 	/**
 	 * 创建指定的key及其value,同时为其设定过期时间<br>

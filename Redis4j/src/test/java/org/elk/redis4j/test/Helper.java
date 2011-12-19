@@ -9,8 +9,8 @@ import org.elk.redis4j.impl.RedisClientBuilder;
 
 public class Helper
 {
-	private static String ip = "192.2.9.223";//"192.2.9.223";//"192.168.1.103";
-	private static int port = 6380;//6379;
+	private static String ip = "172.19.32.46";//"192.2.9.223";//"192.168.1.103";
+	private static int port = 6379;//6379;
 	private static int defaultIndexDB = 0;
 	private static String password = "abc";
 	

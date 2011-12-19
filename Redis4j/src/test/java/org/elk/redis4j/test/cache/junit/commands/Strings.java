@@ -60,10 +60,10 @@ public class Strings extends RedisCommandTestBase
 		Boolean status = client.set("foo", "bar");
 		assertEquals(true, status);
 
-		String value = client.get("foo");
+		String value = client.get(String.class, "foo");
 		assertEquals("bar", value);
 
-		assertEquals(null, client.get("bar"));
+		assertEquals(null, client.get(String.class, "bar"));
 	}
 	
 	@Test
@@ -102,9 +102,9 @@ public class Strings extends RedisCommandTestBase
 	@Test
 	public void getSet()
 	{
-		String value = client.getSet("foo", "bar");
+		String value = client.getSet(String.class, "foo", "bar");
 		assertEquals(null, value);
-		value = client.get("foo");
+		value = client.get(String.class, "foo");
 		assertEquals("bar", value);
 	}
 
@@ -159,7 +159,7 @@ public class Strings extends RedisCommandTestBase
 	@Test
 	public void mget()
 	{
-		List<String> values = client.multipleGet("foo", "bar");
+		List<String> values = client.multipleGet(String.class, "foo", "bar");
 		List<String> expected = new ArrayList<String>(2);
 		expected.add(null);
 		expected.add(null);
@@ -170,7 +170,7 @@ public class Strings extends RedisCommandTestBase
 		expected = new ArrayList<String>(2);
 		expected.add("bar");
 		expected.add(null);
-		values = client.multipleGet("foo", "bar");
+		values = client.multipleGet(String.class, "foo", "bar");
 
 		assertEquals(expected, values);
 
@@ -179,7 +179,7 @@ public class Strings extends RedisCommandTestBase
 		expected = new ArrayList<String>(2);
 		expected.add("bar");
 		expected.add("foo");
-		values = client.multipleGet("foo", "bar");
+		values = client.multipleGet(String.class, "foo", "bar");
 
 		assertEquals(expected, values);
 	}
@@ -192,8 +192,8 @@ public class Strings extends RedisCommandTestBase
 		keyAndValue.put("bar", "foo");
 		Boolean status = client.multipleSet(keyAndValue);
 		assertEquals(true, status);
-		assertEquals("bar", client.get("foo"));
-		assertEquals("foo", client.get("bar"));
+		assertEquals("bar", client.get(String.class, "foo"));
+		assertEquals("foo", client.get(String.class, "bar"));
 	}
 	
 //	@Test
@@ -231,11 +231,11 @@ public class Strings extends RedisCommandTestBase
 	{
 		Boolean status = client.setOnNotExist("foo", "bar");
 		assertEquals(true, status);
-		assertEquals("bar", client.get("foo"));
+		assertEquals("bar", client.get(String.class, "foo"));
 
 		status = client.setOnNotExist("foo", "bar2");
 		assertEquals(false, status);
-		assertEquals("bar", client.get("foo"));
+		assertEquals("bar", client.get(String.class, "foo"));
 	}
 	
 	

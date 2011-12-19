@@ -1,25 +1,64 @@
 package org.elk.redis4j.impl.util;
 
-import com.dyuproject.protostuff.LinkedBuffer;
-import com.dyuproject.protostuff.ProtostuffIOUtil;
-import com.dyuproject.protostuff.Schema;
-import com.dyuproject.protostuff.runtime.RuntimeSchema;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.type.TypeFactory;
+import org.codehaus.jackson.smile.SmileFactory;
+import org.codehaus.jackson.type.JavaType;
 
 public class ObjectWrapper<T>
 {
 	private T original;
 
-	@SuppressWarnings("unchecked")
-	public ObjectWrapper(byte[] objectByteArray)
+	private static volatile ObjectMapper objectMapper = null;
+
+	private static ObjectMapper getMapper()
+	{
+		if (objectMapper == null)
+		{
+			synchronized (ObjectMapper.class)
+			{
+				if (objectMapper == null)
+				{
+					objectMapper = new ObjectMapper(new SmileFactory());
+				}
+			}
+		}
+		return objectMapper;
+	}
+
+	public ObjectWrapper(byte[] objectByteArray, Class<T> clazz)
 	{
 		if (objectByteArray == null)
 		{
 			original = null;
 			return;
 		}
-		Schema<ObjectWrapper> schema = RuntimeSchema.getSchema(ObjectWrapper.class);
-		ProtostuffIOUtil.mergeFrom(objectByteArray, this, schema);
+
+		try
+		{
+			original = getMapper().readValue(Compress.unGZip(objectByteArray), clazz);
+		} catch (JsonParseException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
+
 
 	/**
 	 * @param original
@@ -37,15 +76,24 @@ public class ObjectWrapper<T>
 		return original;
 	}
 
-	@SuppressWarnings("unchecked")
 	public byte[] getByteArray()
 	{
-		byte[] bytes = null;
-		Schema<ObjectWrapper> schema = RuntimeSchema.getSchema(ObjectWrapper.class);
-		LinkedBuffer tmpBuffer = LinkedBuffer.allocate(256);
-
-		bytes = ProtostuffIOUtil.toByteArray(this, schema, tmpBuffer);
-		tmpBuffer.clear();
-		return bytes;
+		try
+		{
+			return Compress.gZip(getMapper().writeValueAsBytes(original));
+		} catch (JsonGenerationException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

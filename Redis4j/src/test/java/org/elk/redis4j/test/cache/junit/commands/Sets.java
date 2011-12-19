@@ -54,7 +54,7 @@ public class Sets extends RedisCommandTestBase
 		expected.add("a");
 		expected.add("b");
 
-		List<String> members = client.setsMembers("foo");
+		List<String> members = client.setsMembers(String.class, "foo");
 
 		assertEquals(expected, members);
 	}
@@ -65,12 +65,12 @@ public class Sets extends RedisCommandTestBase
 		client.setsAdd("foo", "a");
 		client.setsAdd("foo", "b");
 
-		String member = client.setsPop("foo");
+		String member = client.setsPop(String.class, "foo");
 
 		assertTrue("a".equals(member) || "b".equals(member));
-		assertEquals(1, client.setsMembers("foo").size());
+		assertEquals(1, client.setsMembers(String.class, "foo").size());
 
-		member = client.setsPop("bar");
+		member = client.setsPop(String.class, "bar");
 		assertNull(member);
 	}
 
@@ -80,12 +80,12 @@ public class Sets extends RedisCommandTestBase
 		client.setsAdd("foo", "a");
 		client.setsAdd("foo", "b");
 
-		String member = client.setsRandMember("foo");
+		String member = client.setsRandMember(String.class, "foo");
 
 		assertTrue("a".equals(member) || "b".equals(member));
-		assertEquals(2, client.setsMembers("foo").size());
+		assertEquals(2, client.setsMembers(String.class, "foo").size());
 
-		member = client.setsRandMember("bar");
+		member = client.setsRandMember(String.class, "bar");
 		assertNull(member);
 	}
 
@@ -101,7 +101,7 @@ public class Sets extends RedisCommandTestBase
 		List<String> expected = new ArrayList<String>(1);
 		expected.add("b");
 
-		assertEquals(expected, client.setsMembers("foo"));
+		assertEquals(expected, client.setsMembers(String.class, "foo"));
 
 		status = client.setsRemove("foo", "bar");
 

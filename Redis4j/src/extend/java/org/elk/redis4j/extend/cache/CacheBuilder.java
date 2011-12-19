@@ -55,7 +55,7 @@ public class CacheBuilder
 			} else
 			{
 				// 创建锁失败,说明全局锁已经存在
-				Long time = redisCacheClient.get(globalLockKey);
+				Long time = redisCacheClient.get(Long.class, globalLockKey);
 				if (time != null)
 				{
 					if (System.currentTimeMillis() - time >= 1000)

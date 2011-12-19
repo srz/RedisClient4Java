@@ -50,13 +50,13 @@ public class ParameterConvert
 		return map;
 	}
 	
-	public static <T> Map<String, T> objectArrayToMap(byte[][] result)
+	public static <T> Map<String, T> objectArrayToMap(Class<T> clazz, byte[][] result)
 	{
 		Map<String, T> map = new HashMap<String, T>();
 		
 		for(int i=0; i<result.length; i+=2)
 		{
-			ObjectWrapper<T> obj = new ObjectWrapper<T>(result[i+1]);
+			ObjectWrapper<T> obj = new ObjectWrapper<T>(result[i+1], clazz);
 			map.put(new String(result[i]), obj.getOriginal());
 		}
 		return map;
@@ -72,12 +72,12 @@ public class ParameterConvert
 		return list;
 	}
 	
-	public static <T> List<T> objectArrayToObjectList(byte[][] result)
+	public static <T> List<T> objectArrayToObjectList(Class<T> clazz, byte[][] result)
 	{
 		List<T> list = new ArrayList<T>(result.length);
 		for(int i=0; i<result.length; i++)
 		{
-			ObjectWrapper<T> obj = new ObjectWrapper<T>(result[i]);
+			ObjectWrapper<T> obj = new ObjectWrapper<T>(result[i], clazz);
 			list.add(obj.getOriginal());
 		}
 		return list;

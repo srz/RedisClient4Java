@@ -59,7 +59,7 @@ public class SortedSets extends RedisCommandTestBase
 		List<String> expected = new ArrayList<String>(2);
 		expected.add("b");
 		expected.add("a");
-		assertEquals(expected, client.sortedSetsRange("foo", 0, 100));
+		assertEquals(expected, client.sortedSetsRange(String.class, "foo", 0, 100));
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class SortedSets extends RedisCommandTestBase
 		expected.add("c");
 		expected.add("b");
 
-		List<String> range = client.sortedSetsRange("foo", 0, 1);
+		List<String> range = client.sortedSetsRange(String.class, "foo", 0, 1);
 		assertEquals(expected, range);
 
 		expected = new ArrayList<String>(3);
@@ -82,7 +82,7 @@ public class SortedSets extends RedisCommandTestBase
 		expected.add("b");
 		expected.add("a");
 
-		range = client.sortedSetsRange("foo", 0, 100);
+		range = client.sortedSetsRange(String.class, "foo", 0, 100);
 		assertEquals(expected, range);
 	}
 
@@ -98,7 +98,7 @@ public class SortedSets extends RedisCommandTestBase
 		expected.add("c");
 		expected.add("a");
 
-		List<String> range = client.sortedSetsRangeByScore("foo", 1, 3);
+		List<String> range = client.sortedSetsRangeByScore(String.class, "foo", 1, 3);
 		assertEquals(expected, range);
 
 		expected = new ArrayList<String>(3);
@@ -106,7 +106,7 @@ public class SortedSets extends RedisCommandTestBase
 		expected.add("a");
 		expected.add("b");
 
-		range = client.sortedSetsRangeByScore("foo", 0, 100);
+		range = client.sortedSetsRangeByScore(String.class, "foo", 0, 100);
 		assertEquals(expected, range);
 	}
 
@@ -137,7 +137,7 @@ public class SortedSets extends RedisCommandTestBase
 		List<String> expected = new ArrayList<String>(1);
 		expected.add("b");
 
-		assertEquals(expected, client.sortedSetsRange("foo", 0, 100));
+		assertEquals(expected, client.sortedSetsRange(String.class, "foo", 0, 100));
 
 		status = client.sortedSetsRemove("foo", "bar");
 
@@ -160,7 +160,7 @@ public class SortedSets extends RedisCommandTestBase
 		expected.add("a");
 		expected.add("b");
 
-		assertEquals(expected, client.sortedSetsRange("foo", 0, 100));
+		assertEquals(expected, client.sortedSetsRange(String.class, "foo", 0, 100));
 	}
 
 	@Test
@@ -187,7 +187,7 @@ public class SortedSets extends RedisCommandTestBase
 		expected.add("a");
 		expected.add("b");
 
-		assertEquals(expected, client.sortedSetsRange("foo", 0, 100));
+		assertEquals(expected, client.sortedSetsRange(String.class, "foo", 0, 100));
 	}
 
 	@Test
@@ -202,14 +202,14 @@ public class SortedSets extends RedisCommandTestBase
 		expected.add("a");
 		expected.add("b");
 
-		List<String> range = client.sortedSetsRevRange("foo", 0, 1);
+		List<String> range = client.sortedSetsRevRange(String.class, "foo", 0, 1);
 		assertEquals(expected, range);
 
 		expected = new ArrayList<String>(3);
 		expected.add("a");
 		expected.add("b");
 		expected.add("c");
-		range = client.sortedSetsRevRange("foo", 0, 100);
+		range = client.sortedSetsRevRange(String.class, "foo", 0, 100);
 		assertEquals(expected, range);
 	}
 
@@ -225,7 +225,7 @@ public class SortedSets extends RedisCommandTestBase
 		expected.add("a");
 		expected.add("c");
 
-		List<String> range = client.sortedSetsRevRangeByScore("foo", 3, 0);
+		List<String> range = client.sortedSetsRevRangeByScore(String.class, "foo", 3, 0);
 		assertEquals(expected, range);
 
 		expected = new ArrayList<String>(3);
@@ -233,7 +233,7 @@ public class SortedSets extends RedisCommandTestBase
 		expected.add("a");
 		expected.add("c");
 
-		range = client.sortedSetsRevRangeByScore("foo", 100, 0);
+		range = client.sortedSetsRevRangeByScore(String.class, "foo", 100, 0);
 		assertEquals(expected, range);
 	}
 
