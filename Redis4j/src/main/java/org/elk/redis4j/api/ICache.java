@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.elk.redis4j.api.cache.TypeReference;
+
+
+
 /**
  * 当把Redis作为缓存时,实现以下基础功能<br>
  * 这里会对所有操作的key对象进行序列化存储,所以无法使用sort等redis的全部功能
@@ -878,6 +882,16 @@ public interface ICache
 	 * @return 该key的值
 	 */
 	public <T> T get(Class<T> clazz, String key);
+	
+	/**
+	 * 获取指定的key的值<br>
+	 * [GET]Get the value of a key
+	 * @see link http://redis.io/commands/get
+	 * @param clazz 取出的对象的类型,本版本函数用于获取泛型集合对象,如List等
+	 * @param key 要操作的key
+	 * @return 该key的值
+	 */
+	public <T> T get(TypeReference<T> clazz, String key);
 
 	/**
 	 * 为值为整形的key进行加法操作,增加的值为 increment<br>

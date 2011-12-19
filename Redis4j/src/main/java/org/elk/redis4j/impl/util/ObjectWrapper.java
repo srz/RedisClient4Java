@@ -1,16 +1,16 @@
 package org.elk.redis4j.impl.util;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
+import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.smile.SmileFactory;
-import org.codehaus.jackson.type.JavaType;
 
 public class ObjectWrapper<T>
 {
@@ -27,6 +27,8 @@ public class ObjectWrapper<T>
 				if (objectMapper == null)
 				{
 					objectMapper = new ObjectMapper(new SmileFactory());
+					objectMapper.setVisibility(JsonMethod.FIELD, Visibility.ANY);
+					objectMapper.configure(SerializationConfig.Feature.USE_ANNOTATIONS, false);
 				}
 			}
 		}
@@ -44,6 +46,32 @@ public class ObjectWrapper<T>
 		try
 		{
 			original = getMapper().readValue(Compress.unGZip(objectByteArray), clazz);
+		} catch (JsonParseException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public ObjectWrapper(byte[] objectByteArray, org.elk.redis4j.api.cache.TypeReference<T> clazz)
+	{
+		if (objectByteArray == null)
+		{
+			original = null;
+			return;
+		}
+
+		try
+		{
+			original = getMapper().readValue(Compress.unGZip(objectByteArray), TypeFactory.defaultInstance().constructType(clazz.getType()));
 		} catch (JsonParseException e)
 		{
 			// TODO Auto-generated catch block

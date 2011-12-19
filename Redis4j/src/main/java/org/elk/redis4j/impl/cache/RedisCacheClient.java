@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.elk.redis4j.api.ListPosition;
 import org.elk.redis4j.api.RedisCommand;
@@ -20,6 +20,7 @@ import org.elk.redis4j.api.RedisResponseType;
 import org.elk.redis4j.api.Sharding;
 import org.elk.redis4j.api.cache.ICacheConnector;
 import org.elk.redis4j.api.cache.IRedisCacheClient;
+import org.elk.redis4j.api.cache.TypeReference;
 import org.elk.redis4j.api.exception.CleanLockedThreadException;
 import org.elk.redis4j.api.exception.ErrorCommandException;
 import org.elk.redis4j.impl.util.ObjectWrapper;
@@ -126,6 +127,14 @@ public class RedisCacheClient implements IRedisCacheClient
 	 */
 	@Override
 	public <T> T get(Class<T> clazz, String key)
+	{
+		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.GET, key);
+
+		return new ObjectWrapper<T>(objectbyte, clazz).getOriginal();
+	}
+	
+	@Override
+	public <T> T get(TypeReference<T> clazz, String key)
 	{
 		byte[] objectbyte = this.sendRequest(byte[].class, null, RedisCommand.GET, key);
 
